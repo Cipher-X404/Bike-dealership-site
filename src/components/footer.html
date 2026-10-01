@@ -1,0 +1,123 @@
+<!-- ============================================================
+     FOOTER (shared partial), see src/css/footer.css
+     Signature giant wordmark, CTA band, staggered link columns,
+     trust row, legal bar with back-to-top.
+     ============================================================ -->
+<footer class="site-footer">
+
+  <!-- Signature wordmark band: Lottie scene, static wordmark as fallback -->
+  <div class="footer-word" data-lottie-host aria-hidden="true">
+    <div class="footer-word__scene" data-lottie="/lottie/wordmark.json"></div>
+    <span class="footer-word__static">SOKO <i data-lucide="zap" class="footer-word__zap"></i> MOTO</span>
+  </div>
+
+  <div class="container">
+    <!-- CTA band -->
+    <div class="footer-cta" data-stagger="0.1">
+      <div class="footer-cta__text">
+        <h2 data-split>New arrivals and open verification slots, once a fortnight.</h2>
+        <p class="footer-cta__sub">No sales calls. Unsubscribe in one tap.</p>
+      </div>
+      <div class="footer-cta__actions">
+        <form class="newsletter" data-newsletter>
+          <label class="visually-hidden" for="newsletter-email">Email address</label>
+          <input class="input" id="newsletter-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+          <button class="btn btn--primary" type="submit">Notify me</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Link columns -->
+    <div class="footer-grid">
+      <div class="brand-col" data-reveal>
+        <a class="brand" href="/" aria-label="SOKO Moto home">
+          <span class="brand__mark"><i data-lucide="zap"></i></span>
+          SOKO<span class="accent">·</span>MOTO
+        </a>
+        <p class="footer-note">
+          Igbo-Nigerian-owned electric bike dealer based in Guangzhou. We source bikes
+          from manufacturers, inspect each unit, and arrange shipping and support.
+        </p>
+        <ul class="footer-contact">
+          <li><i data-lucide="mail" class="icon-16"></i><a href="mailto:hello@sokomoto.ng">hello@sokomoto.ng</a></li>
+          <li><i data-lucide="phone" class="icon-16"></i><a href="tel:+2348012345678">+234 801 234 5678</a></li>
+          <li><i data-lucide="map-pin" class="icon-16"></i><span>Guangzhou hub · serving all of Nigeria</span></li>
+        </ul>
+      </div>
+
+      <nav aria-label="Lineup" data-reveal>
+        <h3>Lineup</h3>
+        <a href="/pages/shop.html">All bikes</a>
+        <a href="/pages/shop.html?cat=commuter">Commuter</a>
+        <a href="/pages/shop.html?cat=delivery">Delivery</a>
+        <a href="/pages/shop.html?cat=adventure">Adventure</a>
+        <a href="/pages/shop.html?cat=performance">Performance</a>
+        <a href="/pages/shop.html?cat=accessory">Accessories</a>
+      </nav>
+
+      <nav aria-label="Company" data-reveal>
+        <h3>Company</h3>
+        <a href="/pages/about.html">Our story</a>
+        <a href="/pages/contact.html">Contact</a>
+        <a href="/pages/faq.html">FAQ</a>
+        <a href="/pages/faq.html">Guarantee &amp; service</a>
+        <a href="/pages/contact.html">Book unit verification</a>
+      </nav>
+
+      <nav aria-label="Account" data-reveal>
+        <h3>Account</h3>
+        <a href="/pages/dashboard.html">Your dashboard</a>
+        <a href="/pages/login.html">Sign in</a>
+        <a href="/pages/signup.html">Create account</a>
+        <a href="/pages/cart.html">Cart &amp; checkout</a>
+        <a href="/pages/order-confirmation.html">Track an order</a>
+      </nav>
+    </div>
+
+    <!-- Trust & payments -->
+    <div class="footer-trust">
+      <div class="trust-badges">
+        <span class="trust-badge"><i data-lucide="shield-check" class="icon-16"></i> 90-day guarantee</span>
+        <span class="trust-badge"><i data-lucide="rotate-ccw" class="icon-16"></i> 7-day returns</span>
+        <span class="trust-badge"><i data-lucide="lock" class="icon-16"></i> Secure checkout</span>
+        <span class="trust-badge"><i data-lucide="globe" class="icon-16"></i> Worldwide delivery arranged</span>
+      </div>
+      <div class="pay-badges" aria-label="Accepted payment methods">
+        <span class="pay-badge">VISA</span>
+        <span class="pay-badge">MASTERCARD</span>
+        <span class="pay-badge">VERVE</span>
+        <span class="pay-badge">PAYSTACK</span>
+        <span class="pay-badge">BANK TRANSFER</span>
+      </div>
+      <div class="socials">
+        <a class="icon-btn" href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg class="icon-18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37a4 4 0 1 1-7.75 1.26 4 4 0 0 1 7.75-1.26z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+          </svg>
+        </a>
+        <a class="icon-btn" href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube">
+          <svg class="icon-18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><path d="m9.75 15.02 5.75-3.27-5.75-3.27z"/>
+          </svg>
+        </a>
+        <a class="icon-btn" href="https://strava.com" target="_blank" rel="noopener" aria-label="Strava">
+          <i data-lucide="activity" class="icon-18"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Legal / registration -->
+    <div class="footer-legal">
+      <span>© 2026 SOKO Moto Ltd.</span>
+      <span class="rc">Hub · Guangzhou, China</span>
+      <span>
+        <a href="/pages/faq.html">Privacy</a> ·
+        <a href="/pages/faq.html">Terms</a> ·
+        <a href="/pages/faq.html">Warranty</a>
+      </span>
+      <button class="back-to-top js-back-to-top" type="button" aria-label="Back to top">
+        <i data-lucide="arrow-up" class="icon-18"></i>
+      </button>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in · SOKO Moto</title>
+    <meta name="description" content="Sign in to your SOKO Moto account, orders, wallet, wishlist and unit-verification bookings in one place." />
+    <link rel="canonical" href="https://sokomoto.ng/pages/login.html" />
+    <meta name="theme-color" content="#0D0D0D" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SOKO Moto" />
+    <meta property="og:title" content="Sign in · SOKO Moto" />
+    <meta property="og:description" content="Sign in to your SOKO Moto account, orders, wallet, wishlist and unit-verification bookings in one place." />
+    <meta property="og:url" content="https://sokomoto.ng/pages/login.html" />
+    <meta property="og:image" content="https://sokomoto.ng/images/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sign in · SOKO Moto" />
+    <meta name="twitter:description" content="Sign in to your SOKO Moto account, orders, wallet, wishlist and unit-verification bookings in one place." />
+    <meta name="twitter:image" content="https://sokomoto.ng/images/og.jpg" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@600,700&f[]=cabinet-grotesk@500,700&display=swap" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="scroll-progress" aria-hidden="true"><div class="scroll-progress__bar"></div></div>
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
+    <div class="page-curtains" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- @@NAVBAR@@ -->
+
+    <main id="main">
+      <div class="auth">
+        <!-- Brand panel -->
+        <div class="auth__brand" aria-hidden="true">
+          <div class="auth__brand-media">
+            <img src="/images/lifestyle-3.webp" alt="" width="1536" height="1024" />
+          </div>
+          <div class="auth__brand-scrim"></div>
+          <div class="auth__brand-body">
+            <span class="sec-head__kicker">Members' garage</span>
+            <h2 data-split>Your ride,<br>on file.</h2>
+            <p>
+              Orders, wallet, wishlist, warranty and unit-verification bookings,
+              everything you own with SOKO, one login.
+            </p>
+            <div class="auth__brand-stats">
+              <div><b data-count="500" data-suffix="+">0</b><span>bikes delivered</span></div>
+              <div><b data-count="98" data-suffix="%">0</b><span>would recommend</span></div>
+              <div><b data-count="12">0</b><span>cities covered</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form panel -->
+        <div class="auth__panel">
+          <div class="auth__panel-inner">
+            <p class="auth__eyebrow">Welcome back, rider.</p>
+            <h1 data-split>Sign in.</h1>
+            <p class="auth__sub">New to SOKO? <a href="/pages/signup.html">Create an account</a>, guests can still shop without one.</p>
+
+            <form data-auth="login" novalidate>
+              <div class="field">
+                <label for="login-email">Email</label>
+                <input class="input" id="login-email" type="email" autocomplete="email" placeholder="you@example.com" required />
+              </div>
+              <div class="field">
+                <label for="login-pass">Password</label>
+                <input class="input" id="login-pass" type="password" autocomplete="current-password" placeholder="••••••••" required />
+              </div>
+              <button class="btn btn--primary btn--block btn--lg" type="submit" data-magnetic>
+                Sign in <i data-lucide="arrow-right" class="icon-18"></i>
+              </button>
+            </form>
+
+            <div class="auth__divider"><span>or</span></div>
+
+            <div class="auth__demo">
+              <p>Demo accounts (pre-filled data)</p>
+              <button class="auth__demo-btn" type="button" data-demo="customer"><b>Rider</b><small>chidi@example.com</small></button>
+              <button class="auth__demo-btn" type="button" data-demo="admin"><b>Store manager</b><small>admin@sokomoto.ng</small></button>
+            </div>
+
+            <p class="auth__fineprint"><i data-lucide="lock" class="icon-16"></i> Tokenised, never shared. No account? <a href="/pages/shop.html">Keep shopping as a guest.</a></p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- @@FOOTER@@ -->
+
+    <script type="module" src="/src/js/main.js"></script>
+    <script type="module">
+      import { login, initAccountUI } from '/src/js/account.js';
+      const form = document.querySelector('[data-auth="login"]');
+      const err = document.createElement('p');
+      err.className = 'auth__error';
+      err.style.display = 'none';
+      form.querySelector('button[type="submit"]').after(err);
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        err.style.display = 'none';
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        const res = login(email, pass);
+        if (res.error) {
+          err.textContent = res.error;
+          err.style.display = 'block';
+          return;
+        }
+        initAccountUI(); // navbar swaps icon → avatar in place, before the redirect
+        const dest = sessionStorage.getItem('soko-redirect') ||
+          (res.user && res.user.role === 'admin' ? '/pages/admin.html' : '/pages/dashboard.html');
+        sessionStorage.removeItem('soko-redirect');
+        window.location.href = dest;
+      });
+
+      // one-tap demo logins
+      const demos = { customer: ['chidi@example.com', 'demo1234'], admin: ['admin@sokomoto.ng', 'admin1234'] };
+      document.querySelectorAll('[data-demo]').forEach((b) =>
+        b.addEventListener('click', () => {
+          const [em, pw] = demos[b.dataset.demo];
+          document.getElementById('login-email').value = em;
+          document.getElementById('login-pass').value = pw;
+          form.requestSubmit();
+        }),
+      );
+    </script>
+  </body>
+</html>

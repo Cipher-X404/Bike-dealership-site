@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /pages/admin.html
+Disallow: /pages/dashboard.html
+Disallow: /pages/checkout.html
+Disallow: /pages/cart.html
+Disallow: /pages/order-confirmation.html
+
+Sitemap: https://sokomoto.ng/sitemap.xml

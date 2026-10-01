@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create account · SOKO Moto</title>
+    <meta name="description" content="Create your SOKO Moto account, track orders, top up your wallet, save your wishlist and book unit verification." />
+    <link rel="canonical" href="https://sokomoto.ng/pages/signup.html" />
+    <meta name="theme-color" content="#0D0D0D" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SOKO Moto" />
+    <meta property="og:title" content="Create account · SOKO Moto" />
+    <meta property="og:description" content="Create your SOKO Moto account, track orders, top up your wallet, save your wishlist and book unit verification." />
+    <meta property="og:url" content="https://sokomoto.ng/pages/signup.html" />
+    <meta property="og:image" content="https://sokomoto.ng/images/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Create account · SOKO Moto" />
+    <meta name="twitter:description" content="Create your SOKO Moto account, track orders, top up your wallet, save your wishlist and book unit verification." />
+    <meta name="twitter:image" content="https://sokomoto.ng/images/og.jpg" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@600,700&f[]=cabinet-grotesk@500,700&display=swap" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="scroll-progress" aria-hidden="true"><div class="scroll-progress__bar"></div></div>
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
+    <div class="page-curtains" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- @@NAVBAR@@ -->
+
+    <main id="main">
+      <div class="auth">
+        <!-- Brand panel -->
+        <div class="auth__brand" aria-hidden="true">
+          <div class="auth__brand-media">
+            <img src="/images/lifestyle-1.webp" alt="" width="1536" height="1024" />
+          </div>
+          <div class="auth__brand-scrim"></div>
+          <div class="auth__brand-body">
+            <span class="sec-head__kicker">Join the garage</span>
+            <h2 data-split>Fifty riders<br>stronger.</h2>
+            <p>
+              One account unlocks order tracking, a wallet with instant top-ups,
+              your wishlist, and 48-hour priority support.
+            </p>
+            <ul class="auth__perks">
+              <li><i data-lucide="package" class="icon-16"></i> Live order tracking &amp; invoices</li>
+              <li><i data-lucide="banknote" class="icon-16"></i> Wallet + ₦25,000 referral earnings</li>
+              <li><i data-lucide="heart" class="icon-16"></i> Wishlist synced to your phone</li>
+              <li><i data-lucide="wrench" class="icon-16"></i> Priority support, 48 h SLA</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Form panel -->
+        <div class="auth__panel">
+          <div class="auth__panel-inner">
+            <p class="auth__eyebrow">Two minutes, rider.</p>
+            <h1 data-split>Create your account.</h1>
+            <p class="auth__sub">Already with us? <a href="/pages/login.html">Sign in</a>.</p>
+
+            <form data-auth="signup" novalidate>
+              <div class="field-row">
+                <div class="field">
+                  <label for="su-first">First name</label>
+                  <input class="input" id="su-first" autocomplete="given-name" placeholder="Chidi" required />
+                </div>
+                <div class="field">
+                  <label for="su-last">Last name</label>
+                  <input class="input" id="su-last" autocomplete="family-name" placeholder="Okeke" required />
+                </div>
+              </div>
+              <div class="field">
+                <label for="su-email">Email</label>
+                <input class="input" id="su-email" type="email" autocomplete="email" placeholder="you@example.com" required />
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="su-pass">Password</label>
+                  <div class="pw-wrap">
+                    <input class="input" id="su-pass" type="password" autocomplete="new-password" placeholder="Letters, numbers &amp; !@#$%&amp;*?" required />
+                    <button type="button" class="pw-toggle" id="su-pass-toggle" aria-label="Show password" aria-pressed="false"><i data-lucide="eye" class="icon-18"></i></button>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="su-pass2">Repeat password</label>
+                  <input class="input" id="su-pass2" type="password" autocomplete="new-password" placeholder="••••••••" required />
+                </div>
+              </div>
+
+              <!-- The SOKO Sentry · password sentry + snooper check -->
+              <div class="sentry" data-sentry aria-live="polite">
+                <div class="sentry__gauge">
+                  <div class="sentry__bars" aria-hidden="true">
+                    <span class="sentry__bar" data-lvl="1"></span>
+                    <span class="sentry__bar" data-lvl="2"></span>
+                    <span class="sentry__bar" data-lvl="3"></span>
+                    <span class="sentry__bar" data-lvl="4"></span>
+                    <span class="sentry__bar" data-lvl="5"></span>
+                  </div>
+                  <div class="sentry__face" aria-hidden="true">
+                    <svg viewBox="0 0 120 92" fill="none">
+                      <line class="sentry__antenna-line" x1="60" y1="18" x2="60" y2="8" />
+                      <circle class="sentry__antenna" cx="60" cy="6" r="3.5" />
+                      <rect class="sentry__body" x="18" y="18" width="84" height="58" rx="18" />
+                      <g class="sentry__eye" data-eye="l">
+                        <circle cx="44" cy="44" r="8.5" class="sentry__eye-ring" />
+                        <circle cx="44" cy="44" r="3.4" class="sentry__pupil" />
+                      </g>
+                      <g class="sentry__eye" data-eye="r">
+                        <circle cx="76" cy="44" r="8.5" class="sentry__eye-ring" />
+                        <circle cx="76" cy="44" r="3.4" class="sentry__pupil" />
+                      </g>
+                      <path class="sentry__mouth is-on" data-mood="0" d="M48 66 Q60 57 72 66" />
+                      <path class="sentry__mouth" data-mood="1" d="M50 63 L70 63" />
+                      <path class="sentry__mouth" data-mood="2" d="M48 62 Q60 68 72 62" />
+                      <path class="sentry__mouth" data-mood="3" d="M46 60 Q60 70 74 60" />
+                      <path class="sentry__mouth" data-mood="4" d="M44 58 Q60 75 76 58" />
+                    </svg>
+                  </div>
+                  <div class="sentry__verdict"><b class="sentry__word" data-word="idle">Waiting up.</b><small>the sentry is watching your password</small></div>
+                  <ul class="sentry__rules">
+                    <li data-rule="len"><i aria-hidden="true"></i> 8+ characters</li>
+                    <li data-rule="alpha"><i aria-hidden="true"></i> At least one letter</li>
+                    <li data-rule="num"><i aria-hidden="true"></i> At least one number</li>
+                    <li data-rule="special"><i aria-hidden="true"></i> One of ! @ # $ % &amp; * ?</li>
+                  </ul>
+                </div>
+                <div class="sentry__snooper">
+                  <span class="sentry__snooper-kicker"><i data-lucide="eye" class="icon-16"></i> Snooper check</span>
+                  <p class="sentry__snooper-sub">Patterns a shoulder-surfing friend could guess:</p>
+                  <ul class="sentry__flags" id="sentry-flags">
+                    <li data-flag="seq"><i aria-hidden="true"></i> 12345-style sequences</li>
+                    <li data-flag="name"><i aria-hidden="true"></i> Your name in it</li>
+                    <li data-flag="email"><i aria-hidden="true"></i> Your email prefix in it</li>
+                    <li data-flag="year"><i aria-hidden="true"></i> A birth-year (19xx/20xx)</li>
+                    <li data-flag="repeat"><i aria-hidden="true"></i> Repeated characters</li>
+                    <li data-flag="keyboard"><i aria-hidden="true"></i> Keyboard walks (qwerty…)</li>
+                  </ul>
+                  <p class="sentry__snooper-ok" id="sentry-ok" hidden><i data-lucide="shield-check" class="icon-18"></i> Nobody's reading over your shoulder.</p>
+                </div>
+              </div>
+
+              <button class="btn btn--primary btn--block btn--lg" type="submit" data-magnetic>
+                Create account <i data-lucide="arrow-right" class="icon-18"></i>
+              </button>
+            </form>
+
+            <p class="auth__fineprint"><i data-lucide="lock" class="icon-16"></i> No spam, ever. Leave whenever you like. Your ride history stays.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- @@FOOTER@@ -->
+
+    <script type="module" src="/src/js/main.js"></script>
+    <script type="module">
+      import { signup, initAccountUI } from '/src/js/account.js';
+      const $ = (id) => document.getElementById(id);
+      const form = document.querySelector('[data-auth="signup"]');
+      const passEl = $('su-pass');
+      const err = document.createElement('p');
+      err.className = 'auth__error';
+      err.style.display = 'none';
+      form.querySelector('button[type="submit"]').after(err);
+
+      /* ── show / hide toggle ─────────────────────────────────── */
+      const toggle = $('su-pass-toggle');
+      toggle.addEventListener('click', () => {
+        const show = passEl.type === 'password';
+        passEl.type = show ? 'text' : 'password';
+        toggle.setAttribute('aria-pressed', String(show));
+        toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        toggle.querySelector('svg')?.setAttribute('data-swapped', '1');
+        toggle.classList.toggle('is-open', show);
+      });
+
+      /* ── The SOKO Sentry ────────────────────────────────────── */
+      const SPECIALS = /[^A-Za-z0-9]/;
+      const SPECIAL_SET = /[!@#$%&*?]/;
+      const WORDS = ['Waiting up.', 'Too soft.', 'Risky.', 'Getting there.', 'Strong.', 'Bulletproof.'];
+      const MOODS = ['0', '0', '1', '2', '3', '4'];
+      const body = document.querySelector('.sentry__body');
+      const pupils = [...document.querySelectorAll('.sentry__pupil')];
+      const mouths = [...document.querySelectorAll('.sentry__mouth')];
+      const bars = [...document.querySelectorAll('.sentry__bar')];
+      const word = document.querySelector('.sentry__word');
+      const sentryRoot = document.querySelector('[data-sentry]');
+      const flagEls = [...document.querySelectorAll('#sentry-flags li')];
+      const snooperOk = $('sentry-ok');
+
+      function sequences(p) {
+        for (let i = 0; i + 3 < p.length; i++) {
+          const a = p.charCodeAt(i), b = p.charCodeAt(i + 1), c = p.charCodeAt(i + 2), d = p.charCodeAt(i + 3);
+          if (b - a === 1 && c - b === 1 && d - c === 1) return true;   // 1234 / abcd
+          if (a - b === 1 && b - c === 1 && c - d === 1) return true;   // 4321
+        }
+        return false;
+      }
+      function keyboardWalk(p) {
+        const rows = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm', '1234567890'];
+        const lp = p.toLowerCase();
+        for (const r of rows) {
+          for (let i = 0; i + 3 < r.length; i++) {
+            const run = r.slice(i, i + 4);
+            const back = [...run].reverse().join('');
+            if (lp.includes(run) || lp.includes(back)) return true;
+          }
+        }
+        return false;
+      }
+      function repeated(p) {
+        return /(.)\1{2,}/.test(p);
+      }
+      function yearIn(p) {
+        return /(19|20)\d{2}/.test(p);
+      }
+      function score(pass) {
+        let s = 0;
+        if (pass.length >= 8) s++;
+        if (pass.length >= 12) s++;
+        if (/[a-z]/.test(pass)) s++;
+        if (/[A-Z]/.test(pass)) s++;
+        if (/\d/.test(pass)) s++;
+        if (SPECIAL_SET.test(pass)) s++;
+        // snooper penalties
+        const flags = [];
+        if (sequences(pass)) flags.push('seq');
+        const nameBits = [$('su-first').value.trim(), $('su-last').value.trim()].filter(Boolean);
+        if (nameBits.some((n) => n.length > 2 && pass.toLowerCase().includes(n.toLowerCase()))) flags.push('name');
+        const em = $('su-email').value.trim().toLowerCase().split('@')[0] || '';
+        if (em.length > 2 && pass.toLowerCase().includes(em)) flags.push('email');
+        if (yearIn(pass)) flags.push('year');
+        if (repeated(pass)) flags.push('repeat');
+        if (keyboardWalk(pass)) flags.push('keyboard');
+        s -= flags.length;
+        const level = pass.length === 0 ? 0 : Math.max(1, Math.min(5, s - 1));
+        return { level, flags, rules: {
+          len: pass.length >= 8,
+          alpha: /[A-Za-z]/.test(pass),
+          num: /\d/.test(pass),
+          special: SPECIAL_SET.test(pass),
+        } };
+      }
+
+      function renderSentry() {
+        const pass = passEl.value;
+        const { level, flags, rules } = score(pass);
+        const active = pass.length > 0;
+        sentryRoot.classList.toggle('is-live', active);
+        sentryRoot.classList.toggle('is-alert', active && flags.length > 0);
+
+        bars.forEach((b, i) => {
+          const on = active && i < level;
+          b.classList.toggle('is-on', on);
+          b.style.setProperty('--lvl', level);
+        });
+        mouths.forEach((m) => m.classList.toggle('is-on', active ? m.dataset.mood === MOODS[level] : m.dataset.mood === '0'));
+        word.textContent = WORDS[level];
+        word.dataset.word = String(level);
+
+        for (const [key, okv] of Object.entries(rules)) {
+          document.querySelector(`[data-rule="${key}"]`).classList.toggle('is-ok', active && okv);
+        }
+        flagEls.forEach((li) => li.classList.toggle('is-hit', flags.includes(li.dataset.flag)));
+        snooperOk.hidden = !(active && flags.length === 0 && Object.values(rules).every(Boolean));
+
+        // pupil dilate when a snooper pattern is caught
+        pupils.forEach((p) => p.classList.toggle('is-wide', active && flags.length > 0));
+      }
+
+      // eyes follow the cursor, the sentry is genuinely watching
+      const eyeL = document.querySelector('[data-eye="l"] .sentry__pupil');
+      const eyeR = document.querySelector('[data-eye="r"] .sentry__pupil');
+      window.addEventListener('mousemove', (e) => {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const cx = innerWidth / 2;
+        const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / cx));
+        eyeL.setAttribute('cx', String(44 + dx * 2.4));
+        eyeR.setAttribute('cx', String(76 + dx * 2.4));
+      }, { passive: true });
+
+      passEl.addEventListener('input', renderSentry);
+      $('su-first').addEventListener('input', renderSentry);
+      $('su-last').addEventListener('input', renderSentry);
+      $('su-email').addEventListener('input', renderSentry);
+      renderSentry();
+
+      /* ── submit gate ────────────────────────────────────────── */
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        err.style.display = 'none';
+        const name = $('su-first').value + ' ' + $('su-last').value;
+        const email = $('su-email').value;
+        const pass = passEl.value;
+        const pass2 = $('su-pass2').value;
+
+        const rules = score(pass).rules;
+        if (!rules.alpha || !rules.num || !rules.special || !rules.len) {
+          err.textContent = 'The sentry blocks this one. Your password needs 8+ characters, a letter, a number, and one of ! @ # $ % & * ?';
+          err.style.display = 'block';
+          passEl.focus();
+          return;
+        }
+        if (pass !== pass2) {
+          err.textContent = 'Passwords do not match.';
+          err.style.display = 'block';
+          return;
+        }
+        const res = signup({ name, email, password: pass });
+        if (res.error) {
+          err.textContent = res.error;
+          err.style.display = 'block';
+          return;
+        }
+        const dest = sessionStorage.getItem('soko-redirect') || '/pages/dashboard.html';
+        sessionStorage.removeItem('soko-redirect');
+        initAccountUI(); // navbar swaps icon → avatar in place, before the redirect
+        window.location.href = dest;
+      });
+    </script>
+  </body>
+</html>

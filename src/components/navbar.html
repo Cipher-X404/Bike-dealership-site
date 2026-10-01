@@ -1,0 +1,158 @@
+<!-- ============================================================
+     NAVBAR (shared partial)
+     Sticky header: transparent over hero → frosted + shrunk on
+     scroll. Logo left, primary links center, icon cluster right
+     (search, wishlist, cart, account). Award-style Shop mega menu.
+     ============================================================ -->
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-nav" id="site-nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/" aria-label="SOKO·MOTO home">
+      <span class="brand__mark"><i data-lucide="zap"></i></span>
+      <span class="brand__word">SOKO<span class="accent">·</span>MOTO</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a class="nav-link" href="/">Home</a>
+      <div class="has-mega">
+        <button class="nav-link nav-link--btn" type="button"
+                aria-expanded="false" aria-controls="mega-menu"
+                data-mega-trigger data-nav-active="/pages/shop.html">
+          Shop
+          <i data-lucide="chevron-down" class="icon-16 nav-chev" aria-hidden="true"></i>
+        </button>
+      </div>
+      <a class="nav-link" href="/pages/about.html">About</a>
+      <a class="nav-link" href="/pages/contact.html">Contact</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="icon-btn js-search-btn" type="button" aria-label="Search" aria-expanded="false" aria-controls="search-overlay">
+        <i data-lucide="search" class="icon-18"></i>
+      </button>
+      <a class="icon-btn js-wish-link" href="/pages/dashboard.html#wishlist" aria-label="Wishlist">
+        <i data-lucide="heart" class="icon-18"></i>
+      </a>
+      <a class="icon-btn" href="/pages/cart.html" aria-label="Cart">
+        <i data-lucide="shopping-bag" class="icon-18"></i>
+        <span class="count js-cart-count" hidden>0</span>
+      </a>
+      <a class="icon-btn icon-btn--avatar js-account-link" href="/pages/login.html" aria-label="Account">
+        <i data-lucide="user" class="icon-18 js-account-icon"></i>
+        <span class="js-account-avatar" hidden></span>
+        <span class="js-account-dot" style="position:absolute;bottom:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--color-success)" hidden></span>
+      </a>
+      <button class="menu-btn" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+        <span class="menu-btn__lines" aria-hidden="true"><i></i><i></i></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MEGA MENU -->
+  <div class="mega" id="mega-menu">
+    <div class="container mega__inner">
+      <div class="mega__col mega__col--intro" data-mega-col>
+        <span class="mega__kicker">The lineup</span>
+        <p class="mega__desc">Browse electric bikes and riding gear sourced by our team in Guangzhou, then inspected before shipment.</p>
+        <a class="btn btn--ghost" href="/pages/shop.html">
+          <span class="btn__label" data-text="Browse the selection"><span>Browse the selection</span></span>
+          <span class="btn-icon"><i data-lucide="arrow-right" class="icon-18"></i></span>
+        </a>
+      </div>
+
+      <div class="mega__col" data-mega-col>
+        <h4 class="mega__head">Bikes</h4>
+        <a class="mega__link" href="/pages/product.html">
+          <span class="mega__thumb"><img src="/images/bike-commuter.webp" alt="" loading="lazy" width="1448" height="1086" /></span>
+          <span class="mega__link-body"><b>SOKO 01 · Commuter</b><small>140 km · from ₦1.35M</small></span>
+        </a>
+        <a class="mega__link" href="/pages/product.html">
+          <span class="mega__thumb"><img src="/images/bike-delivery.webp" alt="" loading="lazy" width="1448" height="1086" /></span>
+          <span class="mega__link-body"><b>SOKO 02 · Cargo</b><small>180 kg load · from ₦1.65M</small></span>
+        </a>
+        <a class="mega__link" href="/pages/product.html">
+          <span class="mega__thumb"><img src="/images/bike-adventure.webp" alt="" loading="lazy" width="1448" height="1086" /></span>
+          <span class="mega__link-body"><b>SOKO 03 · Trail</b><small>Dual-sport · from ₦1.89M</small></span>
+        </a>
+        <a class="mega__link" href="/pages/product.html">
+          <span class="mega__thumb"><img src="/images/bike-pro.webp" alt="" loading="lazy" width="1448" height="1086" /></span>
+          <span class="mega__link-body"><b>SOKO Pro · Performance</b><small>120 km/h · from ₦2.45M</small></span>
+        </a>
+      </div>
+
+      <div class="mega__col" data-mega-col>
+        <h4 class="mega__head">Accessories</h4>
+        <a class="mega__link mega__link--plain" href="/pages/product.html"><b>SOKO Aero Helmet</b><small>₦85,000</small></a>
+        <a class="mega__link mega__link--plain" href="/pages/product.html"><b>Swap Battery 2.9 kWh</b><small>₦320,000</small></a>
+        <a class="mega__link mega__link--plain" href="/pages/product.html"><b>SOKO Fast Charger</b><small>₦145,000</small></a>
+        <a class="mega__link mega__link--plain" href="/pages/product.html"><b>Smart Lock + GPS</b><small>₦65,000</small></a>
+      </div>
+
+      <div class="mega__col mega__col--feature" data-mega-col>
+        <a class="mega__feature" href="/pages/product.html">
+          <img src="/images/bike-pro.webp" alt="SOKO Pro, performance flagship" loading="lazy" width="1448" height="1086" />
+          <span class="mega__feature-body">
+            <span class="chip chip--accent">New</span>
+            <b>SOKO Pro · Performance</b>
+            <small>Flagship · 120 km/h top speed</small>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <div class="mega__foot">
+      <div class="container mega__foot-inner">
+        <a href="/pages/contact.html">Book unit verification <i data-lucide="arrow-up-right" class="icon-16"></i></a>
+        <a href="/pages/faq.html">Guarantee &amp; service <i data-lucide="arrow-up-right" class="icon-16"></i></a>
+        <a href="/pages/faq.html">FAQ <i data-lucide="arrow-up-right" class="icon-16"></i></a>
+        <a href="/pages/about.html">Why we exist <i data-lucide="arrow-up-right" class="icon-16"></i></a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SEARCH OVERLAY -->
+<div class="search-overlay" id="search-overlay" aria-hidden="true">
+  <div class="search-overlay__scrim js-search-close" aria-hidden="true"></div>
+  <div class="search-overlay__panel" role="dialog" aria-modal="true" aria-label="Search">
+    <div class="search-overlay__top">
+      <div class="search-overlay__field">
+        <i data-lucide="search" class="icon-22"></i>
+        <input class="js-search-input" type="search" placeholder="Search bikes, accessories, specs…" aria-label="Search products" />
+        <kbd class="js-search-hint">ESC</kbd>
+      </div>
+      <button class="js-search-close" type="button" aria-label="Close search"><i data-lucide="x" class="icon-24"></i></button>
+    </div>
+    <div class="search-overlay__body">
+      <p class="search-overlay__hint js-search-empty" hidden>
+        <span>Nothing found for "<b class="js-search-query"></b>". Try commuter, battery or cargo.</span>
+      </p>
+      <div class="js-search-results" role="list"></div>
+      <div class="search-overlay__popular" aria-label="Popular searches">
+        <span>Popular:</span>
+        <button class="chip js-search-pop" type="button">SOKO 01</button>
+        <button class="chip js-search-pop" type="button">Cargo</button>
+        <button class="chip js-search-pop" type="button">Battery</button>
+        <button class="chip js-search-pop" type="button">Helmet</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile menu overlay -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <a class="mobile-menu__link" href="/">Home <small>Start here</small></a>
+  <a class="mobile-menu__link" href="/pages/shop.html">Shop <small>The lineup</small></a>
+  <a class="mobile-menu__link" href="/pages/about.html">About <small>Why us</small></a>
+  <a class="mobile-menu__link" href="/pages/contact.html">Contact <small>Talk to us</small></a>
+  <a class="mobile-menu__link" href="/pages/faq.html">FAQ <small>Answers</small></a>
+  <a class="mobile-menu__link js-wish-link" href="/pages/dashboard.html#wishlist">Wishlist <small>Saved rides</small></a>
+  <a class="mobile-menu__link js-account-link-mobile" href="/pages/login.html">Account <small>Sign in</small></a>
+  <a class="mobile-menu__link" href="/pages/cart.html">Cart <small>Checkout</small></a>
+  <div class="mobile-menu__foot">
+    <span>Igbo-owned · China-based</span>
+    <span class="sep">●</span>
+    <span>Nigeria → the world</span>
+  </div>
+</div>

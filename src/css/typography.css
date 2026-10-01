@@ -1,0 +1,112 @@
+/*
+ * typography.css — Type scale & editorial primitives
+ * -----------------------------------------------------------------
+ * Clash Display: display sizes. Cabinet Grotesk: headings. General Sans:
+ * body. Utility classes mirror the semantic usage so components stay terse.
+ */
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.h-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/* Section header kit */
+.sec-head {
+  display: grid;
+  gap: 1.1rem;
+  margin-bottom: clamp(2.4rem, 5vw, 4rem);
+  max-width: 900px;
+}
+.sec-head__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--color-accent);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.sec-head__kicker::before {
+  content: '';
+  width: 2.2rem;
+  height: 1px;
+  background: var(--color-accent);
+}
+.sec-head h2 {
+  font-size: clamp(2rem, 5vw, 3.6rem);
+}
+.sec-head p {
+  color: var(--color-text-muted);
+  max-width: 58ch;
+  font-size: 1.05rem;
+}
+
+/* Big editorial pull-out / lead */
+.lead {
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+  line-height: 1.45;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+.lead em {
+  font-style: normal;
+  color: var(--color-accent);
+}
+
+/* Inline accent */
+.accent {
+  color: var(--color-accent);
+}
+.muted {
+  color: var(--color-text-muted);
+}
+
+/* Oversized ghost numbers (stats, indices) */
+.ghost-num {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(245, 243, 239, 0.16);
+  font-size: clamp(5rem, 14vw, 12rem);
+  user-select: none;
+}
+
+/* Stat block */
+.stat__value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.6rem, 6vw, 4.5rem);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+.stat__label {
+  margin-top: 0.6rem;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+/* Blockquote / testimonial */
+.testimonial blockquote {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+/* Money and counters never jitter while animating */
+.price, .pdp__price, .amt, .total, .kpi__value, .hero-num, [data-count], .price-line span:last-child, .cart-total, .order-card__foot .total { font-variant-numeric: tabular-nums; }

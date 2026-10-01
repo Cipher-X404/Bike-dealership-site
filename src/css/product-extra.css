@@ -1,0 +1,43 @@
+.js-add.added { background: var(--color-success) !important; border-color: var(--color-success) !important; color: #06281b !important; }
+
+/* ── Price row + stock pulse ─────────────────────────────────── */
+.pdp__price-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.pdp__price { font-variant-numeric: tabular-nums; }
+.stock-pulse {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  padding: 0.4rem 0.8rem 0.4rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
+  border-radius: 999px;
+  font-size: 0.76rem; font-weight: 500; color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.stock-pulse i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-success); animation: stock-breathe 2.2s ease-in-out infinite; }
+@keyframes stock-breathe { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-success) 45%, transparent); } 50% { box-shadow: 0 0 0 6px transparent; } }
+
+.swatch-name { color: var(--color-text); text-transform: none; letter-spacing: 0; font-weight: 600; margin-left: 0.35rem; display: inline-block; }
+
+/* ── Financing module ────────────────────────────────────────── */
+.finance {
+  margin-top: 1.1rem;
+  padding: 1rem 1.1rem 1.05rem;
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-secondary) 38%, var(--color-bg));
+  display: grid; gap: 0.7rem;
+}
+.finance__head { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap; }
+.finance__kicker { font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600; }
+.finance__seg { display: inline-flex; padding: 3px; border: 1px solid var(--color-line); border-radius: 999px; background: var(--color-bg); }
+.finance__seg button {
+  padding: 0.42rem 0.85rem; border: 0; border-radius: 999px; background: transparent;
+  color: var(--color-text-muted); font-size: 0.78rem; font-weight: 600; cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.finance__seg button:active { transform: scale(0.96); }
+.finance__seg button[aria-checked='true'] { background: var(--color-text); color: var(--color-bg); }
+.finance__line { display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+.finance__monthly { font-family: var(--font-display, 'Clash Display'); font-size: clamp(1.5rem, 2.6vw, 1.9rem); font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; display: inline-block; }
+.finance__per { font-size: 0.85rem; color: var(--color-text-muted); }
+.finance__note { font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.5; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .stock-pulse i { animation: none; } }
+@media (max-width: 520px) { .finance__head { flex-direction: column; align-items: flex-start; } .finance__seg { width: 100%; justify-content: space-between; } .finance__seg button { flex: 1; padding-inline: 0.4rem; } }

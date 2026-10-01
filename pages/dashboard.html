@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Member deck · SOKO Moto</title>
+    <meta name="description" content="Your SOKO Moto member deck. Orders on the water, wallet, garage and support, all live." />
+    <link rel="canonical" href="https://sokomoto.ng/pages/dashboard.html" />
+    <meta name="theme-color" content="#0D0D0D" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SOKO Moto" />
+    <meta property="og:title" content="Member deck · SOKO Moto" />
+    <meta property="og:description" content="Your SOKO Moto member deck. Orders on the water, wallet, garage and support, all live." />
+    <meta property="og:url" content="https://sokomoto.ng/pages/dashboard.html" />
+    <meta property="og:image" content="https://sokomoto.ng/images/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Member deck · SOKO Moto" />
+    <meta name="twitter:description" content="Your SOKO Moto member deck. Orders on the water, wallet, garage and support, all live." />
+    <meta name="twitter:image" content="https://sokomoto.ng/images/og.jpg" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@600,700&f[]=cabinet-grotesk@500,700&f[]=jetbrains-mono@400,500,600&display=swap" />
+  </head>
+  <body>
+    <div class="dash" data-dash="user">
+
+      <!-- Guest guard -->
+      <div class="dash-guard js-guest-guard" hidden>
+        <div class="dash-guard__card">
+          <span class="dash-guard__kicker">MEMBER DECK / ACCESS</span>
+          <span class="dash-guard__icon"><i data-lucide="zap" class="icon-24"></i></span>
+          <h1>This deck is for members.</h1>
+          <p>
+            Accounts are optional. Keep shopping and checking out as a guest, or sign in
+            to track your unit from the Guangzhou bench to your door, hold wallet credit,
+            and keep your garage on file.
+          </p>
+          <div class="dash-guard__actions">
+            <a class="btn btn--primary" href="/pages/login.html">Log in</a>
+            <a class="btn btn--secondary" href="/pages/signup.html">Create account</a>
+            <a class="btn btn--ghost" href="/pages/shop.html">Keep shopping as guest</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- App shell -->
+      <div class="js-app" hidden>
+        <div class="dash-shell">
+
+          <aside class="dash-rail" aria-label="Deck navigation">
+            <a class="rail__brand" href="/" aria-label="SOKO Moto home"><i data-lucide="zap" class="icon-18"></i></a>
+
+            <nav class="dash-nav" aria-label="Member deck">
+              <span class="rail__ink" aria-hidden="true"></span>
+              <a href="#overview" data-view="overview" data-label="Overview" class="is-active" aria-label="Overview"><i data-lucide="layout-dashboard" class="icon-18"></i></a>
+              <a href="#orders" data-view="orders" data-label="Orders" aria-label="Orders"><i data-lucide="package" class="icon-18"></i></a>
+              <a href="#wishlist" data-view="wishlist" data-label="Wishlist" aria-label="Wishlist"><i data-lucide="heart" class="icon-18"></i></a>
+              <a href="#wallet" data-view="wallet" data-label="Wallet" aria-label="Wallet and cards"><i data-lucide="wallet" class="icon-18"></i></a>
+              <a href="#garage" data-view="garage" data-label="Garage" aria-label="Garage"><i data-lucide="gauge" class="icon-18"></i></a>
+              <a href="#addresses" data-view="addresses" data-label="Addresses" aria-label="Addresses"><i data-lucide="map-pin" class="icon-18"></i></a>
+              <a href="#support" data-view="support" data-label="Support" aria-label="Support"><i data-lucide="life-buoy" class="icon-18"></i></a>
+              <a href="#notifications" data-view="notifications" data-label="Notifications" aria-label="Notifications"><i data-lucide="bell" class="icon-18"></i></a>
+              <a href="#settings" data-view="settings" data-label="Settings" aria-label="Settings"><i data-lucide="settings" class="icon-18"></i></a>
+            </nav>
+
+            <div class="rail__foot">
+              <span class="rail__clock" aria-hidden="true"><span>WAT</span><b class="js-dash-clock">--:--</b></span>
+              <button type="button" data-logout class="rail__logout" aria-label="Sign out"><i data-lucide="log-out" class="icon-18"></i></button>
+            </div>
+          </aside>
+
+          <div class="dash-stage">
+            <header class="dash-top">
+              <div class="dash-top__id">
+                <span class="dash-top__path">MEMBER DECK <b>/</b> <span class="js-view-path">OVERVIEW</span></span>
+                <h1 class="js-view-title">Overview</h1>
+              </div>
+              <div class="dash-top__actions">
+                <span class="top-chip"><i data-lucide="ship" class="icon-14"></i> Guangzhou → Nigeria</span>
+                <a class="btn btn--secondary btn--sm" href="/pages/cart.html"><i data-lucide="shopping-bag" class="icon-16"></i> <span>Cart</span></a>
+                <a class="btn btn--primary btn--sm" href="/pages/shop.html"><span>Shop</span> <i data-lucide="arrow-up-right" class="icon-16"></i></a>
+                <div class="top-user">
+                  <span class="top-user__avatar js-user-initial">C</span>
+                  <span class="top-user__meta"><b class="js-user-name">-</b><small class="js-user-email">-</small></span>
+                </div>
+              </div>
+            </header>
+
+            <main class="dash-main">
+
+              <!-- Overview -->
+              <section class="dash-view js-view" data-view-panel="overview">
+                <div class="welcome">
+                  <div class="welcome__text">
+                    <h2 class="js-welcome-heading">Welcome back.</h2>
+                    <p class="js-welcome-body"></p>
+                  </div>
+                  <div class="welcome__ctas">
+                    <a class="btn btn--primary" href="/pages/shop.html" data-magnetic>Browse the lineup</a>
+                    <a class="btn btn--secondary" href="/pages/contact.html">Book unit verification</a>
+                  </div>
+                </div>
+                <div class="kpis js-kpis"></div>
+                <div class="js-recent-orders"></div>
+                <div class="dash-view__grid dash-grid-2">
+                  <div class="panel">
+                    <div class="panel__head"><span class="panel__title">Latest activity</span><a class="panel__link" href="#notifications" data-goto="notifications">All notifications →</a></div>
+                    <div class="notif-list js-overview-notifs"></div>
+                  </div>
+                  <div class="panel">
+                    <div class="panel__head"><span class="panel__title">Quick actions</span></div>
+                    <div class="js-quick-actions"></div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Orders -->
+              <section class="dash-view js-view" data-view-panel="orders" hidden>
+                <div class="panel">
+                  <div class="panel__head"><span class="panel__title">Order history</span><span class="panel__meta js-order-count"></span></div>
+                  <div class="order-list js-orders"></div>
+                </div>
+              </section>
+
+              <!-- Wishlist -->
+              <section class="dash-view js-view" data-view-panel="wishlist" hidden>
+                <div class="panel">
+                  <div class="panel__head"><span class="panel__title">Saved rides</span><a class="panel__link" href="/pages/shop.html">Keep shopping →</a></div>
+                  <div class="wish-grid js-wishlist"></div>
+                </div>
+              </section>
+
+              <!-- Wallet & cards -->
+              <section class="dash-view js-view" data-view-panel="wallet" hidden>
+                <div class="wallet-balance">
+                  <div class="wallet-balance__glow" aria-hidden="true"></div>
+                  <span class="wallet-balance__label"><i data-lucide="wallet" class="icon-16"></i> Wallet balance</span>
+                  <div class="amount js-wallet-balance">₦0</div>
+                  <p>Credits from referrals and returns land here and apply automatically at checkout.</p>
+                  <div class="wallet-balance__actions">
+                    <button class="btn btn--primary btn--sm js-topup" type="button"><i data-lucide="plus" class="icon-16"></i> Top up</button>
+                  </div>
+                </div>
+                <div class="dash-view__grid dash-grid-2">
+                  <div class="panel">
+                    <div class="panel__head"><span class="panel__title">Transactions</span></div>
+                    <div class="table-scroll"><table class="dash-table js-wallet-txns"><thead><tr><th>Date</th><th>Detail</th><th>Type</th><th style="text-align:right">Amount</th></tr></thead><tbody></tbody></table></div>
+                  </div>
+                  <div class="dash-stack">
+                    <div class="panel">
+                      <div class="panel__head"><span class="panel__title">Referral code</span></div>
+                      <div class="ref-code js-ref-code">SOKO-XXXXX</div>
+                      <div class="js-ref-stats muted" style="margin-top:10px"></div>
+                    </div>
+                    <div class="panel">
+                      <div class="panel__head"><span class="panel__title">Payment methods</span><button class="btn btn--secondary btn--sm js-add-card" type="button"><i data-lucide="plus" class="icon-16"></i> Add card</button></div>
+                      <div class="card-grid js-cards"></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Addresses -->
+              <section class="dash-view js-view" data-view-panel="addresses" hidden>
+                <div class="panel">
+                  <div class="panel__head"><span class="panel__title">Delivery addresses</span><button class="btn btn--primary btn--sm js-add-addr" type="button"><i data-lucide="plus" class="icon-16"></i> New address</button></div>
+                  <div class="addr-grid js-addresses"></div>
+                </div>
+              </section>
+
+              <!-- Garage -->
+              <section class="dash-view js-view" data-view-panel="garage" hidden>
+                <div class="panel">
+                  <div class="panel__head"><span class="panel__title">Your garage</span><button class="btn btn--primary btn--sm js-register-bike" type="button"><i data-lucide="plus" class="icon-16"></i> Register a bike</button></div>
+                  <div class="dash-view__grid js-garage"></div>
+                </div>
+              </section>
+
+              <!-- Support -->
+              <section class="dash-view js-view" data-view-panel="support" hidden>
+                <div class="dash-view__grid dash-grid-2">
+                  <div class="panel">
+                    <div class="panel__head"><span class="panel__title">New ticket</span><span class="panel__meta">REPLY WITHIN 24H</span></div>
+                    <div class="dash-view__grid dash-grid-form">
+                      <div class="field"><label for="tk-type">Type</label><select class="select js-tk-type" id="tk-type"><option value="service">Service request</option><option value="returns">Returns / refund</option><option value="warranty">Guarantee claim</option><option value="verification">Unit verification</option><option value="other">Other</option></select></div>
+                      <div class="field"><label for="tk-subject">Subject</label><input class="input js-tk-subject" id="tk-subject" placeholder="Short summary" /></div>
+                    </div>
+                    <div class="field dash-field-stack"><label for="tk-detail">Details</label><textarea class="textarea js-tk-detail" id="tk-detail" placeholder="Describe the issue"></textarea></div>
+                    <div class="panel__foot"><button class="btn btn--primary js-tk-submit" type="button">Submit ticket <i data-lucide="send" class="icon-16"></i></button></div>
+                  </div>
+                  <div class="panel">
+                    <div class="panel__head"><span class="panel__title">Your tickets</span></div>
+                    <div class="dash-view__grid js-tickets" style="grid-template-columns:1fr"></div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Notifications -->
+              <section class="dash-view js-view" data-view-panel="notifications" hidden>
+                <div class="panel">
+                  <div class="panel__head"><span class="panel__title">Notifications</span><button class="btn btn--secondary btn--sm js-mark-read" type="button">Mark all read</button></div>
+                  <div class="notif-list js-notifs"></div>
+                </div>
+              </section>
+
+              <!-- Settings -->
+              <section class="dash-view js-view" data-view-panel="settings" hidden>
+                <div class="dash-stack">
+                  <div class="panel">
+                    <div class="panel__head"><span class="panel__title">Profile</span></div>
+                    <div class="dash-view__grid dash-grid-form">
+                      <div class="field"><label for="set-name">Full name</label><input class="input js-set-name" id="set-name" /></div>
+                      <div class="field"><label for="set-email">Email</label><input class="input js-set-email" id="set-email" disabled /></div>
+                      <div class="field"><label for="set-phone">Phone</label><input class="input js-set-phone" id="set-phone" /></div>
+                      <div class="field"><label for="set-city">City</label><input class="input js-set-city" id="set-city" /></div>
+                    </div>
+                    <div class="panel__foot"><button class="btn btn--primary js-save-profile" type="button">Save changes</button></div>
+                  </div>
+                  <div class="panel">
+                    <div class="panel__head"><span class="panel__title">Password</span></div>
+                    <div class="dash-view__grid dash-grid-form dash-grid-2c">
+                      <div class="field"><label for="pw-cur">Current password</label><input class="input js-pw-cur" id="pw-cur" type="password" autocomplete="current-password" /></div>
+                      <div class="field"><label for="pw-new">New password</label><input class="input js-pw-new" id="pw-new" type="password" autocomplete="new-password" /></div>
+                    </div>
+                    <div class="panel__foot"><button class="btn btn--secondary js-pw-change" type="button">Update password</button></div>
+                  </div>
+                  <div class="panel">
+                    <div class="panel__head"><span class="panel__title">Notification preferences</span></div>
+                    <div class="dash-prefs">
+                      <label class="check"><input type="checkbox" class="js-pref-order" /> Order updates (bench, port, delivery)</label>
+                      <label class="check"><input type="checkbox" class="js-pref-promo" /> Promotions and drops</label>
+                      <label class="check"><input type="checkbox" class="js-pref-sms" /> SMS alerts</label>
+                    </div>
+                  </div>
+                  <div class="panel panel--danger">
+                    <div class="panel__head"><span class="panel__title">Danger zone</span></div>
+                    <p class="panel__danger-copy">
+                      Prefer to stay a guest? You can leave anytime. Your cart stays in this
+                      browser and checkout keeps working without an account.
+                    </p>
+                    <div class="panel__foot">
+                      <button class="btn btn--secondary js-logout" type="button">Sign out of this device</button>
+                      <button class="btn btn--secondary js-delete-account" type="button">Delete account</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast js-toast" aria-live="polite"></div>
+
+    <script type="module" src="/src/js/main.js"></script>
+    <script type="module" src="/src/js/dashboard.user.js"></script>
+  </body>
+</html>

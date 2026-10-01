@@ -1,0 +1,51 @@
+/*
+ * fonts.css — Custom font faces
+ * ----------------------------------------------------------------
+ * The three brand fonts are served from the Fontshare CDN for now (see the
+ * <link> in each page's <head>). File names resolve to the same family
+ * names used globally:
+ *
+ *   - 'General Sans'    → body / UI text      (public/fonts/general-sans)
+ *   - 'Clash Display'   → logo / display type  (public/fonts/clash-display)
+ *   - 'Cabinet Grotesk' → headings             (public/fonts/cabinet-grotesk)
+ *
+ * When the self-hosted files are uploaded to /public/fonts/..., uncomment
+ * (and complete) the blocks below and remove the CDN <link> from the pages.
+ * ----------------------------------------------------------------
+ */
+
+/* ── General Sans (body text) ─────────────────────────────────────
+@font-face {
+  font-family: 'General Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/general-sans/GeneralSans-Regular.woff2') format('woff2');
+}
+@font-face { … 500, 600, 700 weights … }
+────────────────────────────────────────────────────────────────── */
+
+/* ── Clash Display (logo / display text) ──────────────────────────
+@font-face {
+  font-family: 'Clash Display';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/clash-display/ClashDisplay-Semibold.woff2') format('woff2');
+}
+────────────────────────────────────────────────────────────────── */
+
+/* ── Cabinet Grotesk (headings) ───────────────────────────────────
+@font-face {
+  font-family: 'Cabinet Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/cabinet-grotesk/CabinetGrotesk-Bold.woff2') format('woff2');
+}
+────────────────────────────────────────────────────────────────── */
+
+/* Anti-flicker: keep fallbacks looking intentional until the web fonts
+   swap in. Clash/Cabinet fall back to General Sans gracefully. */
+.font-display { font-family: var(--font-display); }
+.font-heading { font-family: var(--font-heading); }

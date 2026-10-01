@@ -1,0 +1,82 @@
+/*
+ * four-oh-four.css — 404
+ */
+.fof {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 8rem var(--gutter) 4rem;
+  overflow: hidden;
+}
+.fof .fof-num {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(7rem, 30vw, 22rem);
+  line-height: 0.85;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--color-accent);
+  user-select: none;
+  animation: fof-float 5s var(--ease-io) infinite;
+}
+@keyframes fof-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+.fof h1 {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  margin-top: 1.6rem;
+}
+.fof p {
+  color: var(--color-text-muted);
+  max-width: 46ch;
+  margin: 0.8rem auto 0;
+}
+.fof .fof-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2rem;
+}
+.fof-scroll {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 3rem;
+}
+.fof-scroll svg {
+  animation: fof-bob 2s var(--ease-io) infinite;
+  color: var(--color-accent);
+}
+@keyframes fof-bob {
+  0%, 100% { transform: translateY(-3px); }
+  50% { transform: translateY(4px); }
+}
+
+/* Lottie battery scene inside the 404 numeral */
+.fof .fof-num { position: relative; }
+.fof .fof-num__scene {
+  width: min(100%, 720px);
+  aspect-ratio: 900 / 420;
+  margin: 0 auto;
+}
+.fof .fof-num__scene svg { display: block; width: 100%; height: 100%; }
+.fof .fof-num__scene { opacity: 0; transition: opacity 320ms ease; }
+.fof .fof-num__scene.is-ready { opacity: 1; }
+.fof .fof-num__static {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: clamp(5rem, 24vw, 15rem);
+  line-height: 1;
+  transition: opacity 200ms ease;
+}
+.fof .fof-num.is-ready .fof-num__static { opacity: 0; visibility: hidden; }

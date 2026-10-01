@@ -1,0 +1,56 @@
+/*
+ * variables.css — Design tokens
+ * ----------------------------------------------------------------
+ * Global CSS custom properties. Single source of truth for spacing,
+ * typography, motion and layering. Referenced across every stylesheet.
+ */
+
+:root {
+  /* ── Color palette ─────────────────────────────────────────────── */
+  --color-bg: #0d0d0d;                 /* page background (near-black)     */
+  --color-bg-raised: #131313;          /* cards / panels above bg          */
+  --color-surface: #1a1a1a;            /* inputs, chips, raised surfaces   */
+  --color-text: #f5f3ef;               /* primary text (warm off-white)    */
+  --color-text-muted: rgba(245, 243, 239, 0.60);  /* secondary text        */
+  --color-line: rgba(245, 243, 239, 0.12);        /* hairline borders      */
+  --color-line-strong: rgba(245, 243, 239, 0.22); /* emphasis borders      */
+  --color-accent: #ff5a1f;             /* accent / highlight (burnt orange)*/
+  --color-accent-deep: #e84a12;        /* pressed/hover accent             */
+  --color-accent-dim: rgba(255, 90, 31, 0.14); /* tinted fills             */
+  --color-secondary: #2b2b2b;          /* muted graphite surfaces          */
+  --color-success: #3ddc97;            /* success / confirmation           */
+  --color-success-dim: rgba(61, 220, 151, 0.14);
+
+  /* ── Typography ────────────────────────────────────────────────── */
+  --font-body: 'General Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Clash Display', 'Cabinet Grotesk', ui-sans-serif, sans-serif;
+  --font-heading: 'Cabinet Grotesk', 'General Sans', ui-sans-serif, sans-serif;
+
+  /* ── Layout ────────────────────────────────────────────────────── */
+  --container: 1240px;
+  --container-wide: 1480px;
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+  --section-y: clamp(4.5rem, 9vw, 9rem);
+
+  /* ── Radius ────────────────────────────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* ── Motion ────────────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);       /* expo-ish out  */
+  --ease-io: cubic-bezier(0.76, 0, 0.24, 1);        /* in-out        */
+  --ease-linear: linear;
+  --dur-fast: 0.28s;
+  --dur-med: 0.6s;
+  --dur-slow: 1s;
+
+  /* ── Layers ────────────────────────────────────────────────────── */
+  --z-progress: 70;
+  --z-cursor: 80;
+  --z-nav: 50;
+  --z-menu: 60;
+  --z-overlay: 40;
+  --z-transition: 100;
+}

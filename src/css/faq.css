@@ -1,0 +1,57 @@
+/*
+ * faq.css — FAQ page
+ */
+.faq-cats {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+.faq-layout {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+.faq-list {
+  border-top: 1px solid var(--color-line);
+}
+.faq-group + .faq-group {
+  margin-top: 3rem;
+}
+.faq-group h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.faq-group h2 svg {
+  color: var(--color-accent);
+}
+.faq-side {
+  display: grid;
+  gap: 1rem;
+  position: sticky;
+  top: 7rem;
+}
+.faq-help {
+  border: 1px solid var(--color-accent-dim);
+  background: var(--color-accent-dim);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+}
+.faq-help h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+.faq-help p {
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  margin-bottom: 1.1rem;
+}
+@media (min-width: 900px) {
+  .faq-layout {
+    grid-template-columns: 1.6fr 1fr;
+    gap: clamp(2.5rem, 5vw, 5rem);
+  }
+}

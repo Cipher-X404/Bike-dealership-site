@@ -1,0 +1,688 @@
+/*
+ * main.css — Design system, base + shared components
+ * ----------------------------------------------------------------
+ * Imported by main.js. Tailwind v4 provides preflight + the utility layer
+ * (we rely on preflight, tokens and a few utilities; the art direction
+ * lives in the component stylesheets below).
+ */
+
+@import 'tailwindcss';
+
+@import './variables.css';
+@import './fonts.css';
+@import './navbar.css';
+@import './hero.css';
+@import './footer.css';
+@import './buttons.css';
+@import './typography.css';
+@import './pages.css';
+
+/* ═══════════════════════════════════════════════════════════════
+   1. BASE
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  color-scheme: dark;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #0d0d0d;
+}
+
+/* Nicer scrollbar (WebKit) — thin, on-brand */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-secondary);
+  border-radius: 8px;
+  border: 2px solid var(--color-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* blockquote / quote char already styled in typography.css */
+
+/* ═══════════════════════════════════════════════════════════════
+   2. LAYOUT PRIMITIVES
+   ═══════════════════════════════════════════════════════════════ */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container--wide {
+  max-width: var(--container-wide);
+}
+
+.section {
+  padding-block: var(--section-y);
+  position: relative;
+}
+
+/* section anchor offset — so nav anchor links aren't hidden under navbar */
+[id] {
+  scroll-margin-top: 90px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3. REVEAL-ON-SCROLL primitives
+   -----------------------------------------------------------------
+   Default motion lives in JS: [data-reveal], [data-split], [data-mask],
+   [data-par], [data-count], [data-stagger] children. With no JS (or
+   prefers-reduced-motion), content simply remains visible.
+   ═══════════════════════════════════════════════════════════════ */
+[data-split] .word,
+[data-split] .char,
+.display .word,
+.display .char,
+.h-display .word,
+.h-display .char {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Mask-reveal wrapper canvas (JS sets the animated clip-path) */
+[data-mask] {
+  display: block;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   4. CARDS & CHIPS
+   ═══════════════════════════════════════════════════════════════ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.95rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  font-size: 0.84rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--color-text-muted);
+  background: var(--color-bg-raised);
+  white-space: nowrap;
+}
+.chip--accent {
+  color: var(--color-accent);
+  border-color: var(--color-accent-dim);
+  background: var(--color-accent-dim);
+}
+
+/* Filter pills (shop) */
+.filter-pill {
+  padding: 0.55rem 1.2rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-raised);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.filter-pill:hover {
+  color: var(--color-text);
+  border-color: var(--color-line-strong);
+}
+.filter-pill[aria-pressed='true'] {
+  color: #0d0d0d;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. FAQ ACCORDION (native <details>)
+   ═══════════════════════════════════════════════════════════════ */
+.faq-item {
+  border-bottom: 1px solid var(--color-line);
+}
+.faq-item summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.6rem 0.25rem;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+.faq-item .faq-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  color: var(--color-accent);
+  transition: transform var(--dur-med) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+.faq-item[open] .faq-icon {
+  transform: rotate(180deg);
+  background: var(--color-accent);
+  color: #0d0d0d;
+  border-color: var(--color-accent);
+}
+.faq-item .faq-body {
+  padding: 0 0.25rem 1.7rem;
+  max-width: 62ch;
+  color: var(--color-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   6. FORMS
+   ═══════════════════════════════════════════════════════════════ */
+.field {
+  display: grid;
+  gap: 0.45rem;
+}
+.field label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.input,
+.select,
+.textarea {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  padding: 0.85rem 1.05rem;
+  font: inherit;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: rgba(245, 243, 239, 0.35);
+}
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-dim);
+}
+.textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f3ef' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.6rem;
+  cursor: pointer;
+}
+.field .hint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 560px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* checkbox / radio keep native semantics but go on-brand */
+.check {
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+.check input {
+  accent-color: var(--color-accent);
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.15rem;
+  flex: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   7. CUSTOM CURSOR
+   Geometry (position, size, radius, squash) is driven per frame from
+   animations.js; this file owns colour, blend and the inner parts.
+   Modes live on [data-mode]: default | magnet | label | media | text |
+   link | hidden.
+   ═══════════════════════════════════════════════════════════════ */
+html.cursor-on,
+html.cursor-on * { cursor: none !important; }
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: var(--z-cursor);
+  opacity: 0;
+  will-change: transform, width, height;
+  transition: opacity 240ms ease;
+}
+.cursor-dot.is-on,
+.cursor-ring.is-on { opacity: 1; }
+
+/* the true pointer position */
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 1px rgba(13, 13, 13, 0.6);
+  transition: opacity 240ms ease, transform 160ms var(--ease-out);
+}
+.cursor-dot[data-mode="magnet"],
+.cursor-dot[data-mode="label"],
+.cursor-dot[data-mode="text"],
+.cursor-dot[data-mode="hidden"] { opacity: 0; }
+.cursor-dot[data-mode="media"] { background: var(--color-text); mix-blend-mode: difference; }
+
+/* the ring: a lagging, deformable body */
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  box-sizing: border-box;
+  border: 1.5px solid rgba(245, 243, 239, 0.6);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition: opacity 240ms ease, border-color 200ms ease, background-color 200ms ease, box-shadow 200ms ease;
+}
+.cursor-ring[data-mode="hidden"] { opacity: 0; }
+
+/* inline text links: tight accent ring */
+.cursor-ring[data-mode="link"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-dim);
+}
+
+/* buttons and nav: the ring wraps the control */
+.cursor-ring[data-mode="magnet"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-dim);
+  box-shadow: 0 0 0 6px rgba(255, 90, 31, 0.06);
+}
+
+/* imagery: white disc in difference blend */
+.cursor-ring[data-mode="media"] {
+  border-color: transparent;
+  background: var(--color-text);
+  mix-blend-mode: difference;
+}
+
+/* text: an I-beam the height of the line */
+.cursor-ring[data-mode="text"] {
+  border-color: transparent;
+  background: var(--color-text);
+  mix-blend-mode: difference;
+}
+
+/* rich targets: accent disc with icon + verb */
+.cursor-ring[data-mode="label"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: 0 12px 32px rgba(255, 90, 31, 0.28);
+}
+.cursor-ring__icon,
+.cursor-ring__label {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 160ms ease, transform 260ms var(--ease-out);
+  color: var(--color-bg);
+}
+.cursor-ring__icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  translate: 0 -11px;
+}
+.cursor-ring__label {
+  font-family: var(--font-heading, 'Cabinet Grotesk'), sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  translate: 0 14px;
+}
+.cursor-ring[data-mode="label"] .cursor-ring__icon,
+.cursor-ring[data-mode="label"] .cursor-ring__label { opacity: 1; transform: scale(1); }
+.cursor-ring[data-mode="label"] .cursor-ring__icon { transition-delay: 40ms; }
+
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .cursor-dot,
+  .cursor-ring { display: none; }
+  html.cursor-on,
+  html.cursor-on * { cursor: auto !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   8. GRAIN OVERLAY
+   ═══════════════════════════════════════════════════════════════ */
+.grain {
+  position: fixed;
+  inset: -100%;
+  width: 300%;
+  height: 300%;
+  pointer-events: none;
+  z-index: 24;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* equivalent dark-section local variant */
+.grain-static {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   9. SCROLL PROGRESS (tied to Lenis)
+   ═══════════════════════════════════════════════════════════════ */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(245, 243, 239, 0.08);
+  z-index: var(--z-progress);
+  pointer-events: none;
+}
+.scroll-progress__bar {
+  height: 100%;
+  width: 100%;
+  background: var(--color-accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   10. PAGE TRANSITION OVERLAY
+   ═══════════════════════════════════════════════════════════════ */
+.page-curtains {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-transition);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  isolation: isolate;
+}
+.page-curtains span {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(155deg, #202020 0%, #111 72%);
+  border-right: 1px solid rgba(245, 243, 239, 0.04);
+  transform: scaleY(0);
+  transform-origin: 0 100%;
+  will-change: transform;
+}
+.page-curtains span:nth-child(2),
+.page-curtains span:nth-child(5) {
+  background: linear-gradient(155deg, #ff6b32 0%, #d94112 100%);
+}
+.page-curtains::before,
+.page-curtains::after {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+}
+.page-curtains::before {
+  content: '';
+  top: 50%;
+  width: clamp(3rem, 5vw, 4.25rem);
+  aspect-ratio: 1;
+  background: var(--color-accent);
+  clip-path: polygon(58% 0, 28% 48%, 51% 48%, 39% 100%, 75% 39%, 53% 39%);
+  filter: drop-shadow(0 0 18px rgba(255, 90, 31, 0.6));
+  transform: translate(-50%, -75%) scale(0.88) rotate(-12deg);
+}
+.page-curtains::after {
+  content: 'SOKO MOTO';
+  top: calc(50% + clamp(2.2rem, 4vw, 3rem));
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.8vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  transform: translate(-50%, -35%);
+}
+.page-curtains.is-active::before,
+.page-curtains.is-active::after {
+  opacity: 1;
+}
+.page-curtains.is-active::before {
+  transform: translate(-50%, -50%) scale(1) rotate(0);
+}
+.page-curtains.is-active::after {
+  transform: translate(-50%, 0);
+}
+/* .is-leaving triggers the wipe; .is-entering clears it (set by JS) */
+.page-curtains.is-entering span {
+  transform: scaleY(0);
+  transform-origin: 0 0;
+  transition: transform var(--dur-slow) var(--ease-io);
+}
+.page-curtains.is-leaving span {
+  transform: scaleY(1);
+  transform-origin: 0 100%;
+  transition: transform 0.55s var(--ease-io);
+  transition-delay: calc(var(--i) * 40ms);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   11. MISC SHARED UI
+   ═══════════════════════════════════════════════════════════════ */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 1rem;
+  z-index: 300;
+  background: var(--color-accent);
+  color: #0d0d0d;
+  padding: 0.7rem 1.2rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  transition: top var(--dur-fast) var(--ease-out);
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Checkout step rail (cart → delivery → payment) */
+.steps {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.2rem;
+  margin-top: 2rem;
+}
+.steps__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  position: relative;
+  padding-right: 1.2rem;
+}
+.steps__item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 2.4rem;
+  height: 1px;
+  background: var(--color-line);
+}
+.steps__dot {
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-line-strong);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.steps__item.is-current {
+  color: var(--color-text);
+}
+.steps__item.is-current .steps__dot {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #0d0d0d;
+}
+.steps__item.is-done .steps__dot {
+  background: var(--color-success-dim);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+/* inline icon sizing so lucide SVGs are consistent */
+.icon-14 { width: 14px; height: 14px; }
+.icon-16 { width: 16px; height: 16px; }
+.icon-18 { width: 18px; height: 18px; }
+.icon-20 { width: 20px; height: 20px; }
+.icon-22 { width: 22px; height: 22px; }
+.icon-24 { width: 24px; height: 24px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   12. ACCESSIBILITY / MOTION PREFERENCES
+   ═══════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .page-curtains::before,
+  .page-curtains::after {
+    transition: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Tap targets: 44px minimum on coarse pointers (SEO/mobile guideline) */
+@media (pointer: coarse) {
+  .icon-btn,
+  .hero-widget__arrow,
+  .showcase__arrow,
+  .socials .icon-btn,
+  .lineup__btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

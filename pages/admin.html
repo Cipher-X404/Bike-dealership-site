@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ops deck · SOKO Moto</title>
+    <meta name="description" content="SOKO Moto store operations: orders, inventory, customers, analytics and settings." />
+    <link rel="canonical" href="https://sokomoto.ng/pages/admin.html" />
+    <meta name="theme-color" content="#0D0D0D" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SOKO Moto" />
+    <meta property="og:title" content="Ops deck · SOKO Moto" />
+    <meta property="og:description" content="SOKO Moto store operations: orders, inventory, customers, analytics and settings." />
+    <meta property="og:url" content="https://sokomoto.ng/pages/admin.html" />
+    <meta property="og:image" content="https://sokomoto.ng/images/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ops deck · SOKO Moto" />
+    <meta name="twitter:description" content="SOKO Moto store operations: orders, inventory, customers, analytics and settings." />
+    <meta name="twitter:image" content="https://sokomoto.ng/images/og.jpg" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@600,700&f[]=cabinet-grotesk@500,700&f[]=jetbrains-mono@400,500,600&display=swap" />
+  </head>
+  <body>
+    <div class="dash" data-dash="admin" style="--dash-accent:var(--color-success)">
+
+      <!-- Guest guard -->
+      <div class="dash-guard js-guest-guard" hidden>
+        <div class="dash-guard__card">
+          <span class="dash-guard__kicker">OPS DECK / ACCESS</span>
+          <span class="dash-guard__icon"><i data-lucide="shield" class="icon-24"></i></span>
+          <h1>Staff access only.</h1>
+          <p>Sign in with a SOKO Moto admin account to manage orders, stock, customers and store settings.</p>
+          <div class="dash-guard__actions">
+            <a class="btn btn--primary" href="/pages/login.html">Log in</a>
+            <a class="btn btn--ghost" href="/"><span class="btn__label" data-text="Back to storefront"><span>Back to storefront</span></span></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Not authorized -->
+      <div class="dash-guard js-not-admin-guard" hidden>
+        <div class="dash-guard__card">
+          <span class="dash-guard__kicker">OPS DECK / DENIED</span>
+          <span class="dash-guard__icon"><i data-lucide="shield-alert" class="icon-24"></i></span>
+          <h1>Admins only.</h1>
+          <p>This account isn't a staff account. Head back to your member dashboard or the storefront.</p>
+          <div class="dash-guard__actions">
+            <a class="btn btn--primary" href="/pages/dashboard.html">My dashboard</a>
+            <a class="btn btn--ghost" href="/"><span class="btn__label" data-text="Storefront"><span>Storefront</span></span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="js-app" hidden>
+        <div class="dash-shell">
+        <aside class="dash-rail" aria-label="Ops navigation">
+          <a class="rail__brand" href="/" aria-label="SOKO Moto home"><i data-lucide="zap" class="icon-18"></i></a>
+          <nav class="dash-nav" aria-label="Ops deck">
+            <span class="rail__ink" aria-hidden="true"></span>
+            <a href="#overview" data-view="overview" data-label="Overview" class="is-active" aria-label="Overview"><i data-lucide="layout-dashboard" class="icon-18"></i></a>
+            <a href="#orders" data-view="orders" data-label="Orders" aria-label="Orders"><i data-lucide="package" class="icon-18"></i></a>
+            <a href="#inventory" data-view="inventory" data-label="Inventory" aria-label="Inventory"><i data-lucide="boxes" class="icon-18"></i></a>
+            <a href="#customers" data-view="customers" data-label="Customers" aria-label="Customers"><i data-lucide="users" class="icon-18"></i></a>
+            <a href="#analytics" data-view="analytics" data-label="Analytics" aria-label="Analytics"><i data-lucide="bar-chart-3" class="icon-18"></i></a>
+            <a href="#settings" data-view="settings" data-label="Settings" aria-label="Settings"><i data-lucide="settings" class="icon-18"></i></a>
+          </nav>
+          <div class="rail__foot">
+            <span class="rail__clock" aria-hidden="true"><span>CST</span><b class="js-dash-clock">--:--</b></span>
+            <a href="#" data-logout class="rail__logout" aria-label="Sign out"><i data-lucide="log-out" class="icon-18"></i></a>
+          </div>
+        </aside>
+
+        <div class="dash-stage">
+        <header class="dash-top">
+          <div class="dash-top__id">
+            <span class="dash-top__path">OPS DECK <b>/</b> <span class="js-view-path">OVERVIEW</span></span>
+            <h1 class="js-view-title">Overview</h1>
+          </div>
+          <div class="dash-top__actions">
+            <span class="top-chip js-open-chip"><i data-lucide="activity" class="icon-14"></i> <span class="js-open-count">0</span> open orders</span>
+            <a class="btn btn--secondary btn--sm" href="/" target="_blank" rel="noopener"><span>Storefront</span> <i data-lucide="arrow-up-right" class="icon-16"></i></a>
+            <div class="top-user">
+              <span class="top-user__avatar js-user-initial">A</span>
+              <span class="top-user__meta"><b class="js-user-name">-</b><small class="js-user-email">-</small></span>
+            </div>
+          </div>
+        </header>
+        <main class="dash-main">
+
+          <!-- Overview -->
+          <section class="dash-view js-view" data-view-panel="overview">
+            <div class="kpis js-kpis"></div>
+            <div class="dash-view__grid dash-grid-2">
+              <div class="panel">
+                <div class="panel__head"><span class="panel__title">Revenue (last 6 months)</span><select class="select select--sm js-chart-range" style="margin-left:auto"><option value="6">6 months</option><option value="12">12 months</option></select></div>
+                <div class="chart js-chart" style="height:280px"></div>
+              </div>
+              <div class="panel">
+                <div class="panel__head"><span class="panel__title">Alerts</span></div>
+                <div class="notif-list js-alerts"></div>
+              </div>
+            </div>
+            <div class="panel" style="margin-top:16px">
+              <div class="panel__head"><span class="panel__title">Latest orders</span><a class="panel__link" href="#orders" data-goto="orders">View all →</a></div>
+              <div class="table-scroll">
+                <table class="dash-table js-latest-orders"><thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Status</th><th style="text-align:right">Total</th></tr></thead><tbody></tbody></table>
+              </div>
+            </div>
+          </section>
+
+          <!-- Orders -->
+          <section class="dash-view js-view" data-view-panel="orders" hidden>
+            <div class="panel">
+              <div class="dash-toolbar">
+                <div class="search"><i data-lucide="search" class="icon-16"></i><input class="js-order-search" placeholder="Search by ID, ref or customer…" /></div>
+                <div class="card-actions">
+                  <select class="select select--sm js-order-export">
+                    <option value="csv">Export CSV (all)</option>
+                    <option value="csv-open">Export CSV (open only)</option>
+                    <option value="print">Print list</option>
+                  </select>
+                  <button class="btn btn--secondary btn--sm js-order-export-go" type="button"><i data-lucide="download" class="icon-16"></i> Export</button>
+                </div>
+              </div>
+              <div class="bulk-bar js-bulk-bar" hidden>
+                <span class="js-bulk-count"></span>
+                <button class="chip-btn js-bulk-cancel" type="button"><i data-lucide="x" class="icon-14"></i> Cancel selected</button>
+                <button class="chip-btn js-bulk-deliver" type="button"><i data-lucide="check" class="icon-14"></i> Mark delivered</button>
+                <button class="chip-btn js-bulk-clear" type="button">Clear</button>
+              </div>
+              <div class="table-scroll">
+                <table class="dash-table js-admin-orders">
+                  <thead><tr><th style="width:44px"><input type="checkbox" class="js-check-all" aria-label="Select all" /></th><th>Order</th><th>Customer</th><th>Items</th><th>Date</th><th>Status</th><th style="text-align:right">Total</th><th style="text-align:right">Actions</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- Inventory -->
+          <section class="dash-view js-view" data-view-panel="inventory" hidden>
+            <div class="panel">
+              <div class="dash-toolbar">
+                <div class="search"><i data-lucide="search" class="icon-16"></i><input class="js-inv-search" placeholder="Search products…" /></div>
+                <button class="btn btn--primary btn--sm js-product-add" type="button"><i data-lucide="plus" class="icon-16"></i> Add product</button>
+              </div>
+              <div class="table-scroll">
+                <table class="dash-table js-admin-inventory">
+                  <thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Sold (30d)</th><th style="text-align:right">Actions</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <div class="js-inv-note" style="margin-top:1rem;font-size:0.8rem;color:var(--color-text-muted)"></div>
+            </div>
+          </section>
+
+          <!-- Customers -->
+          <section class="dash-view js-view" data-view-panel="customers" hidden>
+            <div class="panel">
+              <div class="dash-toolbar">
+                <div class="search"><i data-lucide="search" class="icon-16"></i><input class="js-cust-search" placeholder="Search customers…" /></div>
+                <div class="card-actions">
+                  <select class="select select--sm js-cust-sort"><option value="spend">Sort: total spend</option><option value="orders">Sort: orders</option><option value="recent">Sort: most recent</option></select>
+                </div>
+              </div>
+              <div class="table-scroll">
+                <table class="dash-table js-admin-customers">
+                  <thead><tr><th>Customer</th><th>Email</th><th>Location</th><th>Orders</th><th style="text-align:right">Total spend</th><th>Joined</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- Analytics -->
+          <section class="dash-view js-view" data-view-panel="analytics" hidden>
+            <div class="dash-view__grid dash-grid-2">
+              <div class="panel">
+                <div class="panel__head"><span class="panel__title">Orders trend (12 weeks)</span></div>
+                <div class="chart js-trend-chart" style="height:260px"></div>
+              </div>
+              <div class="panel">
+                <div class="panel__head"><span class="panel__title">Status breakdown</span></div>
+                <div class="dash-break js-status-break"></div>
+              </div>
+            </div>
+            <div class="dash-view__grid dash-grid-2c" style="margin-top:16px">
+              <div class="panel">
+                <div class="panel__head"><span class="panel__title">Category value</span></div>
+                <div class="h-bars js-cat-value"></div>
+              </div>
+              <div class="panel">
+                <div class="panel__head"><span class="panel__title">Top products</span></div>
+                <div class="h-bars js-top-products"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Settings -->
+          <section class="dash-view js-view" data-view-panel="settings" hidden>
+            <form class="panel js-admin-settings" id="admin-settings">
+              <div class="panel__head"><span class="panel__title">Store settings</span></div>
+              <div class="dash-view__grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+                <div class="field"><label for="adm-gateway">Primary gateway</label><select class="select js-set-gateway" id="adm-gateway"><option value="Paystack">Paystack</option><option value="Flutterwave">Flutterwave</option><option value="Stripe">Stripe</option></select></div>
+                <div class="field"><label for="adm-currency">Currency</label><select class="select js-set-currency" id="adm-currency"><option value="₦">₦ NGN</option><option value="$">$ USD</option><option value="£">£ GBP</option></select></div>
+                <div class="field"><label for="adm-low">Low-stock threshold</label><input class="input js-set-low" id="adm-low" type="number" min="0" /></div>
+                <div class="field"><label for="adm-tax">Tax rate (%)</label><input class="input js-set-tax" id="adm-tax" type="number" min="0" step="0.5" /></div>
+              </div>
+              <label class="check" style="margin-top:1.1rem"><input type="checkbox" class="js-set-enable" /> Orders enabled (accepting new orders)</label>
+              <div style="margin-top:1.4rem;display:flex;gap:0.8rem;flex-wrap:wrap">
+                <button class="btn btn--primary js-settings-save" type="submit">Save settings</button>
+                <button class="btn btn--secondary js-csv-download" type="button"><i data-lucide="download" class="icon-16"></i> Download orders CSV</button>
+              </div>
+            </form>
+            <div class="panel panel--danger" style="margin-top:16px">
+              <div class="panel__head"><span class="panel__title">Danger zone</span></div>
+              <p style="color:var(--color-text-muted);font-size:0.9rem">
+                Reset all demo store data (orders, inventory, customers) back to the seeded state.
+              </p>
+              <div style="margin-top:1rem">
+                <button class="btn btn--secondary js-admin-reset" type="button" style="color:var(--color-accent);border-color:var(--color-accent-dim)">Reset demo data</button>
+              </div>
+            </div>
+          </section>
+
+        </main>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast js-toast" aria-live="polite"></div>
+
+    <script type="module" src="/src/js/main.js"></script>
+    <script type="module" src="/src/js/dashboard.admin.js"></script>
+  </body>
+</html>

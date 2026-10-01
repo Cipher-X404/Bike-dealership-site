@@ -1,0 +1,124 @@
+/*
+ * buttons.css — Button system + magnetic/arrow hover behavior
+ * -----------------------------------------------------------------
+ * Primary (accent fill), secondary (outline), ghost (text + arrow), and
+ * icon chips. Magnetic pull is applied by JS only on the primary CTAs;
+ * the arrow/label micro-slide below is pure CSS.
+ */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius-pill);
+  padding: 1rem 1.9rem;
+  white-space: nowrap;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  will-change: transform;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--color-accent);
+  color: #0d0d0d;
+}
+.btn--success {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #06281b;
+}
+.btn--primary:hover {
+  background: var(--color-accent-deep);
+  transform: translateY(-1px);
+}
+
+.btn--secondary {
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-text);
+  background: transparent;
+}
+.btn--secondary:hover {
+  border-color: var(--color-text);
+  background: var(--color-bg-raised);
+}
+
+.btn--ghost {
+  padding-inline: 0.2rem;
+  color: var(--color-text);
+  gap: 0.65rem;
+}
+.btn--ghost .btn__label {
+  position: relative;
+  overflow: hidden;
+}
+.btn--ghost .btn__label > span {
+  display: inline-block;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+/* duplicate label for the rollover effect */
+.btn--ghost .btn__label::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  color: var(--color-accent);
+}
+.btn--ghost .btn-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.btn--ghost:hover .btn-icon {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #0d0d0d;
+  transform: rotate(45deg);
+}
+.btn--ghost:hover .btn__label > span {
+  transform: translateY(-100%);
+}
+
+.btn--block {
+  display: flex;
+  width: 100%;
+}
+.btn--sm {
+  padding: 0.7rem 1.3rem;
+  font-size: 0.88rem;
+}
+.btn--lg {
+  padding: 0.85rem 1.7rem;
+  font-size: 0.95rem;
+}
+
+/* Link-chip (arrow circle used on cards) */
+.link-chip {
+  display: inline-grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  color: var(--color-text);
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+a:hover > .link-chip,
+.link-chip:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #0d0d0d;
+  transform: rotate(45deg);
+}

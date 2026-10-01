@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout · SOKO Moto</title>
+    <meta name="description" content="Secure checkout at SOKO Moto. Guest checkout available, no account required." />
+    <link rel="canonical" href="https://sokomoto.ng/pages/checkout.html" />
+    <meta name="theme-color" content="#0D0D0D" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SOKO Moto" />
+    <meta property="og:title" content="Checkout · SOKO Moto" />
+    <meta property="og:description" content="Secure checkout at SOKO Moto. Guest checkout available, no account required." />
+    <meta property="og:url" content="https://sokomoto.ng/pages/checkout.html" />
+    <meta property="og:image" content="https://sokomoto.ng/images/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Checkout · SOKO Moto" />
+    <meta name="twitter:description" content="Secure checkout at SOKO Moto. Guest checkout available, no account required." />
+    <meta name="twitter:image" content="https://sokomoto.ng/images/og.jpg" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@600,700&f[]=cabinet-grotesk@500,700&display=swap" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="scroll-progress" aria-hidden="true"><div class="scroll-progress__bar"></div></div>
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
+    <div class="page-curtains" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- @@NAVBAR@@ -->
+
+    <main id="main">
+      <section class="page-head" style="padding-bottom:2.5rem">
+        <div class="page-head__grid" aria-hidden="true"></div>
+        <div class="page-head__glow" aria-hidden="true"></div>
+        <div class="container">
+          <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="/pages/cart.html">Cart</a> <i data-lucide="chevron-right" class="icon-16"></i> <span>Checkout</span>
+          </nav>
+          <h1 data-split>Checkout.</h1>
+          <p>Guest checkout is fine. No account needed. The important part is the bike.</p>
+          <ol class="steps" aria-label="Checkout progress">
+            <li class="steps__item is-current"><span class="steps__dot">1</span> Shipping</li>
+            <li class="steps__item"><span class="steps__dot">2</span> Payment</li>
+            <li class="steps__item"><span class="steps__dot">3</span> Confirmation</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section" style="padding-top:0.5rem">
+        <div class="container">
+          <div class="co-layout">
+
+            <div style="display:grid;gap:1.5rem">
+              <!-- Shipping -->
+              <div class="co-panel">
+                <h2><span style="color:var(--color-accent)">01</span> · Shipping details</h2>
+                <p class="panel-sub">Where does the SOKO live?</p>
+                <form style="display:grid;gap:1.1rem" data-checkout-form novalidate>
+                  <div class="field-row">
+                    <div class="field"><label for="co-fname">First name</label><input class="input" id="co-fname" autocomplete="given-name" required /></div>
+                    <div class="field"><label for="co-lname">Last name</label><input class="input" id="co-lname" autocomplete="family-name" required /></div>
+                  </div>
+                  <div class="field"><label for="co-phone">Phone</label><input class="input" id="co-phone" type="tel" autocomplete="tel" placeholder="+234 800 000 0000" required /></div>
+                  <div class="field"><label for="co-address">Street address</label><input class="input" id="co-address" autocomplete="street-address" placeholder="House number, street" required /></div>
+                  <div class="field-row">
+                    <div class="field"><label for="co-city">City</label><input class="input" id="co-city" autocomplete="address-level2" value="Lagos" required /></div>
+                    <div class="field">
+                      <label for="co-state">State</label>
+                      <select class="select" id="co-state" autocomplete="address-level1">
+                        <option>Lagos</option><option>Oyo</option><option>Ogun</option><option>Rivers</option><option>FCT Abuja</option><option>Kano</option><option>Enugu</option><option>Anambra</option><option>Kaduna</option><option>Katsina</option><option>Delta</option><option>Akwa Ibom</option><option>Cross River</option><option>Abia</option><option>Edo</option><option>Osun</option><option>Kwara</option><option>Plateau</option><option>Bauchi</option><option>Bornu</option><option>Benue</option><option>Jigawa</option><option>Sokoto</option><option>Gombe</option><option>Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field" id="co-state-other-wrap" hidden>
+                    <label for="co-state-other">Tell us which state</label>
+                    <input class="input" id="co-state-other" placeholder="Type your state" />
+                  </div>
+                  <label class="check"><input type="checkbox" checked /> This is a residential delivery address</label>
+                  <p class="co-error" id="co-error" role="alert" hidden></p>
+                  <div class="panel-actions">
+                    <a class="back" href="/pages/cart.html"><i data-lucide="arrow-left" class="icon-16"></i> Back to cart</a>
+                    <button class="btn btn--primary" type="submit" data-magnetic>Continue to payment <i data-lucide="arrow-right" class="icon-18"></i></button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Payment -->
+              <div class="co-panel" id="co-payment">
+                <h2><span style="color:var(--color-accent)">02</span> · Payment</h2>
+                <p class="panel-sub">Payments are powered by Paystack (sandbox in this demo).</p>
+                <div class="pay-methods">
+                  <label class="pay-method">
+                    <input type="radio" name="pay" value="card" checked />
+                    <span class="pay-card">
+                      <i data-lucide="credit-card" class="icon-20"></i>
+                      <span class="pay-name">Card<small>Visa · Mastercard · Verve</small></span>
+                    </span>
+                  </label>
+                  <label class="pay-method">
+                    <input type="radio" name="pay" value="transfer" />
+                    <span class="pay-card">
+                      <i data-lucide="landmark" class="icon-20"></i>
+                      <span class="pay-name">Bank transfer<small>Instant via Paystack</small></span>
+                    </span>
+                  </label>
+                  <label class="pay-method">
+                    <input type="radio" name="pay" value="split" />
+                    <span class="pay-card">
+                      <i data-lucide="calendar-range" class="icon-20"></i>
+                      <span class="pay-name">Split in 3<small>0% · Paystack instalments</small></span>
+                    </span>
+                  </label>
+                  <label class="pay-method">
+                    <input type="radio" name="pay" value="pod" />
+                    <span class="pay-card">
+                      <i data-lucide="truck" class="icon-20"></i>
+                      <span class="pay-name">Pay on delivery<small>Available in Lagos &amp; Ibadan</small></span>
+                    </span>
+                  </label>
+                </div>
+                <div class="field" style="margin-top:1.1rem">
+                  <label for="co-email">Email for receipt</label>
+                  <input class="input" id="co-email" type="email" autocomplete="email" placeholder="you@example.com" required />
+                  <small class="field-hint">The moment payment clears, your itemised receipt is generated and sent here automatically.</small>
+                </div>
+                <div class="trust-note">
+                  <i data-lucide="lock" class="icon-18"></i>
+                  <span><b style="color:var(--color-text)">Your details are safe.</b> We use tokenised payments and never store card numbers. 256-bit encryption via Paystack.</span>
+                </div>
+                <button class="btn btn--primary btn--block js-place-order" type="button" data-magnetic data-place-order>
+                  <span class="js-place-label">Place order · <b id="co-total">₦0</b></span>
+                  <span class="js-place-spin" aria-hidden="true"></span>
+                </button>
+                <p class="guest-link"><i data-lucide="user" class="icon-16"></i> Checking out without an account, <a href="/pages/login.html" id="co-signin">sign in</a> to track this order later.</p>
+              </div>
+            </div>
+
+            <!-- Summary, updates in real time as you type -->
+            <aside class="summary" aria-label="Order summary">
+              <h2>Your order</h2>
+              <div class="co-items" id="co-items"></div>
+              <div class="co-deliv">
+                <span class="co-deliv__label"><i data-lucide="map-pin" class="icon-16"></i> Deliver to</span>
+                <p id="co-deliver-to">Fill in the shipping form…</p>
+              </div>
+              <div class="co-deliv">
+                <span class="co-deliv__label"><i data-lucide="wallet" class="icon-16"></i> Paying with</span>
+                <p id="co-pay-line">Card · Paystack</p>
+              </div>
+              <div class="price-line"><span>Subtotal</span><span id="co-subtotal">₦0</span></div>
+              <div class="price-line"><span id="co-delivery-label">Delivery (Lagos)</span><span id="co-delivery">Free</span></div>
+              <div class="price-line"><span>Guarantee registration</span><span>Free</span></div>
+              <div class="price-line total"><span>Total</span><span class="amt" id="co-total-side">₦0</span></div>
+              <div class="price-line" id="co-split-line" hidden><span>Today, then 2 × monthly</span><span id="co-split-each">₦0</span></div>
+              <p class="secure" style="margin-top:1rem"><i data-lucide="shield-check" class="icon-16"></i> 90-day arrival guarantee + factory-backed warranty</p>
+            </aside>
+
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- @@FOOTER@@ -->
+
+    <script type="module" src="/src/js/main.js"></script>
+    <script type="module">
+      const esc = (s = '') => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      import { loadCart, cartTotal, saveCart } from '/src/js/cartstore.js';
+      import { isLoggedIn, currentUser, addOrder, orderInvoiceHTML } from '/src/js/account.js';
+      import { hydrateCartBadge } from '/src/js/badge.js';
+      import { hydrateIcons } from '/src/js/icons.js';
+
+      const $ = (id) => document.getElementById(id);
+      const money = (n) => '₦' + Number(n || 0).toLocaleString('en-NG');
+      const DELIVERY_FEE = 25000;
+
+      // remember the flow: signing in from checkout returns you right back here
+      const signin = $('co-signin');
+      if (signin) signin.addEventListener('click', () => sessionStorage.setItem('soko-redirect', '/pages/checkout.html'));
+
+      const stateSel = $('co-state');
+      const stateOtherWrap = $('co-state-other-wrap');
+      const stateOther = $('co-state-other');
+
+      // ── live summary ────────────────────────────────────────────
+      function cartItems() {
+        const items = loadCart();
+        if (items.length) return items.map((i) => ({ name: i.name, qty: i.qty, price: i.price, img: i.img, color: i.color }));
+        // fallback so the page is never empty (e.g. arriving with an empty cart)
+        return [{ name: 'SOKO 01 · Commuter', qty: 1, price: 1350000, img: '/images/bike-commuter.webp', color: 'Graphite' }];
+      }
+      function effectiveState() {
+        return stateSel.value === 'Other' ? stateOther.value.trim() : stateSel.value;
+      }
+      function deliveryFor() {
+        const s = effectiveState().toLowerCase();
+        return s === 'lagos' ? 0 : DELIVERY_FEE;
+      }
+      function renderSummary() {
+        const items = cartItems();
+        $('co-items').innerHTML = items.map((it) => `
+          <div class="mini-item">
+            <div class="thumb"><img src="${esc(it.img)}" alt="${esc(it.name)}" /><span class="q-flag">${it.qty}</span></div>
+            <div class="meta"><b>${esc(it.name)}</b><span class="color">${esc(it.color || 'Graphite')} · Qty ${it.qty}</span></div>
+            <span class="price">${money(it.price * it.qty)}</span>
+          </div>`).join('');
+
+        const name = [$('co-fname').value.trim(), $('co-lname').value.trim()].filter(Boolean).join(' ');
+        const parts = [
+          name,
+          $('co-phone').value.trim(),
+          $('co-address').value.trim(),
+          [$('co-city').value.trim(), effectiveState()].filter(Boolean).join(', '),
+        ].filter(Boolean);
+        $('co-deliver-to').textContent = parts.length ? parts.join(' · ') : 'Fill in the shipping form…';
+        $('co-deliver-to').classList.toggle('is-live', parts.length > 0);
+
+        const pay = document.querySelector('input[name="pay"]:checked');
+        const payLabel = { card: 'Card · Paystack', transfer: 'Bank transfer · Paystack', split: 'Split in 3 · Paystack', pod: 'Pay on delivery' }[pay ? pay.value : 'card'];
+        $('co-pay-line').textContent = payLabel;
+        const splitLine = $('co-split-line');
+        if (splitLine) splitLine.hidden = !(pay && pay.value === 'split');
+
+        const sub = cartTotal(items);
+        const del = deliveryFor();
+        const total = sub + del;
+        $('co-subtotal').textContent = money(sub);
+        $('co-delivery-label').textContent = del === 0 ? 'Delivery (Lagos)' : 'Delivery (nationwide)';
+        $('co-delivery').textContent = del === 0 ? 'Free' : money(del);
+        $('co-delivery').classList.toggle('is-free', del === 0);
+        const totalEl = $('co-total');
+        if (totalEl) totalEl.textContent = money(total); // el is gone once the button flips to 'Order placed ✓'
+        $('co-total-side').textContent = money(total);
+        const each = $('co-split-each'); if (each) each.textContent = money(Math.ceil(total / 3));
+        return { items, sub, del, total };
+      }
+      function syncStateOther() {
+        stateOtherWrap.hidden = stateSel.value !== 'Other';
+      }
+
+      document.querySelector('[data-checkout-form]').addEventListener('input', () => {
+        document.querySelectorAll('.field--error').forEach((f) => f.classList.remove('field--error'));
+        renderSummary();
+      });
+      stateSel.addEventListener('change', () => { syncStateOther(); renderSummary(); });
+      stateOther.addEventListener('input', renderSummary);
+      document.querySelectorAll('input[name="pay"]').forEach((r) => r.addEventListener('change', renderSummary));
+      syncStateOther();
+      renderSummary();
+
+      // ── validation ─────────────────────────────────────────────
+      function validate(showErrors = true) {
+        const required = [
+          ['co-fname', 'First name'],
+          ['co-lname', 'Last name'],
+          ['co-phone', 'Phone'],
+          ['co-address', 'Street address'],
+          ['co-city', 'City'],
+          ['co-email', 'Email for receipt'],
+        ];
+        let firstMissing = null;
+        for (const [id, label] of required) {
+          const el = $(id);
+          const missing = !el.value.trim();
+          if (showErrors) el.closest('.field').classList.toggle('field--error', missing);
+          if (missing && !firstMissing) firstMissing = { el, label };
+        }
+        const stateMissing = stateSel.value === 'Other' && !stateOther.value.trim();
+        if (stateMissing) {
+          if (showErrors) stateOtherWrap.classList.add('field--error');
+          if (!firstMissing) firstMissing = { el: stateOther, label: 'State' };
+        } else if (showErrors) {
+          stateOtherWrap.classList.remove('field--error');
+        }
+        const emailOk = /.+@.+\..+/.test($('co-email').value.trim());
+        if (!emailOk && $('co-email').value.trim()) {
+          if (showErrors) $('co-email').closest('.field').classList.add('field--error');
+          if (!firstMissing) firstMissing = { el: $('co-email'), label: 'Email' };
+        }
+        return firstMissing;
+      }
+      function fail(msg, missing) {
+        const err = $('co-error');
+        err.textContent = msg;
+        err.hidden = false;
+        if (missing) {
+          missing.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          missing.el.focus({ preventScroll: true });
+        }
+      }
+
+      // step 1 → step 2
+      document.querySelector('[data-checkout-form]').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const missing = validate(true);
+        if (missing) return fail(`Almost there: ${missing.label.toLowerCase()} is still missing.`);
+        $('co-error').hidden = true;
+        const steps = document.querySelectorAll('.steps__item');
+        steps[0].classList.replace('is-current', 'is-done');
+        steps[1].classList.add('is-current');
+        $('co-payment').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      // ── place order: transaction → receipt ─────────────────────
+      const placeBtn = document.querySelector('[data-place-order]');
+      let processing = false;
+      placeBtn.addEventListener('click', () => {
+        if (processing) return;
+        const missing = validate(true);
+        if (missing) {
+          document.querySelector('[data-checkout-form]').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return fail(`Almost there: ${missing.label.toLowerCase()} is still missing. The order can't be placed until every field is complete.`);
+        }
+        const email = $('co-email').value.trim();
+        const snapshot = renderSummary();
+
+        processing = true;
+        placeBtn.classList.add('is-processing');
+        placeBtn.disabled = true;
+        placeBtn.querySelector('.js-place-label').textContent = 'Processing payment…';
+
+        // simulated Paystack settlement, succeeds once all fields are valid
+        setTimeout(() => {
+          const ref = 'SM-' + Math.floor(1000 + Math.random() * 9000);
+          const order = {
+            ref,
+            status: 'paid',
+            eta: snapshot.del === 0 ? 'Arriving in ~4 days' : 'Arriving in ~6 days',
+            items: snapshot.items,
+            total: snapshot.total,
+            address: {
+              name: $('co-fname').value.trim() + ' ' + $('co-lname').value.trim(),
+              phone: $('co-phone').value.trim(),
+              line1: $('co-address').value.trim(),
+              city: $('co-city').value.trim(),
+              state: effectiveState(),
+              country: 'Nigeria',
+            },
+          };
+          if (isLoggedIn()) addOrder(order);
+          const cartNow = loadCart();
+          if (cartNow.length) { saveCart([]); hydrateCartBadge(); }
+          hydrateCartBadge();
+
+          const steps = document.querySelectorAll('.steps__item');
+          steps[1].classList.replace('is-current', 'is-done');
+          steps[2].classList.add('is-current');
+
+          processing = false;
+          placeBtn.classList.remove('is-processing');
+          placeBtn.disabled = false;
+          placeBtn.querySelector('.js-place-label').innerHTML = 'Order placed ✓';
+          openReceipt(order, email, snapshot);
+        }, 1900);
+      });
+
+      // ── receipt modal: generated + "sent" automatically ────────
+      function openReceipt(order, email, snap) {
+        const invoice = orderInvoiceHTML(order, { name: order.address.name, email, city: order.address.city });
+        const blob = new Blob([invoice], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+
+        const el = document.createElement('div');
+        el.className = 'co-receipt';
+        el.setAttribute('role', 'dialog');
+        el.setAttribute('aria-modal', 'true');
+        el.innerHTML = `
+          <div class="co-receipt__card">
+            <div class="co-receipt__seal" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" stroke="var(--color-success)" stroke-width="2" class="co-seal-ring"/><path d="M20 33.5 28.5 42 44 24" stroke="var(--color-success)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="co-seal-tick"/></svg>
+            </div>
+            <span class="co-receipt__kicker">Payment successful · ${order.ref}</span>
+            <h2 class="co-receipt__title">Receipt sent to ${esc(email)}</h2>
+            <p class="co-receipt__sub">Generated the second your payment cleared. It's on its way to your inbox right now.</p>
+            <div class="co-receipt__lines">
+              ${snap.items.map((it) => `<div class="co-receipt__line"><span>${esc(it.name)} <small>× ${it.qty}</small></span><b>${money(it.price * it.qty)}</b></div>`).join('')}
+              ${snap.del ? `<div class="co-receipt__line"><span>Delivery (${esc(order.address.state || order.address.city)})</span><b>${money(snap.del)}</b></div>` : ''}
+              <div class="co-receipt__line total"><span>Total paid</span><b>${money(snap.total)}</b></div>
+            </div>
+            <div class="co-receipt__actions">
+              <a class="btn btn--primary" href="${url}" download="SOKO-${order.ref}-receipt.html" data-magnetic><i data-lucide="download" class="icon-16"></i> Download receipt</a>
+              <a class="btn btn--secondary" href="${isLoggedIn() ? '/pages/dashboard.html' : '/pages/order-confirmation.html'}">Track order</a>
+            </div>
+            <button class="co-receipt__close" type="button" aria-label="Close"><i data-lucide="x" class="icon-18"></i></button>
+          </div>`;
+        document.body.appendChild(el);
+        hydrateIcons(el);
+        requestAnimationFrame(() => el.classList.add('is-open'));
+        el.addEventListener('click', (e) => {
+          if (e.target === el || e.target.closest('.co-receipt__close')) {
+            el.classList.remove('is-open');
+            setTimeout(() => { el.remove(); URL.revokeObjectURL(url); }, 350);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+/*
+ * cart-extra.css — JS-driven cart page states
+ */
+
+/* Cart body is populated by JS; hide layout flash until ready */
+.cart-coupon {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.cart-layout {
+  visibility: hidden;
+}
+.cart-layout.is-ready {
+  visibility: visible;
+}

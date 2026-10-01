@@ -1,0 +1,22 @@
+/*
+ * pages.css — Imports for page-specific stylesheets.
+ * Each page component stylesheet is scoped/imported here so main.css stays
+ * the single entry point.
+ */
+
+@import './home.css';
+@import './shop.css';
+@import './product.css';
+@import './product-extra.css';
+@import './cart.css';
+@import './cart-extra.css';
+@import './checkout.css';
+@import './account.css';
+@import './contact.css';
+@import './about.css';
+@import './faq.css';
+@import './four-oh-four.css';
+@import './scrollstory.css';
+@import './collage.css';
+@import './storycarousel.css';
+@import './dashboard.css';
