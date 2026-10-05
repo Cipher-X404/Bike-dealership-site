@@ -217,19 +217,132 @@ export function deleteAccount() {
 /* ── Orders (user) ─────────────────────────────────────────────── */
 const allOrders = () => load(ORDERS_KEY, []);
 export const ordersFor = (userId) => allOrders().filter((o) => o.userId === userId);
+function nextOrderId() {
+  const ids = [...load(A_ORDERS, []), ...load(ORDERS_KEY, [])]
+    .map((order) => Number(String(order.id || '').replace(/^ORD-/, '')))
+    .filter(Number.isFinite);
+  return `ORD-${Math.max(1570, ...ids) + 1}`;
+}
+function decrementInventoryForOrder(items = []) {
+  const inventory = load(A_INV, []);
+  if (!inventory.length || !Array.isArray(items)) return;
+  const threshold = Number(getAdminSettings().lowStockThreshold ?? 6);
+  let changed = false;
+  items.forEach((item) => {
+    const product = inventory.find((entry) => (item.id && entry.id === item.id) || entry.name === item.name);
+    if (!product) return;
+    const quantity = Math.max(1, Number(item.qty) || 1);
+    product.stock = Math.max(0, Number(product.stock) - quantity);
+    product.sold = Math.max(0, Number(product.sold) || 0) + quantity;
+    product.status = product.stock === 0 ? 'out' : product.stock <= threshold ? 'low' : 'in';
+    changed = true;
+  });
+  if (changed) save(A_INV, inventory);
+}
+function restoreInventoryForOrder(items = []) {
+  const inventory = load(A_INV, []);
+  if (!inventory.length || !Array.isArray(items)) return;
+  const threshold = Number(getAdminSettings().lowStockThreshold ?? 6);
+  let changed = false;
+  items.forEach((item) => {
+    const product = inventory.find((entry) => (item.id && entry.id === item.id) || entry.name === item.name);
+    if (!product) return;
+    const quantity = Math.max(1, Number(item.qty) || 1);
+    product.stock = Math.max(0, Number(product.stock) || 0) + quantity;
+    product.sold = Math.max(0, (Number(product.sold) || 0) - quantity);
+    product.status = product.stock === 0 ? 'out' : product.stock <= threshold ? 'low' : 'in';
+    changed = true;
+  });
+  if (changed) save(A_INV, inventory);
+}
+export function recordAdminOrder(order, { customer = '', email = '' } = {}) {
+  ensureSeeded();
+  const orders = load(A_ORDERS, []);
+  const id = order.id || nextOrderId();
+  const lineItems = Array.isArray(order.items) ? order.items : [];
+  const adminOrder = {
+    id,
+    ref: order.ref || '',
+    customer: customer || order.customer || 'Guest',
+    email: email || order.email || '',
+    items: Array.isArray(order.items) ? lineItems.reduce((sum, item) => sum + Math.max(1, Number(item.qty) || 1), 0) : Math.max(0, Number(order.items) || 0),
+    subtotal: Number(order.subtotal) || 0,
+    delivery: Number(order.delivery) || 0,
+    tax: Number(order.tax) || 0,
+    taxRate: Number(order.taxRate) || 0,
+    paymentGateway: order.paymentGateway || '',
+    paymentMethod: order.paymentMethod || '',
+    paymentStatus: order.paymentStatus || 'simulated',
+    total: Number(order.total) || 0,
+    status: order.status || 'paid',
+    date: order.date || new Date().toISOString().slice(0, 10),
+    address: order.address || null,
+    inventoryItems: lineItems.map(({ id: productId, name, qty }) => ({ id: productId, name, qty })),
+  };
+  const existingIndex = orders.findIndex((entry) => entry.id === id);
+  if (existingIndex === -1) {
+    adminOrder.inventoryAdjusted = true;
+    orders.unshift(adminOrder);
+    decrementInventoryForOrder(adminOrder.inventoryItems);
+  } else {
+    const previous = orders[existingIndex];
+    orders[existingIndex] = {
+      ...previous,
+      ...adminOrder,
+      inventoryItems: previous.inventoryItems || adminOrder.inventoryItems,
+      inventoryAdjusted: !!previous.inventoryAdjusted,
+    };
+  }
+  save(A_ORDERS, orders);
+  if (existingIndex === -1) {
+    if (adminOrder.email) {
+      const customers = load(A_CUST, []);
+      const customer = customers.find((entry) => entry.email === adminOrder.email);
+      if (customer) {
+        customer.orders = (Number(customer.orders) || 0) + 1;
+        customer.spent = (Number(customer.spent ?? customer.spend) || 0) + adminOrder.total;
+      } else {
+        customers.push({ name: adminOrder.customer, email: adminOrder.email, joined: adminOrder.date, orders: 1, spent: adminOrder.total, city: adminOrder.address?.city || '' });
+      }
+      save(A_CUST, customers);
+    }
+  }
+  return adminOrder;
+}
+function syncOrderStatus(orderId, status) {
+  const all = load(ORDERS_KEY, []);
+  const order = all.find((entry) => entry.id === orderId);
+  if (!order) return;
+  order.status = status;
+  if (status === 'cancelled') order.eta = 'Cancelled';
+  else if (status === 'delivered') order.eta = 'Delivered';
+  else if (status === 'processing') order.eta = 'Being prepared';
+  else if (status === 'paid') order.eta = 'Order recorded';
+  save(ORDERS_KEY, all);
+}
 export function addOrder(order) {
+  ensureSeeded();
   const orders = allOrders();
-  orders.unshift({ ...order, id: 'ORD-' + (1570 + orders.length), userId: getSession()?.userId, date: new Date().toISOString().slice(0, 10) });
+  const buyer = currentUser();
+  const saved = {
+    ...order,
+    id: order.id || nextOrderId(),
+    userId: getSession()?.userId,
+    date: order.date || new Date().toISOString().slice(0, 10),
+  };
+  orders.unshift(saved);
   save(ORDERS_KEY, orders);
-  return orders[0];
+  recordAdminOrder(saved, { customer: buyer?.name || order.customer || 'Guest', email: buyer?.email || order.email || '' });
+  return saved;
 }
 export function cancelOrder(orderId) {
   const orders = allOrders();
-  const o = orders.find((x) => x.id === orderId);
-  if (o && ['paid', 'processing'].includes(o.status)) {
-    o.status = 'cancelled';
-    o.eta = 'Cancelled';
+  const order = orders.find((entry) => entry.id === orderId);
+  if (order && ['paid', 'processing'].includes(order.status)) {
+    order.status = 'cancelled';
+    order.eta = 'Cancelled';
     save(ORDERS_KEY, orders);
+    setOrderStatus(orderId, 'cancelled');
   }
   return ordersFor((getSession() || {}).userId);
 }
@@ -243,14 +356,19 @@ export function reorderOrder(orderId) {
   return true;
 }
 export function orderTimeline(status) {
-  if (status === 'cancelled') return [{ label: 'Order placed', done: true }, { label: 'Cancelled', done: true }];
+  if (status === 'cancelled') return [{ label: 'Order recorded', done: true }, { label: 'Cancelled', done: true }];
   const idx = ORDER_FLOW.indexOf(status);
-  const labels = ['Payment confirmed', 'Processing', 'Shipped', 'Delivered'];
+  const labels = ['Order recorded', 'Being prepared', 'Shipped', 'Delivered'];
   return labels.map((label, i) => ({ label, done: i <= idx }));
 }
 const esc = (s = '') => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export function orderInvoiceHTML(order, user) {
   const t = new Date(order.date).toDateString();
+  const items = Array.isArray(order.items) ? order.items : [];
+  const subtotal = Number(order.subtotal ?? items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 1), 0));
+  const delivery = Number(order.delivery) || 0;
+  const tax = Number(order.tax) || 0;
+  const gateway = order.paymentMethod === 'pod' ? 'Pay on delivery' : `${order.paymentMethod || 'card'} · ${order.paymentGateway || 'Paystack'}`;
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice ${esc(order.id)}</title>
   <style>body{font-family:system-ui,Segoe UI,sans-serif;color:#14120e;max-width:640px;margin:40px auto;padding:0 20px;line-height:1.5}
   h1{font-size:22px;margin:0}h2{font-size:15px;color:#6d6a62;font-weight:600}
@@ -263,9 +381,12 @@ export function orderInvoiceHTML(order, user) {
   <div class="row"><div><h2>Billed to</h2><div>${esc(user.name)}</div><div class="muted">${esc(user.email)}</div></div>
   <div><h2>Ship to</h2><div>${esc(order.address ? order.address.name : user.name)}</div><div class="muted">${esc(order.address ? order.address.line1 + ', ' + order.address.city : user.city)}</div></div></div>
   <table><thead><tr><th>Item</th><th>Qty</th><th style="text-align:right">Price</th></tr></thead>
-  <tbody>${order.items.map((i) => `<tr><td>${esc(i.name)}</td><td>${i.qty}</td><td style="text-align:right">${money(i.price)}</td></tr>`).join('')}</tbody></table>
-  <div style="text-align:right;font-size:15px"><span class="muted">Total&nbsp;</span><span class="tot">${money(order.total)}</span></div>
-  <div class="muted" style="margin-top:30px;font-size:12px">SOKO Moto hub · Guangzhou, China · questions: support@sokomoto.ng</div>
+  <tbody>${items.map((i) => `<tr><td>${esc(i.name)}</td><td>${Number(i.qty) || 1}</td><td style="text-align:right">${money((Number(i.price) || 0) * (Number(i.qty) || 1))}</td></tr>`).join('')}
+  <tr><td colspan="2">Subtotal</td><td style="text-align:right">${money(subtotal)}</td></tr>
+  ${delivery ? `<tr><td colspan="2">Delivery</td><td style="text-align:right">${money(delivery)}</td></tr>` : ''}
+  ${tax ? `<tr><td colspan="2">Tax (${Number(order.taxRate) || 0}%)</td><td style="text-align:right">${money(tax)}</td></tr>` : ''}</tbody></table>
+  <div class="row"><span class="muted">Payment · ${esc(gateway)}</span><span style="font-size:15px"><span class="muted">Total&nbsp;</span><span class="tot">${money(order.total)}</span></span></div>
+  <div class="muted" style="margin-top:30px;font-size:12px">SOKO Moto demo checkout · no payment collected · questions: support@sokomoto.ng</div>
   <script>window.onload=()=>window.print()</script></body></html>`;
 }
 
@@ -309,7 +430,11 @@ export function addCard(userId, { brand, last4, exp }) {
 }
 export function removeCard(userId, cardId) {
   const map = load(CARDS_KEY, {});
-  map[userId] = (map[userId] || []).filter((c) => c.id !== cardId);
+  const list = map[userId] || [];
+  const removedDefault = list.some((card) => card.id === cardId && card.isDefault);
+  const remaining = list.filter((card) => card.id !== cardId);
+  if (removedDefault && remaining.length) remaining[0].isDefault = true;
+  map[userId] = remaining;
   save(CARDS_KEY, map);
   return map[userId];
 }
@@ -334,8 +459,13 @@ export function saveAddress(userId, addr) {
 }
 export function removeAddress(userId, addrId) {
   const map = load(ADDR_KEY, {});
-  map[userId] = (map[userId] || []).filter((a) => a.id !== addrId);
+  const list = map[userId] || [];
+  const removedDefault = list.some((address) => address.id === addrId && address.isDefault);
+  const remaining = list.filter((address) => address.id !== addrId);
+  if (removedDefault && remaining.length) remaining[0].isDefault = true;
+  map[userId] = remaining;
   save(ADDR_KEY, map);
+  return remaining;
 }
 export function setDefaultAddress(userId, addrId) {
   const map = load(ADDR_KEY, {});
@@ -429,9 +559,19 @@ export const orderStatuses = ['all', 'paid', 'processing', 'shipped', 'delivered
 export const adminOrders = () => load(A_ORDERS, []);
 export function setOrderStatus(orderId, status) {
   const orders = load(A_ORDERS, []);
-  const o = orders.find((x) => x.id === orderId);
-  if (o) o.status = status;
-  save(A_ORDERS, orders);
+  const order = orders.find((entry) => entry.id === orderId);
+  if (order && orderStatuses.includes(status) && status !== 'all') {
+    if (order.status !== status && status === 'cancelled' && order.inventoryAdjusted) {
+      restoreInventoryForOrder(order.inventoryItems || []);
+      order.inventoryAdjusted = false;
+    } else if (order.status === 'cancelled' && status !== 'cancelled' && !order.inventoryAdjusted && order.inventoryItems?.length) {
+      decrementInventoryForOrder(order.inventoryItems);
+      order.inventoryAdjusted = true;
+    }
+    order.status = status;
+    save(A_ORDERS, orders);
+    syncOrderStatus(orderId, status);
+  }
   return orders;
 }
 export const adminInventory = () => load(A_INV, []);
@@ -439,8 +579,9 @@ export function adjustAdminStock(id, delta) {
   const inv = load(A_INV, []);
   const p = inv.find((x) => x.id === id);
   if (p) {
-    p.stock = Math.max(0, p.stock + delta);
-    p.status = p.stock === 0 ? 'out' : p.stock <= (getAdminSettings().lowStockThreshold || 6) ? 'low' : 'in';
+    const threshold = Number(getAdminSettings().lowStockThreshold ?? 6);
+    p.stock = Math.max(0, Number(p.stock || 0) + Number(delta || 0));
+    p.status = p.stock === 0 ? 'out' : p.stock <= threshold ? 'low' : 'in';
   }
   save(A_INV, inv);
   return inv;
@@ -454,19 +595,29 @@ export function updateAdminPrice(id, price) {
 }
 export function addAdminProduct(p) {
   const inv = load(A_INV, []);
-  inv.push({ id: uid('p'), name: p.name, cat: p.cat || p.category || 'Accessory', price: Number(p.price) || 0, img: p.img || '/images/accessory-helmet.webp', stock: Number(p.stock) || 0, sold: 0, sku: p.sku || 'SM-NEW-' + inv.length, status: 'in' });
+  const stock = Math.max(0, Number(p.stock) || 0);
+  const threshold = Number(getAdminSettings().lowStockThreshold ?? 6);
+  inv.push({ id: uid('p'), name: String(p.name || '').trim(), cat: p.cat || p.category || 'Accessory', price: Math.max(0, Number(p.price) || 0), img: p.img || '/images/accessory-helmet.webp', stock, sold: 0, sku: p.sku || 'SM-NEW-' + String(inv.length + 1).padStart(3, '0'), status: stock === 0 ? 'out' : stock <= threshold ? 'low' : 'in' });
   save(A_INV, inv);
   return inv;
 }
 export function removeAdminProduct(id) {
   save(A_INV, load(A_INV, []).filter((p) => p.id !== id));
 }
-export const adminCustomers = () => load(A_CUST, []);
+export const adminCustomers = () => load(A_CUST, []).map((customer) => ({ ...customer, spend: Number(customer.spend ?? customer.spent ?? 0) }));
 export const getAdminSettings = () => load(A_SETTINGS, {});
 export function setAdminSetting(key, value) {
   const s = load(A_SETTINGS, {});
   s[key] = value;
   save(A_SETTINGS, s);
+  if (key === 'lowStockThreshold') {
+    const threshold = Number(value ?? 6);
+    const inventory = load(A_INV, []).map((product) => ({
+      ...product,
+      status: product.stock === 0 ? 'out' : product.stock <= threshold ? 'low' : 'in',
+    }));
+    save(A_INV, inventory);
+  }
   return s;
 }
 export function resetAdminData() {
@@ -474,7 +625,7 @@ export function resetAdminData() {
   ensureSeeded();
 }
 export const adminLowStock = () => {
-  const th = getAdminSettings().lowStockThreshold || 6;
+  const th = Number(getAdminSettings().lowStockThreshold ?? 6);
   return adminInventory().filter((p) => p.stock <= th);
 };
 export const adminCategoryValue = () => {

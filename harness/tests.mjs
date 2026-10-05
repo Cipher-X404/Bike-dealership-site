@@ -3,7 +3,8 @@
 // literals, so every test is an `async function` expression.
 import fs from 'node:fs';
 import path from 'node:path';
-const ROOT = '/home/user/project';
+import { fileURLToPath } from 'node:url';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 // cardAudit: every card in the manifest must exist, have media, and the
 // media file must exist on disk (absolute /images/... paths resolve site-wide).
@@ -82,7 +83,7 @@ const idx = {
     expect(qa('.finder__card').length === 4, 'finder 4 ride archetypes');
     expect(qa('.finder__card').every((a) => /\?cat=/.test(a.getAttribute('href') || '')), 'finder cards deep-link to shop filters');
     expect(qa('.journal__card').length === 3, 'dispatch 3 cards');
-    expect(q('.rideband') && q('.rideband [data-count]'), 'ride band with live km counter');
+    expect(q('.rideband') && q('.rideband__intro'), 'ride band editorial intro');
     expect(qa('.rideband__strip img').length >= 10, 'ride band photo strip');
     // scroll depth: index must be a long scroll (≥10 full sections + pinned showcase distance)
     const sections = qa('main > section').length;
@@ -366,6 +367,18 @@ const confirm = {
   },
 };
 
+const confirmDemo = {
+  name: 'confirm-demo',
+  run: async function ({ q, expect }) {
+    expect(q('.js-confirm-lead').textContent.includes('Demo order SM-9000 is recorded in this browser'), 'query reference loads the matching local demo order');
+    expect(q('.js-confirm-total').textContent === '₦1,451,250', 'order total is read from the saved record');
+    expect(q('.js-confirm-payment').textContent === 'Card · Flutterwave · simulated', 'payment method and selected gateway are shown as simulated');
+    expect(q('.js-confirm-tracking').textContent === 'SM-9000', 'order reference appears in the tracking details');
+    expect(q('.js-confirm-track').getAttribute('href') === '/pages/shop.html', 'guest is not sent to a dashboard they cannot access');
+    expect(!/email was sent|payment was collected/i.test(q('.js-confirm-lead').textContent), 'copy does not claim payment or email delivery');
+  },
+};
+
 const dashboard = {
   name: 'dashboard',
   run: async function ({ q, qa, expect, store }) {
@@ -392,7 +405,7 @@ const deckUser = {
   name: 'deck-user',
   run: async function ({ q, qa, expect }) {
     expect(q('.js-app').hidden === false, 'app shown for seeded session');
-    expect(q('.rail__ink') !== null, 'rail ink indicator');
+    expect(q('.dash-nav [data-view].is-active') !== null, 'active rail navigation marker');
     expect(qa('.dash-nav a[data-label]').length === 9, '9 labelled rail stations');
     expect(q('.dash-side') === null, 'old sidebar gone');
     expect(q('.js-kpis').children.length === 4, '4 kpis in ledger band');
@@ -416,9 +429,68 @@ const deckUser = {
   },
 };
 
+const deckUserActions = {
+  name: 'deck-user-actions',
+  run: async function ({ q, window, expect, store }) {
+    const read = (key, fallback) => JSON.parse(store.get(key) || JSON.stringify(fallback));
+    const userId = 'u-demo';
+    q('.dash-nav [data-view="wallet"]').click();
+    const balanceBefore = read('soko-wallet-v1', {})[userId].balance;
+    q('.js-topup').click();
+    q('.js-topup-amt[data-amt="10000"]').click();
+    q('.js-topup-go').click();
+    expect(read('soko-wallet-v1', {})[userId].balance === balanceBefore + 10000, 'wallet top-up saves a local demo credit');
+
+    q('.js-add-card').click();
+    q('.js-card-last4').value = '9134';
+    q('.js-card-exp').value = '12/30';
+    q('.js-card-save').click();
+    expect(read('soko-cards-v1', {})[userId].some((card) => card.last4 === '9134'), 'payment method form saves only its demo card label');
+
+    q('.dash-nav [data-view="addresses"]').click();
+    const addressMap = read('soko-addr-v1', {});
+    const defaultAddress = addressMap[userId].find((address) => address.isDefault);
+    q(`.js-addr-edit[data-id="${defaultAddress.id}"]`).click();
+    q('.js-addr-line2').value = 'Floor 2';
+    q('.js-addr-save').click();
+    expect(read('soko-addr-v1', {})[userId].find((address) => address.id === defaultAddress.id).line2 === 'Floor 2', 'address editor preserves optional address line 2');
+    q(`.js-addr-remove[data-id="${defaultAddress.id}"]`).click();
+    const afterRemoval = read('soko-addr-v1', {})[userId];
+    expect(!afterRemoval.some((address) => address.id === defaultAddress.id) && afterRemoval.some((address) => address.isDefault), 'removing the default promotes another saved address');
+
+    q('.js-add-addr').click();
+    q('.js-addr-label').value = 'Test stop';
+    q('.js-addr-name').value = 'Chidi Okeke';
+    q('.js-addr-phone').value = '08030001234';
+    q('.js-addr-line1').value = '4 Harbour Road';
+    q('.js-addr-line2').value = '';
+    q('.js-addr-city').value = 'Port Harcourt';
+    q('.js-addr-state').value = 'Rivers';
+    q('.js-addr-country').value = 'Nigeria';
+    q('.js-addr-save').click();
+    expect(read('soko-addr-v1', {})[userId].some((address) => address.label === 'Test stop' && !address.line2), 'address form accepts an omitted optional second line');
+
+    q('.dash-nav [data-view="support"]').click();
+    const ticketCount = read('soko-tickets-v1', {})[userId].length;
+    q('.js-tk-subject').value = 'Browser demo check';
+    q('.js-tk-detail').value = 'Testing the saved support request flow.';
+    q('.js-tk-submit').click();
+    expect(read('soko-tickets-v1', {})[userId].length === ticketCount + 1, 'support request is saved to the local account');
+
+    q('.dash-nav [data-view="settings"]').click();
+    const sms = q('.js-pref-sms');
+    sms.checked = !sms.checked;
+    sms.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(read('soko-prefs-v1', {})[userId].sms === sms.checked, 'notification preference persists when toggled');
+    q('.js-set-city').value = 'Port Harcourt';
+    q('.js-save-profile').click();
+    expect(read('soko-users-v1', []).find((user) => user.id === userId).city === 'Port Harcourt', 'profile save updates the account record');
+  },
+};
+
 const deckAdmin = {
   name: 'deck-admin',
-  run: async function ({ q, qa, expect }) {
+  run: async function ({ q, qa, expect, window, store }) {
     expect(q('.js-app').hidden === false, 'admin app shown');
     expect(q('.js-not-admin-guard').hidden === true, 'not-admin guard hidden');
     expect(qa('.dash-nav a[data-label]').length === 6, '6 labelled rail stations');
@@ -426,13 +498,62 @@ const deckAdmin = {
     expect(q('.js-kpis').children.length === 4, '4 kpis');
     expect(q('.js-chart svg') !== null, 'revenue svg');
     expect(/^\d+$/.test(q('.js-open-count').textContent), 'open-orders chip numeric');
-    expect(/\d\d:\d\d/.test(q('.js-dash-clock').textContent), 'CST clock');
+    expect(/\d\d:\d\d/.test(q('.js-dash-clock').textContent), 'Lagos-local clock');
     expect(qa('.js-latest-orders tbody tr').length >= 1, 'latest orders rows');
     expect(qa('.js-admin-inventory tbody tr').length >= 1, 'inventory rows');
     expect(qa('.js-admin-customers tbody tr').length >= 1, 'customer rows');
     q('.dash-nav [data-view="analytics"]').click();
     expect(q('.js-view-path').textContent === 'ANALYTICS', 'path updates');
     expect(qa('.js-trend-chart .bar-col').length === 12, '12 trend bars');
+    q('.js-trend-range').value = '6';
+    q('.js-trend-range').dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(qa('.js-trend-chart .bar-col').length === 6, 'analytics range selector updates the chart');
+
+    q('.dash-nav [data-view="orders"]').click();
+    q('.js-order-search').value = 'ORD-1066';
+    q('.js-order-search').dispatchEvent(new window.Event('input', { bubbles: true }));
+    expect(qa('.js-admin-orders tbody tr').length === 1, 'order search narrows the ledger');
+    const status = q('.js-admin-orders tbody .js-status-set');
+    status.value = 'shipped';
+    status.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(JSON.parse(store.get('soko-a-orders-v1')).find((order) => order.id === 'ORD-1066').status === 'shipped', 'inline status control persists order updates');
+    q('.js-order-search').value = '';
+    q('.js-order-search').dispatchEvent(new window.Event('input', { bubbles: true }));
+    q('.js-check-all').checked = true;
+    q('.js-check-all').dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(q('.js-bulk-bar').hidden === false, 'select-all reveals bulk actions');
+    q('.js-bulk-clear').click();
+    expect(q('.js-bulk-bar').hidden === true, 'clear selection hides bulk actions');
+    q('.js-admin-orders tbody .js-order-view').click();
+    expect(q('.dash-modal') !== null, 'order detail action opens its dialog');
+    q('.dash-modal__close').click();
+
+    const stockBefore = JSON.parse(store.get('soko-a-inventory-v1')).find((product) => product.id === '0001-commuter').stock;
+    q('.dash-nav [data-view="inventory"]').click();
+    q('.js-stock-plus[data-id="0001-commuter"]').click();
+    expect(JSON.parse(store.get('soko-a-inventory-v1')).find((product) => product.id === '0001-commuter').stock === stockBefore + 1, 'stock stepper updates local inventory');
+    q('.js-price[data-id="0001-commuter"]').value = '1400000';
+    q('.js-price[data-id="0001-commuter"]').dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(JSON.parse(store.get('soko-a-inventory-v1')).find((product) => product.id === '0001-commuter').price === 1400000, 'price editor persists changes');
+    q('.js-product-add').click();
+    q('.js-p-name').value = 'Harness touring bike';
+    q('.js-p-price').value = '1720000';
+    q('.js-p-stock').value = '4';
+    q('.js-product-form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+    expect(JSON.parse(store.get('soko-a-inventory-v1')).some((product) => product.name === 'Harness touring bike'), 'add inventory form creates a local stock item');
+
+    q('.dash-nav [data-view="customers"]').click();
+    q('.js-admin-customers tbody .js-customer-view').click();
+    expect(q('.dash-modal h3')?.textContent.trim().length > 0, 'customer action opens rider details');
+    q('.dash-modal__close').click();
+
+    q('.dash-nav [data-view="settings"]').click();
+    q('.js-set-gateway').value = 'Flutterwave';
+    q('.js-set-tax').value = '5';
+    q('.js-set-enable').checked = false;
+    q('.js-admin-settings').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+    const settings = JSON.parse(store.get('soko-a-settings-v1'));
+    expect(settings.gateway === 'Flutterwave' && settings.taxRate === 5 && settings.ordersEnabled === false, 'settings save updates gateway, tax and order availability');
   },
 };
 
@@ -440,6 +561,7 @@ const checkoutFlow = {
   name: 'checkout-flow',
   run: async function ({ q, qa, expect, window, store }) {
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const commuterStockBefore = JSON.parse(store.get('soko-a-inventory-v1') || '[]').find((item) => item.id === '0001-commuter')?.stock;
     const form = q('[data-checkout-form]');
     const submit = () => form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
     // 1) empty submit → blocked with error, still on step 1
@@ -459,19 +581,28 @@ const checkoutFlow = {
     await sleep(120);
     expect(qa('.steps__item')[1].classList.contains('is-current'), 'valid shipping advances to step 2');
     expect(q('#co-error').hidden === true, 'error cleared after valid submit');
-    // 3) place order → processing → receipt "sent to email"
+    // 3) place a local demo order → receipt
     q('[data-place-order]').dispatchEvent(new window.Event('click', { bubbles: true }));
     await sleep(80);
     expect(q('[data-place-order]').classList.contains('is-processing'), 'processing state shown');
     await sleep(2300);
     const receipt = q('.co-receipt');
     expect(receipt !== null, 'receipt modal opened after settlement');
-    expect(receipt && /Receipt sent to chidi@example\.com/.test(receipt.textContent), 'receipt shows email it was sent to');
+    expect(receipt && /Order recorded for chidi@example\.com/.test(receipt.textContent), 'receipt identifies the checkout email without claiming delivery');
+    expect(receipt && /Tax \(7\.5%\)/.test(receipt.textContent), 'receipt includes configured tax');
+    expect(receipt && /Payment method · simulated/.test(receipt.textContent), 'receipt includes method and demo payment state');
+    const trackingLink = receipt?.querySelector('.co-receipt__actions .btn--secondary');
+    expect(trackingLink?.getAttribute('href')?.startsWith('/pages/order-confirmation.html?ref=SM-') === true, 'guest receipt links to the matching order reference');
     expect(qa('.steps__item')[2].classList.contains('is-current'), 'step 3 (confirmation) active');
     // 4) guest: cart cleared, no order recorded for anonymous user
     expect((store.get('soko-cart-v1') || '') === '[]', 'cart cleared after order');
     const ordersRaw = store.get('soko-orders-v1') || '';
     expect(!/Chidi Okafor/.test(ordersRaw), 'guest order not persisted to user store');
+    const adminOrders = JSON.parse(store.get('soko-a-orders-v1') || '[]');
+    const guestOrder = adminOrders.find((o) => o.email === 'chidi@example.com');
+    expect(guestOrder?.ref && guestOrder.status === 'processing' && guestOrder.paymentStatus === 'simulated', 'guest checkout creates an explicitly demo fulfilment record');
+    const commuterStockAfter = JSON.parse(store.get('soko-a-inventory-v1') || '[]').find((item) => item.id === '0001-commuter')?.stock;
+    expect(commuterStockBefore !== undefined && commuterStockAfter === commuterStockBefore - 1, 'checkout decrements matching inventory');
     // 5) state select "Other" reveals typed field
     q('#co-state').value = 'Other';
     q('#co-state').dispatchEvent(new window.Event('change', { bubbles: true }));
@@ -479,17 +610,45 @@ const checkoutFlow = {
   },
 };
 
-const dbgnav = {
-  name: 'dbgnav',
-  run: async function ({ q, qa, expect, window, store }) {
-    const a = q('.js-account-link');
-    const svg = a.querySelector('svg');
-    const iel = a.querySelector('i.js-account-icon');
-    const av = a.querySelector('.js-account-avatar');
-    console.log('DBG anchor html:', a.innerHTML.slice(0, 300));
-    console.log('DBG svg class:', svg && svg.getAttribute('class'), '| hidden:', svg && svg.hasAttribute('hidden'), '| i el:', !!iel, '| avatar hidden:', av.hidden);
-    expect(true, 'end');
+const checkoutMember = {
+  name: 'checkout-member',
+  run: async function ({ q, expect, window, store }) {
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const stockBefore = JSON.parse(store.get('soko-a-inventory-v1') || '[]').find((item) => item.id === '0001-commuter')?.stock;
+    expect(q('#co-fname').value === 'Chidi' && q('#co-lname').value === 'Okeke', 'signed-in name is prefilled from the account');
+    expect(q('#co-email').value === 'chidi@example.com', 'signed-in email is prefilled');
+    expect(q('#co-address').value === '14 Adeola Close, Yaba' && q('#co-city').value === 'Lagos', 'default saved address is prefilled');
+    const form = q('[data-checkout-form]');
+    form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+    await sleep(60);
+    q('[data-place-order]').dispatchEvent(new window.Event('click', { bubbles: true }));
+    await sleep(2300);
+    const userOrders = JSON.parse(store.get('soko-orders-v1') || '[]');
+    const memberOrder = userOrders.find((order) => order.userId === 'u-demo' && order.status === 'processing');
+    expect(!!memberOrder && memberOrder.paymentStatus === 'simulated' && memberOrder.tax > 0, 'member checkout stores its tax and simulated payment state');
+    const adminOrder = JSON.parse(store.get('soko-a-orders-v1') || '[]').find((order) => order.id === memberOrder?.id);
+    expect(!!adminOrder && adminOrder.email === 'chidi@example.com' && adminOrder.address.city === 'Lagos', 'member order is linked to the admin fulfilment record');
+    expect(JSON.parse(store.get('soko-a-inventory-v1') || '[]').find((item) => item.id === '0001-commuter')?.stock === stockBefore - 1, 'member checkout decrements product inventory');
+    expect(q('.co-receipt__actions .btn--secondary').getAttribute('href') === '/pages/dashboard.html#orders', 'member receipt leads to the order desk');
+    expect(store.get('soko-cart-v1') === '[]', 'member checkout clears the cart after order recording');
   },
 };
 
-export default { dbgnav, idx, shop, product, cart, checkout, "checkout-flow": checkoutFlow, login, signup, about, contact, faq, fof, confirm, dashboard, "deck-user": deckUser, "deck-admin": deckAdmin };
+const checkoutClosed = {
+  name: 'checkout-closed',
+  run: async function ({ q, expect, window, store }) {
+    const initialOrderCount = JSON.parse(store.get('soko-a-orders-v1') || '[]').length;
+    const form = q('[data-checkout-form]');
+    expect(q('[data-store-closed]').hidden === false, 'store-closed notice is visible');
+    expect(q('[data-place-order]').disabled && q('[data-checkout-form] button[type="submit"]').disabled, 'checkout actions are disabled while paused');
+    expect(q('[data-gateway-name]').textContent === 'Flutterwave', 'admin-selected gateway label reaches checkout');
+    expect(q('#co-tax-line').hidden === true, 'zero tax preference hides the tax line');
+    form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+    expect(q('#co-error').textContent.includes('Checkout is paused'), 'form cannot advance while checkout is paused');
+    q('[data-place-order]').dispatchEvent(new window.Event('click', { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    expect(JSON.parse(store.get('soko-a-orders-v1') || '[]').length === initialOrderCount, 'paused checkout does not create an order');
+  },
+};
+
+export default { idx, shop, product, cart, checkout, "checkout-flow": checkoutFlow, "checkout-member": checkoutMember, "checkout-closed": checkoutClosed, login, signup, about, contact, faq, fof, confirm, "confirm-demo": confirmDemo, dashboard, "deck-user": deckUser, "deck-user-actions": deckUserActions, "deck-admin": deckAdmin };
