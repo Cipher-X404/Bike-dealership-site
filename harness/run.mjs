@@ -4,9 +4,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { JSDOM } from 'jsdom';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = '/home/user/project';
-const page = process.argv[2] || 'index.html';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const pageArg = process.argv[2] || 'index.html';
+const [page, query = ''] = pageArg.split('?', 2);
 const testName = process.argv[3] || 'generic';
 
 const navbar = fs.readFileSync(path.join(ROOT, 'src/components/navbar.html'), 'utf8');
@@ -15,7 +17,7 @@ let html = fs.readFileSync(path.join(ROOT, page), 'utf8');
 html = html.replaceAll('<!-- @@NAVBAR@@ -->', navbar);
 html = html.replaceAll('<!-- @@FOOTER@@ -->', footer);
 
-const url = 'http://localhost/' + page;
+const url = 'http://localhost/' + page + (query ? `?${query}` : '');
 const dom = new JSDOM(html, { url, runScripts: 'outside-only', pretendToBeVisual: true });
 const { window } = dom;
 
@@ -43,7 +45,7 @@ Object.defineProperty(window, '__harnessStorage', { value: localStorageShim });
 const g = globalThis;
 g.window = window;
 g.document = window.document;
-g.navigator = window.navigator;
+Object.defineProperty(g, 'navigator', { configurable: true, enumerable: true, value: window.navigator, writable: true });
 g.location = window.location;
 g.history = window.history;
 g.Window = window.Window;
@@ -56,6 +58,8 @@ g.Event = window.Event;
 g.MutationObserver = window.MutationObserver;
 g.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} };
 window.HTMLElement.prototype.scrollIntoView = () => {};
+window.SVGElement.prototype.getTotalLength ??= () => 0;
+window.SVGElement.prototype.getPointAtLength ??= () => ({ x: 0, y: 0 });
 g.IntersectionObserver = class {
   constructor(cb) { this.cb = cb; }
   observe() { this.cb([], this); }

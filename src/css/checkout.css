@@ -7,6 +7,23 @@
   gap: 1.5rem;
   align-items: start;
 }
+.co-store-closed {
+  display: flex;
+  align-items: flex-start;
+  gap: .9rem;
+  width: min(1120px, calc(100% - 2rem));
+  margin: 1.25rem auto 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 36%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-accent) 9%, var(--color-bg-raised));
+  color: var(--color-text);
+}
+.co-store-closed[hidden] { display: none; }
+.co-store-closed > svg { flex: none; color: var(--color-accent); }
+.co-store-closed > div { display: grid; gap: .15rem; }
+.co-store-closed b { font-size: .88rem; }
+.co-store-closed span { color: var(--color-text-muted); font-size: .78rem; line-height: 1.45; }
 .co-panel {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);

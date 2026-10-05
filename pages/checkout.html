@@ -54,6 +54,11 @@
         </div>
       </section>
 
+      <div class="co-store-closed" id="co-store-closed" data-store-closed role="status" hidden>
+        <i data-lucide="pause-circle" class="icon-18" aria-hidden="true"></i>
+        <div><b>Checkout is taking a short pause.</b><span>The SOKO team is not accepting new orders right now. Your cart is still here—please check back soon.</span></div>
+      </div>
+
       <section class="section" style="padding-top:0.5rem">
         <div class="container">
           <div class="co-layout">
@@ -95,7 +100,7 @@
               <!-- Payment -->
               <div class="co-panel" id="co-payment">
                 <h2><span style="color:var(--color-accent)">02</span> · Payment</h2>
-                <p class="panel-sub">Payments are powered by Paystack (sandbox in this demo).</p>
+                <p class="panel-sub">Payments are handled by <span data-gateway-name>Paystack</span> in a simulated demo checkout.</p>
                 <div class="pay-methods">
                   <label class="pay-method">
                     <input type="radio" name="pay" value="card" checked />
@@ -108,14 +113,14 @@
                     <input type="radio" name="pay" value="transfer" />
                     <span class="pay-card">
                       <i data-lucide="landmark" class="icon-20"></i>
-                      <span class="pay-name">Bank transfer<small>Instant via Paystack</small></span>
+                      <span class="pay-name">Bank transfer<small>Simulated via <span data-gateway-name>Paystack</span></small></span>
                     </span>
                   </label>
                   <label class="pay-method">
                     <input type="radio" name="pay" value="split" />
                     <span class="pay-card">
                       <i data-lucide="calendar-range" class="icon-20"></i>
-                      <span class="pay-name">Split in 3<small>0% · Paystack instalments</small></span>
+                      <span class="pay-name">Split in 3<small>Demo instalments · <span data-gateway-name>Paystack</span></small></span>
                     </span>
                   </label>
                   <label class="pay-method">
@@ -129,11 +134,11 @@
                 <div class="field" style="margin-top:1.1rem">
                   <label for="co-email">Email for receipt</label>
                   <input class="input" id="co-email" type="email" autocomplete="email" placeholder="you@example.com" required />
-                  <small class="field-hint">The moment payment clears, your itemised receipt is generated and sent here automatically.</small>
+                  <small class="field-hint">Used on the local demo order record and receipt. No email is sent.</small>
                 </div>
                 <div class="trust-note">
                   <i data-lucide="lock" class="icon-18"></i>
-                  <span><b style="color:var(--color-text)">Your details are safe.</b> We use tokenised payments and never store card numbers. 256-bit encryption via Paystack.</span>
+                  <span><b style="color:var(--color-text)">Demo checkout.</b> No payment is collected or card details sent. Selected processor: <span data-gateway-name>Paystack</span>.</span>
                 </div>
                 <button class="btn btn--primary btn--block js-place-order" type="button" data-magnetic data-place-order>
                   <span class="js-place-label">Place order · <b id="co-total">₦0</b></span>
@@ -157,6 +162,7 @@
               </div>
               <div class="price-line"><span>Subtotal</span><span id="co-subtotal">₦0</span></div>
               <div class="price-line"><span id="co-delivery-label">Delivery (Lagos)</span><span id="co-delivery">Free</span></div>
+              <div class="price-line" id="co-tax-line"><span class="js-tax-label">Tax (7.5%)</span><span id="co-tax">₦0</span></div>
               <div class="price-line"><span>Guarantee registration</span><span>Free</span></div>
               <div class="price-line total"><span>Total</span><span class="amt" id="co-total-side">₦0</span></div>
               <div class="price-line" id="co-split-line" hidden><span>Today, then 2 × monthly</span><span id="co-split-each">₦0</span></div>
@@ -174,13 +180,36 @@
     <script type="module">
       const esc = (s = '') => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
       import { loadCart, cartTotal, saveCart } from '/src/js/cartstore.js';
-      import { isLoggedIn, currentUser, addOrder, orderInvoiceHTML } from '/src/js/account.js';
+      import { isLoggedIn, currentUser, addOrder, orderInvoiceHTML, getAdminSettings, getAddresses, recordAdminOrder } from '/src/js/account.js';
       import { hydrateCartBadge } from '/src/js/badge.js';
       import { hydrateIcons } from '/src/js/icons.js';
 
       const $ = (id) => document.getElementById(id);
       const money = (n) => '₦' + Number(n || 0).toLocaleString('en-NG');
       const DELIVERY_FEE = 25000;
+      const checkoutUser = currentUser();
+      let storeSettings = getAdminSettings();
+      let storeOpen = storeSettings.ordersEnabled !== false;
+      const closedNotice = document.querySelector('[data-store-closed]');
+      const continueButton = document.querySelector('[data-checkout-form] button[type="submit"]');
+      const placeBtn = document.querySelector('[data-place-order]');
+      function applyStoreSettings(next = getAdminSettings(), refreshSummary = false) {
+        storeSettings = next || {};
+        storeOpen = storeSettings.ordersEnabled !== false;
+        const gateway = String(storeSettings.gateway || 'Paystack');
+        document.querySelectorAll('[data-gateway-name]').forEach((node) => { node.textContent = gateway; });
+        if (closedNotice) closedNotice.hidden = storeOpen;
+        if (continueButton) continueButton.disabled = !storeOpen;
+        if (placeBtn) {
+          placeBtn.disabled = !storeOpen;
+          placeBtn.setAttribute('aria-describedby', storeOpen ? '' : 'co-store-closed');
+        }
+        if (refreshSummary) renderSummary();
+      }
+      applyStoreSettings();
+      window.addEventListener('storage', (event) => {
+        if (event.key === 'soko-a-settings-v1') applyStoreSettings(getAdminSettings(), true);
+      });
 
       // remember the flow: signing in from checkout returns you right back here
       const signin = $('co-signin');
@@ -190,12 +219,32 @@
       const stateOtherWrap = $('co-state-other-wrap');
       const stateOther = $('co-state-other');
 
+      // A signed-in rider's default address and profile become sensible starting values.
+      if (checkoutUser) {
+        const nameParts = String(checkoutUser.name || '').trim().split(/\s+/).filter(Boolean);
+        $('co-fname').value = nameParts.shift() || '';
+        $('co-lname').value = nameParts.join(' ');
+        $('co-phone').value = checkoutUser.phone || '';
+        $('co-email').value = checkoutUser.email || '';
+        $('co-city').value = checkoutUser.city || $('co-city').value;
+        const address = getAddresses(checkoutUser.id).find((item) => item.isDefault) || getAddresses(checkoutUser.id)[0];
+        if (address) {
+          $('co-phone').value = address.phone || checkoutUser.phone || '';
+          $('co-address').value = [address.line1, address.line2].filter(Boolean).join(', ');
+          $('co-city').value = address.city || checkoutUser.city || '';
+          const state = address.state || '';
+          const validState = Array.from(stateSel.options).some((option) => option.value === state || option.textContent === state);
+          if (validState) stateSel.value = state;
+          else if (state) { stateSel.value = 'Other'; stateOther.value = state; stateOtherWrap.hidden = false; }
+        }
+      }
+
       // ── live summary ────────────────────────────────────────────
       function cartItems() {
         const items = loadCart();
-        if (items.length) return items.map((i) => ({ name: i.name, qty: i.qty, price: i.price, img: i.img, color: i.color }));
+        if (items.length) return items.map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price, img: i.img, color: i.color }));
         // fallback so the page is never empty (e.g. arriving with an empty cart)
-        return [{ name: 'SOKO 01 · Commuter', qty: 1, price: 1350000, img: '/images/bike-commuter.webp', color: 'Graphite' }];
+        return [{ id: '0001-commuter', name: 'SOKO 01 · Commuter', qty: 1, price: 1350000, img: '/images/bike-commuter.webp', color: 'Graphite' }];
       }
       function effectiveState() {
         return stateSel.value === 'Other' ? stateOther.value.trim() : stateSel.value;
@@ -224,23 +273,32 @@
         $('co-deliver-to').classList.toggle('is-live', parts.length > 0);
 
         const pay = document.querySelector('input[name="pay"]:checked');
-        const payLabel = { card: 'Card · Paystack', transfer: 'Bank transfer · Paystack', split: 'Split in 3 · Paystack', pod: 'Pay on delivery' }[pay ? pay.value : 'card'];
+        const gateway = String(storeSettings.gateway || 'Paystack');
+        const payLabel = { card: `Card · ${gateway}`, transfer: `Bank transfer · ${gateway}`, split: `Split in 3 · ${gateway}`, pod: 'Pay on delivery' }[pay ? pay.value : 'card'];
         $('co-pay-line').textContent = payLabel;
         const splitLine = $('co-split-line');
         if (splitLine) splitLine.hidden = !(pay && pay.value === 'split');
 
         const sub = cartTotal(items);
         const del = deliveryFor();
-        const total = sub + del;
+        const rateValue = Number(storeSettings.taxRate ?? 0);
+        const rate = Number.isFinite(rateValue) ? Math.max(0, rateValue) : 0;
+        const tax = Math.round(sub * rate / 100);
+        const total = sub + del + tax;
         $('co-subtotal').textContent = money(sub);
         $('co-delivery-label').textContent = del === 0 ? 'Delivery (Lagos)' : 'Delivery (nationwide)';
         $('co-delivery').textContent = del === 0 ? 'Free' : money(del);
         $('co-delivery').classList.toggle('is-free', del === 0);
+        const taxLine = $('co-tax-line');
+        if (taxLine) taxLine.hidden = rate === 0;
+        const taxLabel = document.querySelector('.js-tax-label');
+        if (taxLabel) taxLabel.textContent = `Tax (${rate.toLocaleString('en-NG')}%)`;
+        $('co-tax').textContent = money(tax);
         const totalEl = $('co-total');
         if (totalEl) totalEl.textContent = money(total); // el is gone once the button flips to 'Order placed ✓'
         $('co-total-side').textContent = money(total);
         const each = $('co-split-each'); if (each) each.textContent = money(Math.ceil(total / 3));
-        return { items, sub, del, total };
+        return { items, sub, del, tax, taxRate: rate, total };
       }
       function syncStateOther() {
         stateOtherWrap.hidden = stateSel.value !== 'Other';
@@ -300,6 +358,7 @@
       // step 1 → step 2
       document.querySelector('[data-checkout-form]').addEventListener('submit', (e) => {
         e.preventDefault();
+        if (!storeOpen) return fail('Checkout is paused by the store. Your cart will remain saved here.');
         const missing = validate(true);
         if (missing) return fail(`Almost there: ${missing.label.toLowerCase()} is still missing.`);
         $('co-error').hidden = true;
@@ -310,9 +369,9 @@
       });
 
       // ── place order: transaction → receipt ─────────────────────
-      const placeBtn = document.querySelector('[data-place-order]');
       let processing = false;
       placeBtn.addEventListener('click', () => {
+        if (!storeOpen) return fail('Checkout is paused by the store. Your cart will remain saved here.');
         if (processing) return;
         const missing = validate(true);
         if (missing) {
@@ -321,23 +380,32 @@
         }
         const email = $('co-email').value.trim();
         const snapshot = renderSummary();
+        const paymentMethod = document.querySelector('input[name="pay"]:checked')?.value || 'card';
+        const paymentGateway = String(storeSettings.gateway || 'Paystack');
 
         processing = true;
         placeBtn.classList.add('is-processing');
         placeBtn.disabled = true;
-        placeBtn.querySelector('.js-place-label').textContent = 'Processing payment…';
+        placeBtn.querySelector('.js-place-label').textContent = 'Recording demo order…';
 
-        // simulated Paystack settlement, succeeds once all fields are valid
+        // This prototype records an order locally; it does not contact a payment provider.
         setTimeout(() => {
           const ref = 'SM-' + Math.floor(1000 + Math.random() * 9000);
           const order = {
             ref,
-            status: 'paid',
+            status: 'processing',
+            paymentStatus: 'simulated',
             eta: snapshot.del === 0 ? 'Arriving in ~4 days' : 'Arriving in ~6 days',
             items: snapshot.items,
+            subtotal: snapshot.sub,
+            delivery: snapshot.del,
+            tax: snapshot.tax,
+            taxRate: snapshot.taxRate,
             total: snapshot.total,
+            paymentMethod,
+            paymentGateway,
             address: {
-              name: $('co-fname').value.trim() + ' ' + $('co-lname').value.trim(),
+              name: [$('co-fname').value.trim(), $('co-lname').value.trim()].filter(Boolean).join(' '),
               phone: $('co-phone').value.trim(),
               line1: $('co-address').value.trim(),
               city: $('co-city').value.trim(),
@@ -345,7 +413,11 @@
               country: 'Nigeria',
             },
           };
-          if (isLoggedIn()) addOrder(order);
+          const savedOrder = checkoutUser
+            ? addOrder(order)
+            : recordAdminOrder(order, { customer: order.address.name || 'Guest', email });
+          order.id = savedOrder.id;
+          order.date = savedOrder.date;
           const cartNow = loadCart();
           if (cartNow.length) { saveCart([]); hydrateCartBadge(); }
           hydrateCartBadge();
@@ -356,15 +428,20 @@
 
           processing = false;
           placeBtn.classList.remove('is-processing');
-          placeBtn.disabled = false;
+          placeBtn.disabled = !storeOpen;
           placeBtn.querySelector('.js-place-label').innerHTML = 'Order placed ✓';
           openReceipt(order, email, snapshot);
         }, 1900);
       });
 
-      // ── receipt modal: generated + "sent" automatically ────────
+      // ── local receipt modal ────────────────────────────────────
       function openReceipt(order, email, snap) {
         const invoice = orderInvoiceHTML(order, { name: order.address.name, email, city: order.address.city });
+        const trackingHref = isLoggedIn() ? '/pages/dashboard.html#orders' : `/pages/order-confirmation.html?ref=${encodeURIComponent(order.ref)}`;
+        const trackingLabel = isLoggedIn() ? 'Track in rider desk' : 'View order details';
+        const paymentMethods = { card: 'Card', transfer: 'Bank transfer', split: 'Split in 3', pod: 'Pay on delivery' };
+        const methodName = paymentMethods[order.paymentMethod] || 'Card';
+        const paymentLabel = order.paymentMethod === 'pod' ? methodName : `${methodName} · ${order.paymentGateway || 'Paystack'}`;
         const blob = new Blob([invoice], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
 
@@ -377,17 +454,19 @@
             <div class="co-receipt__seal" aria-hidden="true">
               <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="30" stroke="var(--color-success)" stroke-width="2" class="co-seal-ring"/><path d="M20 33.5 28.5 42 44 24" stroke="var(--color-success)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="co-seal-tick"/></svg>
             </div>
-            <span class="co-receipt__kicker">Payment successful · ${order.ref}</span>
-            <h2 class="co-receipt__title">Receipt sent to ${esc(email)}</h2>
-            <p class="co-receipt__sub">Generated the second your payment cleared. It's on its way to your inbox right now.</p>
+            <span class="co-receipt__kicker">DEMO ORDER · ${esc(order.ref)}</span>
+            <h2 class="co-receipt__title">Order recorded for ${esc(email)}</h2>
+            <p class="co-receipt__sub">This order and receipt are stored in this browser. No payment was collected and no email was sent.</p>
             <div class="co-receipt__lines">
               ${snap.items.map((it) => `<div class="co-receipt__line"><span>${esc(it.name)} <small>× ${it.qty}</small></span><b>${money(it.price * it.qty)}</b></div>`).join('')}
               ${snap.del ? `<div class="co-receipt__line"><span>Delivery (${esc(order.address.state || order.address.city)})</span><b>${money(snap.del)}</b></div>` : ''}
-              <div class="co-receipt__line total"><span>Total paid</span><b>${money(snap.total)}</b></div>
+              ${snap.tax ? `<div class="co-receipt__line"><span>Tax (${snap.taxRate}%)</span><b>${money(snap.tax)}</b></div>` : ''}
+              <div class="co-receipt__line"><span>Payment method · simulated</span><b>${esc(paymentLabel)}</b></div>
+              <div class="co-receipt__line total"><span>Order total</span><b>${money(snap.total)}</b></div>
             </div>
             <div class="co-receipt__actions">
               <a class="btn btn--primary" href="${url}" download="SOKO-${order.ref}-receipt.html" data-magnetic><i data-lucide="download" class="icon-16"></i> Download receipt</a>
-              <a class="btn btn--secondary" href="${isLoggedIn() ? '/pages/dashboard.html' : '/pages/order-confirmation.html'}">Track order</a>
+              <a class="btn btn--secondary" href="${trackingHref}">${trackingLabel}</a>
             </div>
             <button class="co-receipt__close" type="button" aria-label="Close"><i data-lucide="x" class="icon-18"></i></button>
           </div>`;

@@ -788,6 +788,16 @@
       document.querySelectorAll('[data-cat-link]').forEach((a) =>
         a.addEventListener('click', (e) => { e.preventDefault(); setFilter(a.dataset.catLink, true); }),
       );
+      const requestedItem = new URLSearchParams(location.search).get('item');
+      const targetItem = requestedItem ? cards.find((card) => card.dataset.id === requestedItem) : null;
+      if (targetItem) {
+        setFilter(targetItem.dataset.cat, false);
+        targetItem.classList.add('is-deep-target');
+        setTimeout(() => {
+          targetItem.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
+          setTimeout(() => targetItem.classList.remove('is-deep-target'), 2200);
+        }, 120);
+      }
       document.querySelector('.js-reset-filter')?.addEventListener('click', () => setFilter('all'));
       sortEl?.addEventListener('change', () => sortCards(sortEl.value));
 

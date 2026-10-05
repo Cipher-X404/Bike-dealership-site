@@ -1,5 +1,9 @@
 // smoke.mjs — full localStorage store contract bench (account.js + cartstore.js).
 // Pure Node: Map-based storage shims, no DOM. ~54 assertions.
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const store = new Map();
 globalThis.localStorage = {
   getItem: (k) => (store.has(k) ? store.get(k) : null),
@@ -11,8 +15,8 @@ globalThis.sessionStorage = {
   getItem: () => null, setItem: () => {}, removeItem: () => {}, clear: () => {},
 };
 
-const A = await import('/home/user/project/src/js/account.js');
-const C = await import('/home/user/project/src/js/cartstore.js');
+const A = await import(path.join(ROOT, 'src/js/account.js'));
+const C = await import(path.join(ROOT, 'src/js/cartstore.js'));
 
 let pass = 0; let fail = 0;
 const ok = (cond, label) => {
@@ -82,11 +86,21 @@ A.logout();
 console.log('── orders ──');
 A.login('chidi@example.com', 'demo1234x');
 const before = A.ordersFor('u-demo').length;
-const no = A.addOrder({ ref: 'SM-9000', status: 'paid', eta: '3–5 days', items: [{ name: 'SOKO 01 · Commuter', qty: 1, price: 1350000, img: 'images/bike-commuter.webp' }], total: 1350000, address: { name: 'Chidi Okeke', line1: '14 Adeola Close', city: 'Lagos' } });
+const stockBeforeOrder = A.adminInventory().find((p) => p.id === '0001-commuter').stock;
+const no = A.addOrder({ ref: 'SM-9000', status: 'processing', paymentStatus: 'simulated', eta: '3–5 days', items: [{ id: '0001-commuter', name: 'SOKO 01 · Commuter', qty: 1, price: 1350000, img: 'images/bike-commuter.webp' }], total: 1350000, address: { name: 'Chidi Okeke', line1: '14 Adeola Close', city: 'Lagos' } });
 ok(/^ORD-\d+$/.test(no.id) && no.userId === 'u-demo', 'addOrder stamps id + userId');
 ok(A.ordersFor('u-demo').length === before + 1, 'ordersFor sees new order');
+ok(A.adminOrders().some((o) => o.id === no.id && o.customer === 'Chidi Okeke'), 'new member order also appears in the workshop desk');
+ok(A.adminInventory().find((p) => p.id === '0001-commuter').stock === stockBeforeOrder - 1, 'new order decrements matching inventory');
 A.cancelOrder(no.id);
-ok(A.ordersFor('u-demo').find((o) => o.id === no.id).status === 'cancelled', 'cancelOrder cancels paid order');
+ok(A.ordersFor('u-demo').find((o) => o.id === no.id).status === 'cancelled', 'cancelOrder cancels processing order');
+ok(A.adminOrders().find((o) => o.id === no.id).status === 'cancelled', 'member cancellation syncs to workshop desk');
+ok(A.adminInventory().find((p) => p.id === '0001-commuter').stock === stockBeforeOrder, 'cancelling the order restores stock');
+A.setOrderStatus(no.id, 'processing');
+ok(A.adminInventory().find((p) => p.id === '0001-commuter').stock === stockBeforeOrder - 1, 'reopening a cancelled order reapplies inventory once');
+A.setOrderStatus(no.id, 'cancelled');
+ok(A.ordersFor('u-demo').find((o) => o.id === no.id).status === 'cancelled', 'admin cancellation syncs back to the member order');
+ok(A.adminInventory().find((p) => p.id === '0001-commuter').stock === stockBeforeOrder, 'admin cancellation restores stock exactly once');
 const deliv = A.ordersFor('u-demo').find((o) => o.status === 'delivered');
 A.cancelOrder(deliv.id);
 ok(A.ordersFor('u-demo').find((o) => o.id === deliv.id).status === 'delivered', 'cancelOrder refuses delivered');
@@ -122,14 +136,16 @@ A.setDefaultCard('u-demo', newCard.id);
 ok(A.getCards('u-demo').filter((c) => c.isDefault).length === 1 && A.getCards('u-demo').find((c) => c.id === newCard.id).isDefault, 'setDefaultCard switches default');
 A.removeCard('u-demo', newCard.id);
 ok(A.getCards('u-demo').length === cards.length, 'removeCard deletes');
+ok(A.getCards('u-demo').filter((c) => c.isDefault).length === 1, 'removing the default card promotes its successor');
 const addrs = A.getAddresses('u-demo');
-const after = A.saveAddress('u-demo', { label: 'Test', name: 'Chidi Okeke', phone: '+234 801 234 5678', line1: '1 Test St', city: 'Lagos', state: 'Lagos', country: 'Nigeria' });
+const after = A.saveAddress('u-demo', { label: 'Test', name: 'Chidi Okeke', phone: '+234 801 234 5678', line1: '1 Test St', line2: 'Unit 3', city: 'Lagos', state: 'Lagos', country: 'Nigeria' });
 const na = after[after.length - 1];
-ok(after.length === addrs.length + 1 && na.id, 'saveAddress appends');
+ok(after.length === addrs.length + 1 && na.id && na.line2 === 'Unit 3', 'saveAddress appends and preserves line 2');
 A.setDefaultAddress('u-demo', na.id);
 ok(A.getAddresses('u-demo').find((a) => a.id === na.id).isDefault, 'setDefaultAddress works');
 A.removeAddress('u-demo', na.id);
 ok(A.getAddresses('u-demo').length === addrs.length, 'removeAddress deletes');
+ok(A.getAddresses('u-demo').filter((a) => a.isDefault).length === 1, 'removing the default address promotes its successor');
 
 // ── 7. Garage / tickets / notifs / prefs / referral ────────────
 console.log('── garage·tickets·notifs·prefs ──');
@@ -156,7 +172,7 @@ console.log('── admin ──');
 const kpi = A.adminKPIs();
 ok(kpi.orders === 512 && kpi.revenue === 26900000, 'adminKPIs seeded shape');
 ok(A.adminRevenue(6).length === 6 && A.adminOrdersTrend().length === 12, 'revenue + trend series');
-ok(A.adminOrders().length === 8, 'adminOrders 8');
+ok(A.adminOrders().length === 9, 'adminOrders includes the new member order');
 A.setOrderStatus('ORD-1065', 'shipped');
 ok(A.adminOrders().find((o) => o.id === 'ORD-1065').status === 'shipped', 'setOrderStatus updates');
 ok(A.adminCustomers().length === 6, 'adminCustomers 6');

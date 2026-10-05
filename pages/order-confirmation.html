@@ -3,22 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Order confirmed · SOKO Moto</title>
-    <meta name="description" content="Your SOKO Moto order is confirmed. Here's what happens next." />
+    <title>Demo order · SOKO Moto</title>
+    <meta name="description" content="View order details for a local SOKO Moto demo checkout." />
     <link rel="canonical" href="https://sokomoto.ng/pages/order-confirmation.html" />
     <meta name="theme-color" content="#0D0D0D" />
     <meta name="robots" content="noindex, nofollow" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="SOKO Moto" />
-    <meta property="og:title" content="Order confirmed · SOKO Moto" />
-    <meta property="og:description" content="Your SOKO Moto order is confirmed. Here's what happens next." />
+    <meta property="og:title" content="Demo order · SOKO Moto" />
+    <meta property="og:description" content="View order details for a local SOKO Moto demo checkout." />
     <meta property="og:url" content="https://sokomoto.ng/pages/order-confirmation.html" />
     <meta property="og:image" content="https://sokomoto.ng/images/og.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Order confirmed · SOKO Moto" />
-    <meta name="twitter:description" content="Your SOKO Moto order is confirmed. Here's what happens next." />
+    <meta name="twitter:title" content="Demo order · SOKO Moto" />
+    <meta name="twitter:description" content="View order details for a local SOKO Moto demo checkout." />
     <meta name="twitter:image" content="https://sokomoto.ng/images/og.jpg" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
@@ -41,30 +41,30 @@
         <div class="confirm-card">
           <span class="confirm-badge" data-reveal><i data-lucide="check" class="icon-24"></i></span>
           <h1 data-split>You're in. Ride on.</h1>
-          <p class="lead">Order <b>#SM-2481</b> is confirmed. A confirmation email and SMS are on their way.</p>
+          <p class="lead js-confirm-lead">Sample demo order <b>#SM-2481</b>. Orders on this prototype are stored locally; no payment, email or SMS is sent.</p>
 
           <dl class="confirm-meta" data-reveal>
-            <div class="line"><dt>Estimated delivery</dt><dd>5 to 6 weeks, Guangzhou to Lagos</dd></div>
-            <div class="line"><dt>Order total</dt><dd>₦1,350,000</dd></div>
-            <div class="line"><dt>Payment</dt><dd>Paystack · Paid</dd></div>
-            <div class="line"><dt>Tracking</dt><dd class="tracking">SM-2481-77YQ</dd></div>
+            <div class="line"><dt>Estimated delivery</dt><dd class="js-confirm-delivery">Sample timeline · see rider desk</dd></div>
+            <div class="line"><dt>Order total</dt><dd class="js-confirm-total">₦1,350,000</dd></div>
+            <div class="line"><dt>Payment</dt><dd class="js-confirm-payment">Simulated · no charge</dd></div>
+            <div class="line"><dt>Reference</dt><dd class="tracking js-confirm-tracking">SM-2481</dd></div>
           </dl>
 
           <div class="confirm-next-steps" data-reveal>
             <span class="confirm-next-steps__label">What happens next</span>
-            <div class="confirm-step is-done"><span class="confirm-step__dot">1</span><div><b>QC &amp; prep</b><small>40-point inspection, charge to 100%</small></div></div>
-            <div class="confirm-step"><span class="confirm-step__dot">2</span><div><b>Packed &amp; dispatched</b><small>tracking updates by SMS</small></div></div>
-            <div class="confirm-step"><span class="confirm-step__dot">3</span><div><b>Handover</b><small>ID check, ride-through, warranty card</small></div></div>
+            <div class="confirm-step is-done"><span class="confirm-step__dot">1</span><div><b>QC &amp; prep</b><small>Sample inspection milestone</small></div></div>
+            <div class="confirm-step"><span class="confirm-step__dot">2</span><div><b>Packed &amp; dispatched</b><small>sample milestone in the rider desk</small></div></div>
+            <div class="confirm-step"><span class="confirm-step__dot">3</span><div><b>Handover</b><small>Sample handover milestone</small></div></div>
           </div>
 
           <p class="muted" style="margin-top:1.4rem;max-width:52ch;margin-inline:auto">
-            Our delivery team will call 30 minutes before they arrive. Keep your ID handy
-            for handover, and a clear spot ready for the bike.
+            This page shows a sample delivery flow. In a live store, the rider desk would
+            carry verified shipping updates and handover details for your order.
           </p>
 
           <div class="confirm-next">
             <a class="btn btn--primary" href="/pages/shop.html" data-magnetic>Keep shopping <i data-lucide="arrow-up-right" class="icon-18"></i></a>
-            <a class="btn btn--secondary" href="/pages/dashboard.html">Track order in dashboard</a>
+            <a class="btn btn--secondary js-confirm-track" href="/pages/dashboard.html">Track order in dashboard</a>
           </div>
         </div>
       </section>
@@ -73,5 +73,45 @@
     <!-- @@FOOTER@@ -->
 
     <script type="module" src="/src/js/main.js"></script>
+    <script type="module">
+      import { adminOrders, currentUser, ensureSeeded, money } from '/src/js/account.js';
+      ensureSeeded();
+      const ref = new URLSearchParams(location.search).get('ref');
+      if (ref) {
+        const order = adminOrders().find((item) => item.ref === ref);
+        const lead = document.querySelector('.js-confirm-lead');
+        const delivery = document.querySelector('.js-confirm-delivery');
+        const total = document.querySelector('.js-confirm-total');
+        const payment = document.querySelector('.js-confirm-payment');
+        const tracking = document.querySelector('.js-confirm-tracking');
+        const trackLink = document.querySelector('.js-confirm-track');
+        if (order) {
+          const paymentMethods = { card: 'Card', transfer: 'Bank transfer', split: 'Split in 3', pod: 'Pay on delivery' };
+          const methodName = paymentMethods[order.paymentMethod] || 'Card';
+          const method = order.paymentMethod === 'pod' ? methodName : `${methodName} · ${order.paymentGateway || 'Paystack'}`;
+          lead.textContent = `Demo order ${order.ref} is recorded in this browser. No payment, email or SMS was sent.`;
+          delivery.textContent = order.eta || 'Sample delivery timeline · see rider desk';
+          total.textContent = money(order.total);
+          payment.textContent = `${method} · simulated`;
+          tracking.textContent = order.ref;
+          if (order.status === 'cancelled') document.querySelector('.confirm-card h1').textContent = 'Order status updated.';
+          if (currentUser()) {
+            trackLink.href = '/pages/dashboard.html#orders';
+            trackLink.textContent = 'Track in rider desk';
+          } else {
+            trackLink.href = '/pages/shop.html';
+            trackLink.textContent = 'Continue shopping';
+          }
+        } else {
+          lead.textContent = `Demo order ${ref} was not found in this browser. It may have been cleared when local demo data was reset.`;
+          delivery.textContent = 'No delivery details available';
+          total.textContent = '—';
+          payment.textContent = 'No payment was collected';
+          tracking.textContent = ref;
+          trackLink.href = '/pages/shop.html';
+          trackLink.textContent = 'Back to the lineup';
+        }
+      }
+    </script>
   </body>
 </html>
