@@ -22,9 +22,11 @@ const esc = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': 
 const STATUSES = orderStatuses.filter((status) => status !== 'all');
 const VIEW_NAMES = {
   overview: 'Overview', orders: 'Orders', inventory: 'Inventory',
-  customers: 'Customers', analytics: 'Analytics', settings: 'Settings',
+  customers: 'Customers', analytics: 'Analytics', settings: 'Settings', more: 'More',
 };
 const validView = (name) => Object.prototype.hasOwnProperty.call(VIEW_NAMES, name);
+const DOCK_VIEWS = ['overview', 'orders', 'inventory', 'customers', 'more'];
+const MORE_VIEWS = ['analytics', 'settings'];
 
 let toastTimer;
 function toast(message) {
@@ -118,13 +120,30 @@ if (!user) {
   function showView(name, { focus = false } = {}) {
     if (!validView(name)) name = 'overview';
     $$('.js-view').forEach((panel) => { panel.hidden = panel.dataset.viewPanel !== name; });
-    $$('.dash-nav [data-view]').forEach((link) => {
+
+    // Handle both old sidebar nav and new iOS dock nav
+    $$('.dash-nav [data-view], .dash-ios-dock [data-view]').forEach((link) => {
       const active = link.dataset.view === name;
       link.classList.toggle('is-active', active);
       if (active) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
-    $('.js-view-title').textContent = VIEW_NAMES[name];
+
+    // For secondary views (in More section), keep More tab active in dock
+    if (MORE_VIEWS.includes(name)) {
+      const moreTab = $$('.dash-ios-dock [data-view="more"]').pop();
+      if (moreTab) {
+        moreTab.classList.add('is-active');
+        moreTab.setAttribute('aria-current', 'page');
+      }
+      // Remove active state from other dock tabs
+      $$('.dash-ios-dock [data-view]:not([data-view="more"])').forEach((link) => {
+        link.classList.remove('is-active');
+        link.removeAttribute('aria-current');
+      });
+    }
+
+    $('.js-view-title').textContent = VIEW_NAMES[name] || name.charAt(0).toUpperCase() + name.slice(1);
     $('.js-view-path').textContent = name.toUpperCase();
     if (focus) $('.js-view-title').focus({ preventScroll: true });
     if (window.lenis) window.lenis.scrollTo(0, { immediate: true });
