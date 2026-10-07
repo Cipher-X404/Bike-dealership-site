@@ -21,9 +21,7 @@ import { hydrateCartBadge } from '/src/js/badge.js';
 
 const esc = (s = '') => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const asset = (src, fallback = '/images/bike-commuter.webp') => /^\/images\/[\w./-]+$/.test(String(src || '')) ? src : fallback;
-const VIEWS = ['overview', 'orders', 'wishlist', 'wallet', 'addresses', 'garage', 'support', 'notifications', 'settings', 'more'];
-const DOCK_VIEWS = ['overview', 'orders', 'garage', 'wallet', 'more'];
-const MORE_VIEWS = ['wishlist', 'addresses', 'support', 'notifications', 'settings'];
+const VIEWS = ['overview', 'orders', 'wishlist', 'wallet', 'addresses', 'garage', 'support', 'notifications', 'settings'];
 
 ensureSeeded();
 const user = currentUser();
@@ -87,34 +85,17 @@ function daysRemaining(dateString) {
 const TITLES = {
   overview: 'Overview', orders: 'Your orders', wishlist: 'Saved rides', wallet: 'Wallet & cards',
   addresses: 'Delivery addresses', garage: 'The garage', support: 'Support',
-  notifications: 'Notifications', settings: 'Account settings', more: 'More',
+  notifications: 'Notifications', settings: 'Account settings',
 };
 function showView(name) {
   const view = VIEWS.includes(name) ? name : 'overview';
   $$('.js-view').forEach((panel) => { panel.hidden = panel.dataset.viewPanel !== view; });
-
-  // Handle both old sidebar nav and new iOS dock nav
-  $$('.dash-nav [data-view], .dash-ios-dock [data-view]').forEach((link) => {
+  $$('.dash-nav [data-view]').forEach((link) => {
     const active = link.dataset.view === view;
     link.classList.toggle('is-active', active);
     if (active) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
   });
-
-  // For secondary views (in More section), keep More tab active in dock
-  if (MORE_VIEWS.includes(view)) {
-    const moreTab = $$('.dash-ios-dock [data-view="more"]').pop();
-    if (moreTab) {
-      moreTab.classList.add('is-active');
-      moreTab.setAttribute('aria-current', 'page');
-    }
-    // Remove active state from other dock tabs
-    $$('.dash-ios-dock [data-view]:not([data-view="more"])').forEach((link) => {
-      link.classList.remove('is-active');
-      link.removeAttribute('aria-current');
-    });
-  }
-
-  $('.js-view-title').textContent = TITLES[view] || view.charAt(0).toUpperCase() + view.slice(1);
+  $('.js-view-title').textContent = TITLES[view];
   const path = $('.js-view-path');
   if (path) path.textContent = view.toUpperCase();
   if (window.lenis) window.lenis.scrollTo(0, { immediate: true });
@@ -131,8 +112,7 @@ function navigateToView(name, { historyMode = 'push', ticketType = '' } = {}) {
 }
 function syncViewFromUrl() {
   const name = (window.location.hash || '#overview').slice(1);
-  const view = VIEWS.includes(name) ? name : 'overview';
-  showView(view);
+  showView(VIEWS.includes(name) ? name : 'overview');
 }
 
 /* ── Access guard ─────────────────────────────────────────────── */
@@ -573,7 +553,7 @@ if (!user) {
     event.preventDefault();
     navigateToView(name, { ticketType: goto.dataset.ticketType || '' });
   });
-  $$('.dash-nav [data-view], .dash-ios-dock [data-view]').forEach((link) => link.addEventListener('click', (event) => {
+  $$('.dash-nav [data-view]').forEach((link) => link.addEventListener('click', (event) => {
     event.preventDefault();
     navigateToView(link.dataset.view);
   }));
