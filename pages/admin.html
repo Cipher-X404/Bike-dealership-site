@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@600,700&f[]=cabinet-grotesk@500,700&f[]=jetbrains-mono@400,500,600&display=swap" />
   </head>
   <body>
-    <div class="dash dash--admin" data-dash="admin">
+    <div class="dash dash--admin dash-ios-active" data-dash="admin">
       <a class="dash-skip" href="#admin-main">Skip to workshop control</a>
 
       <div class="dash-guard js-guest-guard" hidden>
@@ -48,7 +48,7 @@
       </div>
 
       <div class="js-app" hidden>
-        <div class="dash-shell">
+        <div class="dash-shell dash-ios-active">
           <aside class="dash-rail" aria-label="Workshop control navigation">
             <a class="rail__brand" href="/" aria-label="SOKO Moto home"><span class="rail__brand-symbol">S</span><span class="rail__brand-copy"><b>SOKO</b><small>WORKSHOP CONTROL</small></span></a>
             <div class="rail__rule"></div>
@@ -165,6 +165,31 @@
         </div>
       </div>
     </div>
+
+    <!-- iOS-inspired bottom dock navigation -->
+    <nav class="dash-ios-dock dash-ios-active" aria-label="Workshop control navigation">
+      <div class="dash-ios-dock__inner">
+        <a href="#overview" data-view="overview" data-label="Home" class="dash-ios-dock__tab is-active" aria-current="page" aria-label="Home"><i data-lucide="panels-top-left" class="icon-20"></i><span>Home</span></a>
+        <a href="#orders" data-view="orders" data-label="Orders" class="dash-ios-dock__tab" aria-label="Orders"><i data-lucide="package-check" class="icon-20"></i><span>Orders</span><span class="nav-count js-open-count">0</span></a>
+        <a href="#inventory" data-view="inventory" data-label="Stock" class="dash-ios-dock__tab" aria-label="Stock"><i data-lucide="boxes" class="icon-20"></i><span>Stock</span><span class="nav-count nav-count--warm js-low-stock-count" hidden>0</span></a>
+        <a href="#customers" data-view="customers" data-label="Riders" class="dash-ios-dock__tab" aria-label="Riders"><i data-lucide="users-round" class="icon-20"></i><span>Riders</span></a>
+        <a href="#more" data-view="more" data-label="More" class="dash-ios-dock__tab" aria-label="More"><i data-lucide="menu" class="icon-20"></i><span>More</span></a>
+      </div>
+    </nav>
+
+    <!-- More view - contains secondary destinations -->
+    <section class="dash-view js-view dash-ios-view" data-view-panel="more" aria-labelledby="admin-more-heading" hidden>
+      <div class="page-intro"><div><p class="page-intro__eyebrow">Additional options</p><h2 id="admin-more-heading">More</h2><p>Additional store management features are available here.</p></div></div>
+      <div class="dash-ios-more">
+        <div class="dash-ios-more__section">
+          <span class="dash-ios-more__title">Management</span>
+          <div class="dash-ios-more__list">
+            <a href="#analytics" data-goto="analytics" class="dash-ios-more__link"><i data-lucide="chart-no-axes-combined" class="icon-18"></i><span>Analytics</span><i data-lucide="arrow-right" class="icon-14"></i></a>
+            <a href="#settings" data-goto="settings" class="dash-ios-more__link"><i data-lucide="sliders-horizontal" class="icon-18"></i><span>Settings</span><i data-lucide="arrow-right" class="icon-14"></i></a>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <div class="toast js-toast" role="status" aria-live="polite" aria-atomic="true"></div>
     <script type="module" src="/src/js/main.js"></script>

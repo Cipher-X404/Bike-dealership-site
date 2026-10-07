@@ -936,6 +936,38 @@
   .dash-modal .dash-view__grid .field:last-of-type { grid-column: auto; }
   .detail-row { grid-template-columns: 80px minmax(0,1fr); gap: 8px; }
   .js-toast { right: 10px; bottom: 10px; max-width: calc(100vw - 20px); }
+
+  /* iOS-style bottom sheet dialogs for phones */
+  .dash-modal {
+    align-items: flex-end;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .dash-modal__card {
+    width: 100%;
+    max-height: 80dvh;
+    border-radius: 16px 16px 0 0;
+    box-shadow: none;
+    animation: ios-sheet-enter 240ms var(--d-ease) both;
+  }
+
+  @keyframes ios-sheet-enter {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dash-modal__card {
+      animation: none;
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -955,4 +987,491 @@
   .dash .dash-table { min-width: 0; font-size: 9pt; }
   .dash .dash-table th { position: static; background: #eee; color: #111; }
   .dash .dash-table td { color: #222; }
+}
+
+/* iOS-inspired bottom dock navigation */
+.dash-ios-dock {
+  position: fixed;
+  z-index: 1000;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 84px;
+  padding: max(12px, env(safe-area-inset-bottom)) 16px calc(12px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  transition: background 220ms ease, backdrop-filter 220ms ease;
+}
+
+/* Member dashboard - cool porcelain/light theme */
+.dash--member .dash-ios-dock {
+  background: rgba(248, 249, 244, 0.9);
+  border-top-color: rgba(29, 41, 35, 0.1);
+}
+
+/* Admin dashboard - graphite/dark theme */
+.dash--admin .dash-ios-dock {
+  background: rgba(23, 26, 24, 0.9);
+  border-top-color: rgba(241, 243, 235, 0.1);
+}
+
+/* Reduced transparency support */
+@media (prefers-reduced-transparency: reduce) {
+  .dash-ios-dock {
+    background: var(--d-panel-raised);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .dash--member .dash-ios-dock {
+    background: #ffffff;
+  }
+
+  .dash--admin .dash-ios-dock {
+    background: #1a221d;
+  }
+}
+
+.dash-ios-dock__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: min(640px, 100vw - 32px);
+  height: 60px;
+  padding: 0 8px;
+  border-radius: 16px;
+  background: var(--d-panel-raised);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.dash-ios-dock__tab {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 100%;
+  min-width: 48px;
+  padding: 0 4px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--d-mut);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease, transform 120ms var(--d-ease);
+}
+
+.dash--member .dash-ios-dock__tab {
+  color: rgba(29, 41, 35, 0.6);
+}
+
+.dash--member .dash-ios-dock__tab:hover {
+  color: rgba(29, 41, 35, 0.8);
+}
+
+.dash--member .dash-ios-dock__tab[aria-current="page"] {
+  color: var(--d-accent);
+  background: var(--d-accent-wash);
+}
+
+.dash--admin .dash-ios-dock__tab {
+  color: rgba(241, 243, 235, 0.6);
+}
+
+.dash--admin .dash-ios-dock__tab:hover {
+  color: rgba(241, 243, 235, 0.8);
+}
+
+.dash--admin .dash-ios-dock__tab[aria-current="page"] {
+  color: var(--d-accent);
+  background: rgba(240, 120, 79, 0.15);
+}
+
+.dash-ios-dock__tab[aria-current="page"]::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--d-accent);
+  box-shadow: 0 0 0 3px var(--d-accent-wash);
+}
+
+.dash-ios-dock__tab i[data-lucide] {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  transition: transform 120ms var(--d-ease);
+}
+
+.dash-ios-dock__tab span {
+  display: inline-block;
+  max-width: 100%;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dash-ios-dock__tab:hover {
+  transform: scale(1.02);
+}
+
+.dash-ios-dock__tab:active {
+  transform: scale(0.97);
+}
+
+.dash-ios-dock__tab:focus-visible {
+  outline: 2px solid var(--d-accent);
+  outline-offset: 2px;
+}
+
+.dash-ios-dock__tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  min-height: 48px;
+  min-width: 48px;
+}
+
+.dash-ios-dock__tab .nav-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  margin-left: 2px;
+  border-radius: 8px;
+  background: var(--d-accent);
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 600;
+}
+
+.dash--admin .dash-ios-dock__tab .nav-count {
+  background: #f0784f;
+}
+
+/* Hide existing sidebar navigation when iOS dock is active */
+.dash-shell.dash-ios-active .dash-rail {
+  display: none;
+}
+
+.dash-shell.dash-ios-active .dash-stage {
+  min-width: 0;
+}
+
+.dash-shell.dash-ios-active .dash-top {
+  padding: 9px clamp(22px, 3vw, 42px);
+}
+
+.dash-shell.dash-ios-active .dash-main {
+  padding: clamp(22px, 3.3vw, 46px) clamp(22px, 3.2vw, 48px) 20px;
+}
+
+.dash-ios-dock:not(.dash-ios-active) {
+  display: none;
+}
+
+/* More view styling */
+.dash-ios-more {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.dash-ios-more__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-ios-more__title {
+  color: var(--d-faint);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.dash-ios-more__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-ios-more__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  color: var(--d-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.dash--member .dash-ios-more__link {
+  color: var(--d-text);
+}
+
+.dash--admin .dash-ios-more__link {
+  color: rgba(241, 243, 235, 0.8);
+}
+
+.dash-ios-more__link:hover {
+  background: var(--d-inset);
+}
+
+.dash-ios-more__link:active {
+  transform: scale(0.97);
+}
+
+.dash-ios-more__link:focus-visible {
+  outline: 2px solid var(--d-accent);
+  outline-offset: 2px;
+}
+
+.dash-ios-more__link i[data-lucide] {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.dash-ios-more__link span {
+  flex: 1;
+}
+
+.dash-ios-more__link i[data-lucide="arrow-right"] {
+  width: 14px;
+  height: 14px;
+  color: var(--d-faint);
+}
+
+.dash-ios-view {
+  width: 100%;
+}
+
+/* View transition animations */
+@keyframes ios-view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ios-view-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.dash-ios-view-enter {
+  animation: ios-view-enter 220ms var(--d-ease) both;
+}
+
+.dash-ios-view-exit {
+  animation: ios-view-exit 220ms var(--d-ease) both;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .dash-ios-dock__tab {
+    transition: color 0.01ms ease, background-color 0.01ms ease, transform 0.01ms ease;
+  }
+
+  .dash-ios-dock__tab:hover {
+    transform: none;
+  }
+
+  .dash-ios-dock__tab:active {
+    transform: none;
+  }
+
+  .dash-ios-more__link:active {
+    transform: none;
+  }
+
+  .dash-ios-view-enter,
+  .dash-ios-view-exit {
+    animation: none;
+  }
+
+  .dash-modal {
+    animation: none;
+  }
+
+  .dash-modal__card {
+    animation: none;
+  }
+}
+
+/* Phone-specific adjustments */
+@media (max-width: 768px) {
+  .dash-ios-dock {
+    padding: max(8px, env(safe-area-inset-bottom)) 12px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .dash-ios-dock__inner {
+    height: 56px;
+    border-radius: 14px;
+  }
+
+  .dash-ios-dock__tab {
+    font-size: 0.65rem;
+    gap: 2px;
+  }
+
+  .dash-ios-dock__tab i[data-lucide] {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* iOS-style bottom sheet dialogs */
+  .dash-modal {
+    align-items: flex-end;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .dash-modal__card {
+    width: 100%;
+    max-height: 80dvh;
+    border-radius: 16px 16px 0 0;
+    box-shadow: none;
+    animation: ios-sheet-enter 240ms var(--d-ease) both;
+  }
+
+  @keyframes ios-sheet-enter {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dash-modal__card {
+      animation: none;
+    }
+  }
+}
+
+/* Desktop dialog positioning */
+@media (min-width: 769px) {
+  .dash-modal {
+    place-items: center;
+    align-items: center;
+    padding: 18px;
+    background: rgba(6, 14, 9, 0.62);
+  }
+
+  .dash-modal__card {
+    width: min(580px, 100%);
+    max-height: min(86dvh, 850px);
+    border-radius: 10px;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.27);
+    animation: modal-enter 190ms var(--d-ease) both;
+  }
+}
+
+/* Responsive adjustments for very narrow screens */
+@media (max-width: 320px) {
+  .dash-ios-dock__tab {
+    min-width: 44px;
+    font-size: 0.6rem;
+    padding: 0 2px;
+  }
+
+  .dash-ios-dock__tab span {
+    display: none;
+  }
+
+  .dash-ios-dock__tab i[data-lucide] {
+    width: 22px;
+    height: 22px;
+  }
+
+  .dash-ios-dock__inner {
+    height: 52px;
+  }
+}
+
+/* Hover effects gated to fine pointers */
+@media (hover: hover) and (pointer: fine) {
+  .dash-ios-dock__tab:hover {
+    transform: scale(1.02);
+  }
+
+  .dash-ios-more__link:hover {
+    background: var(--d-inset);
+  }
+}
+
+/* No hover effects on coarse pointers */
+@media (hover: none) or (pointer: coarse) {
+  .dash-ios-dock__tab:hover {
+    transform: none;
+  }
+
+  .dash-ios-more__link:hover {
+    background: transparent;
+  }
+}
+
+/* Ensure labels fit at 320px by reducing font size */
+@media (max-width: 360px) {
+  .dash-ios-dock__tab {
+    font-size: 0.6rem;
+  }
+
+  .dash-ios-dock__tab span {
+    max-width: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Safe area spacing adjustments */
+@supports (padding: max(0px)) {
+  .dash-ios-dock {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Tap feedback for touch devices */
+.dash-ios-dock__tab:active:not(:disabled) {
+  transform: scale(0.97);
+  opacity: 0.9;
 }

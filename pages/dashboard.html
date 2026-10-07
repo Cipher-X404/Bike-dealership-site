@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@600,700&f[]=cabinet-grotesk@500,700&f[]=jetbrains-mono@400,500,600&display=swap" />
   </head>
   <body>
-    <div class="dash dash--member" data-dash="user">
+    <div class="dash dash--member dash-ios-active" data-dash="user">
       <a class="dash-skip" href="#member-main">Skip to your dashboard</a>
 
       <div class="dash-guard js-guest-guard" hidden>
@@ -47,7 +47,7 @@
       </div>
 
       <div class="js-app" hidden>
-        <div class="dash-shell">
+        <div class="dash-shell dash-ios-active">
           <aside class="dash-rail" aria-label="Rider desk navigation">
             <a class="rail__brand" href="/" aria-label="SOKO Moto home">
               <span class="rail__brand-symbol">S</span>
@@ -258,6 +258,34 @@
         </div>
       </div>
     </div>
+
+    <!-- iOS-inspired bottom dock navigation -->
+    <nav class="dash-ios-dock dash-ios-active" aria-label="Rider desk navigation">
+      <div class="dash-ios-dock__inner">
+        <a href="#overview" data-view="overview" data-label="Home" class="dash-ios-dock__tab is-active" aria-current="page" aria-label="Home"><i data-lucide="house" class="icon-20"></i><span>Home</span></a>
+        <a href="#orders" data-view="orders" data-label="Orders" class="dash-ios-dock__tab" aria-label="Orders"><i data-lucide="package-check" class="icon-20"></i><span>Orders</span></a>
+        <a href="#garage" data-view="garage" data-label="Garage" class="dash-ios-dock__tab" aria-label="Garage"><i data-lucide="bike" class="icon-20"></i><span>Garage</span></a>
+        <a href="#wallet" data-view="wallet" data-label="Wallet" class="dash-ios-dock__tab" aria-label="Wallet"><i data-lucide="wallet-cards" class="icon-20"></i><span>Wallet</span></a>
+        <a href="#more" data-view="more" data-label="More" class="dash-ios-dock__tab" aria-label="More"><i data-lucide="menu" class="icon-20"></i><span>More</span></a>
+      </div>
+    </nav>
+
+    <!-- More view - contains secondary destinations -->
+    <section class="dash-view js-view dash-ios-view" data-view-panel="more" aria-labelledby="more-heading" hidden>
+      <div class="page-intro"><div><p class="page-intro__eyebrow">Additional options</p><h2 id="more-heading">More</h2><p>Additional account settings and features are available here.</p></div></div>
+      <div class="dash-ios-more">
+        <div class="dash-ios-more__section">
+          <span class="dash-ios-more__title">Account</span>
+          <div class="dash-ios-more__list">
+            <a href="#wishlist" data-goto="wishlist" class="dash-ios-more__link"><i data-lucide="heart" class="icon-18"></i><span>Saved rides</span><i data-lucide="arrow-right" class="icon-14"></i></a>
+            <a href="#addresses" data-goto="addresses" class="dash-ios-more__link"><i data-lucide="map-pin-house" class="icon-18"></i><span>Delivery addresses</span><i data-lucide="arrow-right" class="icon-14"></i></a>
+            <a href="#support" data-goto="support" class="dash-ios-more__link"><i data-lucide="life-buoy" class="icon-18"></i><span>Support</span><i data-lucide="arrow-right" class="icon-14"></i></a>
+            <a href="#notifications" data-goto="notifications" class="dash-ios-more__link"><i data-lucide="bell" class="icon-18"></i><span>Notifications</span><span class="nav-count js-unread-count" hidden>0</span><i data-lucide="arrow-right" class="icon-14"></i></a>
+            <a href="#settings" data-goto="settings" class="dash-ios-more__link"><i data-lucide="settings-2" class="icon-18"></i><span>Settings</span><i data-lucide="arrow-right" class="icon-14"></i></a>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <div class="toast js-toast" role="status" aria-live="polite" aria-atomic="true"></div>
     <script type="module" src="/src/js/main.js"></script>
