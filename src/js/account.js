@@ -31,6 +31,7 @@ const A_CUST = 'soko-a-customers-v1';
 const A_SETTINGS = 'soko-a-settings-v1';
 
 export const money = (n) => '₦' + Number(n || 0).toLocaleString('en-NG');
+export const formatNGN = money;
 
 const load = (key, fallback) => {
   try { const v = localStorage.getItem(key); if (v) return JSON.parse(v); } catch (_) {}
@@ -137,6 +138,12 @@ export function ensureSeeded() {
   if (!load(A_SETTINGS, null)) {
     save(A_SETTINGS, { storeName: 'SOKO Moto', supportEmail: 'support@sokomoto.ng', gateway: 'Paystack', currency: '₦', taxRate: 7.5, ordersEnabled: true, lowStockThreshold: 6, notifyNewOrder: true, notifyLowStock: true });
   }
+  if (!load(VERIFY_KEY, null)) {
+    save(VERIFY_KEY, [
+      { ref: 'VR-4812', userId: 'u-demo', name: 'Chidi Okeke', phone: '+234 801 234 5678', email: 'chidi@example.com', model: 'SOKO 01 · Commuter', date: 'Monday, 12 October', slot: '11:00', created: '2026-10-06T09:15:00.000Z', status: 'booked' },
+      { ref: 'VR-4790', userId: null, name: 'Amara Eze', phone: '+234 809 441 2200', email: 'amara@example.com', model: 'SOKO Pro · Performance', date: 'Saturday, 10 October', slot: '09:30', created: '2026-10-05T14:20:00.000Z', status: 'booked' },
+    ]);
+  }
 }
 
 /* ── Auth ──────────────────────────────────────────────────────── */
@@ -217,6 +224,7 @@ export function deleteAccount() {
 /* ── Orders (user) ─────────────────────────────────────────────── */
 const allOrders = () => load(ORDERS_KEY, []);
 export const ordersFor = (userId) => allOrders().filter((o) => o.userId === userId);
+export const getOrders = ordersFor;
 function nextOrderId() {
   const ids = [...load(A_ORDERS, []), ...load(ORDERS_KEY, [])]
     .map((order) => Number(String(order.id || '').replace(/^ORD-/, '')))
@@ -395,6 +403,7 @@ const wishMap = () => load(WISHLIST_KEY, {});
 const wishIds = (userId) => (wishMap()[userId] || []);
 export const isWishlisted = (userId, pid) => wishIds(userId).includes(pid);
 export const wishlistProducts = (userId) => PRODUCTS.filter((p) => wishIds(userId).includes(p.id));
+export const getWishlistProducts = wishlistProducts;
 export function toggleWishlist(userId, pid) {
   const map = wishMap();
   const list = map[userId] || [];
@@ -485,6 +494,12 @@ export function registerBike(userId, { model, serial }) {
   save(GARAGE_KEY, map);
   return list;
 }
+export function removeBike(userId, bikeId) {
+  const map = load(GARAGE_KEY, {});
+  map[userId] = (map[userId] || []).filter((b) => b.id !== bikeId);
+  save(GARAGE_KEY, map);
+  return map[userId];
+}
 
 /* ── Support tickets ───────────────────────────────────────────── */
 export const getTickets = (userId) => (load(TICKETS_KEY, {})[userId]) || [];
@@ -505,6 +520,7 @@ export function pushNotif(userId, { title, body }) {
 
 /* ── Unit verification bookings (live video at the Guangzhou bench) ── */
 export const getVerifications = (userId) => load(VERIFY_KEY, []).filter((v) => !userId || v.userId === userId);
+export const adminVerifications = () => load(VERIFY_KEY, []);
 export function bookVerification({ name, phone, email, model, date, slot }) {
   const ref = 'VR-' + String(Math.floor(1000 + Math.random() * 9000));
   const u = currentUser();
@@ -512,6 +528,62 @@ export function bookVerification({ name, phone, email, model, date, slot }) {
   save(VERIFY_KEY, [rec, ...load(VERIFY_KEY, [])]);
   if (u) pushNotif(u.id, { title: `Verification booked · ${ref}`, body: `${model} on the Guangzhou bench, ${date} at ${slot} WAT. Your live link arrives by WhatsApp 10 minutes before.` });
   return rec;
+}
+export function updateVerificationStatus(ref, status) {
+  const list = load(VERIFY_KEY, []);
+  const item = list.find((v) => v.ref === ref);
+  if (item) {
+    item.status = status;
+    save(VERIFY_KEY, list);
+    if (item.userId) {
+      pushNotif(item.userId, {
+        title: `Bench verification ${status} · ${ref}`,
+        body: status === 'completed'
+          ? `Your 40-point video check for ${item.model} is complete and signed off.`
+          : `Your bench verification slot (${ref}) status is now ${status}.`,
+      });
+    }
+  }
+  return list;
+}
+export function cancelVerification(ref) {
+  return updateVerificationStatus(ref, 'cancelled');
+}
+export function adminTickets() {
+  const map = load(TICKETS_KEY, {});
+  const users = getUsers();
+  const out = [];
+  for (const [uidKey, tickets] of Object.entries(map)) {
+    const owner = users.find((u) => u.id === uidKey);
+    (Array.isArray(tickets) ? tickets : []).forEach((t) => {
+      out.push({
+        ...t,
+        userId: uidKey,
+        customer: owner?.name || 'Rider',
+        email: owner?.email || '',
+      });
+    });
+  }
+  return out.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+}
+export function setTicketStatus(ticketId, status) {
+  const map = load(TICKETS_KEY, {});
+  for (const [uidKey, tickets] of Object.entries(map)) {
+    if (!Array.isArray(tickets)) continue;
+    const found = tickets.find((t) => t.id === ticketId);
+    if (found) {
+      found.status = status;
+      save(TICKETS_KEY, map);
+      if (status === 'resolved') {
+        pushNotif(uidKey, {
+          title: `Support ticket resolved · ${found.subject}`,
+          body: 'The SOKO crew marked your support request as resolved.',
+        });
+      }
+      break;
+    }
+  }
+  return adminTickets();
 }
 export function markAllRead(userId) {
   const map = load(NOTIF_KEY, {});

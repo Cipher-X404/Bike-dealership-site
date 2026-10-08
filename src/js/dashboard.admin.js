@@ -1,719 +1,1170 @@
-/*
- * SOKO Moto — Workshop Control
- * A locally-persisted operations desk for the seeded prototype data.
- */
+/* ============================================================================
+   SOKO MOTO · WORKSHOP CONTROL (Admin Dashboard · iOS Spatial Edition)
+   Orders, stock, Guangzhou bench verifications, support tickets,
+   riders, analytics and store settings.
+   ============================================================================ */
+import { hydrateIcons } from '/src/js/icons.js';
 import {
-  currentUser, logout, money, ensureSeeded,
+  ensureSeeded, isAdmin, logout,
   adminKPIs, adminRevenue, adminOrdersTrend, orderStatuses,
   adminOrders, setOrderStatus,
   adminInventory, adjustAdminStock, updateAdminPrice, addAdminProduct, removeAdminProduct,
-  adminCustomers, adminLowStock, adminCategoryValue, adminStatusBreakdown, adminTopProducts,
-  getAdminSettings, setAdminSetting, resetAdminData,
+  adminCustomers, getAdminSettings, setAdminSetting, resetAdminData,
+  adminLowStock, adminCategoryValue, adminStatusBreakdown, adminTopProducts,
+  adminVerifications, updateVerificationStatus, adminTickets, setTicketStatus,
+  formatNGN,
 } from '/src/js/account.js';
-import { hydrateIcons } from '/src/js/icons.js';
-import { hydrateCartBadge } from '/src/js/badge.js';
 
-ensureSeeded();
-const user = currentUser();
-const isAdminUser = !!user && (user.role === 'admin' || user.isAdmin);
-const $ = (selector, root = document) => root.querySelector(selector);
-const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
-const esc = (value = '') => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
-const STATUSES = orderStatuses.filter((status) => status !== 'all');
-const VIEW_NAMES = {
-  overview: 'Overview', orders: 'Orders', inventory: 'Inventory',
-  customers: 'Customers', analytics: 'Analytics', settings: 'Settings',
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const VIEW_LABELS = {
+  overview: 'Overview',
+  orders: 'Orders',
+  inventory: 'Inventory',
+  customers: 'Customers',
+  analytics: 'Analytics',
+  settings: 'Settings',
 };
-const validView = (name) => Object.prototype.hasOwnProperty.call(VIEW_NAMES, name);
 
-let toastTimer;
-function toast(message) {
-  const target = $('.js-toast');
-  if (!target) return;
-  target.textContent = message;
-  target.classList.add('show');
+/* ── Apple HIG Physics Helpers (Rubber-band & Momentum Projection) ── */
+function rubberband(distance, dimension, constant = 0.55) {
+  if (dimension <= 0) return 0;
+  return (distance * dimension * constant) / (dimension + constant * Math.abs(distance));
+}
+
+function project(velocity, decelerationRate = 0.998) {
+  return (velocity / 1000) * decelerationRate / (1 - decelerationRate);
+}
+
+let toastTimer = null;
+function toast(msg) {
+  const el = $('.js-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('is-shown');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => target.classList.remove('show'), 2600);
+  toastTimer = setTimeout(() => el.classList.remove('is-shown'), 2800);
 }
 
-let activeModal;
-let modalReturnFocus;
-function closeModal() {
-  if (!activeModal) return;
-  activeModal.remove();
-  activeModal = null;
-  if (modalReturnFocus?.isConnected) modalReturnFocus.focus({ preventScroll: true });
-  modalReturnFocus = null;
-}
-function openModal(content, { label = 'Dialog' } = {}) {
-  closeModal();
-  modalReturnFocus = document.activeElement;
-  const overlay = document.createElement('div');
-  overlay.className = 'dash-modal';
-  overlay.setAttribute('role', 'presentation');
-  overlay.innerHTML = `<div class="dash-modal__card" role="dialog" aria-modal="true" aria-label="${esc(label)}" tabindex="-1">${content}</div>`;
-  overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) closeModal();
-  });
-  overlay.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      closeModal();
-      return;
+function startClock() {
+  const nodes = $$('.js-dash-clock');
+  if (!nodes.length) return;
+  const tick = () => {
+    try {
+      const text = new Intl.DateTimeFormat('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Africa/Lagos',
+      }).format(new Date());
+      nodes.forEach((n) => { n.textContent = text; });
+    } catch {
+      const d = new Date();
+      const fallback = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      nodes.forEach((n) => { n.textContent = fallback; });
     }
-    if (event.key !== 'Tab') return;
-    const focusable = $$('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled])', overlay);
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault(); last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault(); first.focus();
-    }
-  });
-  document.body.appendChild(overlay);
-  activeModal = overlay;
-  hydrateIcons(overlay);
-  requestAnimationFrame(() => $('.dash-modal__card', overlay)?.focus({ preventScroll: true }));
-  return overlay;
-}
-function confirmAction({ title, body, confirmText = 'Confirm', danger = false, onConfirm }) {
-  const modal = openModal(`
-    <div class="dash-modal__head"><h3>${esc(title)}</h3><button class="dash-modal__close" type="button" aria-label="Close dialog"><i data-lucide="x" class="icon-18"></i></button></div>
-    <p class="muted">${esc(body)}</p>
-    <div class="card-actions" style="margin-top:1.2rem">
-      <button class="btn ${danger ? 'btn--danger' : 'btn--primary'} js-modal-confirm" type="button">${esc(confirmText)}</button>
-      <button class="btn btn--quiet js-modal-cancel" type="button">Keep it</button>
-    </div>`, { label: title });
-  $('.dash-modal__close', modal).addEventListener('click', closeModal);
-  $('.js-modal-cancel', modal).addEventListener('click', closeModal);
-  $('.js-modal-confirm', modal).addEventListener('click', () => {
-    closeModal();
-    onConfirm?.();
-  });
-  return modal;
+  };
+  tick();
+  setInterval(tick, 30000);
 }
 
-/* ── Session gates ─────────────────────────────────────────────── */
-if (!user) {
-  $('.js-guest-guard').hidden = false;
-} else if (!isAdminUser) {
-  $('.js-not-admin-guard').hidden = false;
-} else {
-  $('.js-app').hidden = false;
-  const initials = String(user.name || 'Staff').split(/\s+/).map((word) => word[0]).slice(0, 2).join('').toUpperCase();
-  $('.js-user-initial').textContent = initials;
-  $('.js-user-name').textContent = user.name || 'Staff';
-  $('.js-user-email').textContent = user.email || '';
+/* ── iOS Dock Sliding Pill Indicator ────────────────────────────── */
+function syncDockPill() {
+  const nav = $('.dash-nav');
+  const pill = $('.js-dock-pill', nav || document);
+  const active = $('.dash-nav [data-view].is-active');
+  if (!nav || !pill || !active) return;
+  const navRect = nav.getBoundingClientRect();
+  const actRect = active.getBoundingClientRect();
+  if (navRect.width <= 0 || actRect.width <= 0) return;
+  const x = actRect.left - navRect.left + nav.scrollLeft;
+  const y = actRect.top - navRect.top + nav.scrollTop;
+  pill.style.width = `${actRect.width}px`;
+  pill.style.height = `${actRect.height}px`;
+  pill.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  pill.classList.add('is-ready');
+}
 
-  const tickClock = () => {
-    const clock = $('.js-dash-clock');
-    if (clock) clock.textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Lagos' });
-  };
-  tickClock();
-  setInterval(tickClock, 30000);
-
-  /* ── Navigation: the URL hash is the source of truth ─────────── */
-  function showView(name, { focus = false } = {}) {
-    if (!validView(name)) name = 'overview';
-    $$('.js-view').forEach((panel) => { panel.hidden = panel.dataset.viewPanel !== name; });
-    $$('.dash-nav [data-view]').forEach((link) => {
-      const active = link.dataset.view === name;
-      link.classList.toggle('is-active', active);
-      if (active) link.setAttribute('aria-current', 'page');
-      else link.removeAttribute('aria-current');
-    });
-    $('.js-view-title').textContent = VIEW_NAMES[name];
-    $('.js-view-path').textContent = name.toUpperCase();
-    if (focus) $('.js-view-title').focus({ preventScroll: true });
-    if (window.lenis) window.lenis.scrollTo(0, { immediate: true });
-    else window.scrollTo({ top: 0, behavior: 'smooth' });
+/* ── iOS Theme Appearance Toggle ───────────────────────────────── */
+function initTheme() {
+  const root = $('.dash');
+  if (!root) return;
+  const saved = localStorage.getItem('soko-admin-theme');
+  if (saved === 'light' || saved === 'dark') {
+    root.dataset.iosTheme = saved;
   }
-  function navigate(name, { replace = false, focus = false } = {}) {
-    if (!validView(name)) return;
-    const nextHash = `#${name}`;
-    if (window.location.hash !== nextHash) {
-      window.history[replace ? 'replaceState' : 'pushState']({ view: name }, '', nextHash);
-    }
-    showView(name, { focus });
-  }
-  document.addEventListener('click', (event) => {
-    const link = event.target.closest('[data-view], [data-goto]');
-    if (!link) return;
-    const destination = link.dataset.view || link.dataset.goto;
-    if (!validView(destination)) return;
-    event.preventDefault();
-    navigate(destination, { focus: true });
-  });
-  const syncViewFromLocation = () => showView((window.location.hash || '#overview').slice(1));
-  window.addEventListener('popstate', syncViewFromLocation);
-  window.addEventListener('hashchange', syncViewFromLocation);
-  navigate(validView((window.location.hash || '#overview').slice(1)) ? (window.location.hash || '#overview').slice(1) : 'overview', { replace: true });
-
-  /* ── Formatting + shared data helpers ───────────────────────── */
-  const cap = (value = '') => value ? value.charAt(0).toUpperCase() + value.slice(1) : '';
-  const cleanStatus = (status) => STATUSES.includes(status) ? status : 'paid';
-  const statusPill = (status) => `<span class="pill ${cleanStatus(status)}">${esc(cap(cleanStatus(status)))}</span>`;
-  const customerName = (order) => order.customer || 'Guest';
-  const itemCount = (order) => Array.isArray(order.items)
-    ? order.items.reduce((total, item) => total + Math.max(1, Number(item.qty) || 1), 0)
-    : Math.max(0, Number(order.items) || 0);
-  const formatDate = (value) => {
-    if (!value) return '—';
-    const date = new Date(`${value}T12:00:00`);
-    return Number.isNaN(date.getTime()) ? esc(value) : new Intl.DateTimeFormat('en-NG', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
-  };
-  const stockState = (stock) => {
-    const level = Number(getAdminSettings().lowStockThreshold ?? 6);
-    if (Number(stock) <= 0) return { key: 'out', label: 'Out' };
-    if (Number(stock) <= level) return { key: 'low', label: 'Low' };
-    return { key: 'in', label: 'In stock' };
-  };
-  const visibleOrders = () => {
-    const query = ($('.js-order-search')?.value || '').trim().toLowerCase();
-    const status = $('.js-order-status-filter')?.value || 'all';
-    return adminOrders().filter((order) => {
-      const text = `${order.id || ''} ${order.ref || ''} ${order.email || ''} ${customerName(order)}`.toLowerCase();
-      return (!query || text.includes(query)) && (status === 'all' || order.status === status);
+  const updateIcons = () => {
+    const isLight = root.dataset.iosTheme === 'light';
+    $$('.js-theme-toggle').forEach((btn) => {
+      btn.setAttribute('aria-label', isLight ? 'Switch to obsidian dark mode' : 'Switch to daylight mode');
+      btn.innerHTML = `<i data-lucide="${isLight ? 'moon' : 'sun'}" class="icon-14"></i>`;
+      hydrateIcons(btn);
     });
   };
-  const exportOrderRows = (orders) => orders.map((order) => ({
-    Order: order.id || '',
-    Reference: order.ref || '',
-    Customer: customerName(order),
-    Email: order.email || '',
-    Date: order.date || '',
-    Status: order.status || '',
-    'Total NGN': Number(order.total) || 0,
-    Items: itemCount(order),
-  }));
-
-  /* ── Revenue chart ──────────────────────────────────────────── */
-  function monthLabels(count) {
-    const labels = [];
-    const now = new Date();
-    for (let offset = count - 1; offset >= 0; offset -= 1) {
-      labels.push(new Intl.DateTimeFormat('en', { month: 'short' }).format(new Date(now.getFullYear(), now.getMonth() - offset, 1)));
-    }
-    return labels;
-  }
-  function revenueSVG(values) {
-    if (!values.length) return '<p class="chart-empty">No revenue points for this period.</p>';
-    const width = 680;
-    const height = 226;
-    const left = 58;
-    const right = 14;
-    const top = 16;
-    const bottom = 18;
-    const minimum = Math.min(...values);
-    const maximum = Math.max(...values);
-    const span = maximum - minimum || 1;
-    const x = (index) => left + index * ((width - left - right) / Math.max(1, values.length - 1));
-    const y = (value) => top + ((maximum - value) / span) * (height - top - bottom);
-    const points = values.map((value, index) => `${x(index).toFixed(1)},${y(value).toFixed(1)}`).join(' ');
-    const grid = [0, 0.5, 1].map((fraction) => {
-      const gy = top + fraction * (height - top - bottom);
-      const label = (maximum - fraction * span).toFixed(1);
-      return `<g><line x1="${left}" y1="${gy}" x2="${width - right}" y2="${gy}" class="gridline" /><text x="2" y="${gy + 4}" class="axis">₦${label}m</text></g>`;
-    }).join('');
-    return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Monthly revenue in millions of naira">
-      ${grid}
-      <polygon points="${left},${height - bottom} ${points} ${width - right},${height - bottom}" class="area" />
-      <polyline points="${points}" class="line" />
-      ${values.map((value, index) => `<circle cx="${x(index)}" cy="${y(value)}" r="3.5" class="dot"><title>${esc(monthLabels(values.length)[index])}: ₦${(value * 1000000).toLocaleString('en-NG')}</title></circle>`).join('')}
-    </svg>`;
-  }
-
-  /* ── Top-level state badges ─────────────────────────────────── */
-  function syncOperationalBadges() {
-    const orders = adminOrders();
-    const openCount = orders.filter((order) => ['paid', 'processing'].includes(order.status)).length;
-    $$('.js-open-count').forEach((badge) => { badge.textContent = String(openCount); });
-    const openChip = $('.js-open-chip');
-    if (openChip) {
-      openChip.hidden = openCount === 0;
-      openChip.setAttribute('aria-label', `${openCount} orders to move`);
-    }
-    const lowCount = adminLowStock().length;
-    const lowBadge = $('.js-low-stock-count');
-    if (lowBadge) {
-      lowBadge.textContent = String(lowCount);
-      lowBadge.hidden = lowCount === 0;
-    }
-    const isOpen = getAdminSettings().ordersEnabled !== false;
-    const stateLabel = $('.js-rail-store-state');
-    if (stateLabel) stateLabel.textContent = isOpen ? 'Store open' : 'Store paused';
-    $('.rail-status')?.classList.toggle('is-paused', !isOpen);
-    const enabledLabel = $('.js-enable-label');
-    if (enabledLabel) enabledLabel.textContent = isOpen ? 'Enabled' : 'Paused';
-  }
-
-  /* ── Overview ───────────────────────────────────────────────── */
-  function renderAlerts() {
-    const alerts = [];
-    const low = adminLowStock();
-    low.slice(0, 3).forEach((product) => {
-      const state = stockState(product.stock);
-      alerts.push({
-        title: `${state.key === 'out' ? 'Out of stock' : 'Low stock'} · ${product.name}`,
-        body: `${product.stock} ${product.stock === 1 ? 'unit' : 'units'} on hand. Review this shelf item.`,
-        tone: 'warn', destination: 'inventory', icon: 'boxes',
-      });
+  updateIcons();
+  $$('.js-theme-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const next = root.dataset.iosTheme === 'light' ? 'dark' : 'light';
+      root.dataset.iosTheme = next;
+      localStorage.setItem('soko-admin-theme', next);
+      updateIcons();
+      toast(`Workshop console set to ${next} mode.`);
     });
-    const open = adminOrders().filter((order) => ['paid', 'processing'].includes(order.status));
-    if (open.length) alerts.push({
-      title: `${open.length} order${open.length === 1 ? '' : 's'} need a hand-off`,
-      body: 'Open demo orders are waiting for fulfilment updates.',
-      tone: 'info', destination: 'orders', icon: 'package-check',
-    });
-    if (getAdminSettings().ordersEnabled === false) alerts.unshift({
-      title: 'Checkout is paused', body: 'The storefront will not accept new orders until it is reopened.',
-      tone: 'warn', destination: 'settings', icon: 'store',
-    });
-    const container = $('.js-alerts');
-    container.innerHTML = alerts.length ? alerts.map((alert) => `
-      <a class="notif notif--action" href="#${alert.destination}" data-goto="${alert.destination}">
-        <span class="notif__dot ${alert.tone}"></span>
-        <i class="notif__icon" data-lucide="${alert.icon}" aria-hidden="true"></i>
-        <span class="notif__body"><b>${esc(alert.title)}</b><small>${esc(alert.body)}</small></span>
-        <i data-lucide="arrow-up-right" class="icon-14 notif__arrow" aria-hidden="true"></i>
-      </a>`).join('') : `
-      <div class="notif notif--quiet"><span class="notif__dot ok"></span><span class="notif__body"><b>Floor is clear</b><small>No low-stock items or open orders need attention.</small></span></div>`;
-    hydrateIcons(container);
-  }
-  function renderOverview() {
-    const kpi = adminKPIs();
-    const cards = [
-      { label: 'Revenue · YTD', value: money(kpi.revenue), delta: `${kpi.revenueDelta >= 0 ? '+' : ''}${kpi.revenueDelta}% vs last year`, tone: kpi.revenueDelta >= 0 ? 'up' : 'down', icon: 'banknote' },
-      { label: 'Orders', value: Number(kpi.orders).toLocaleString('en-NG'), delta: `${kpi.ordersDelta >= 0 ? '+' : ''}${kpi.ordersDelta}% vs last month`, tone: kpi.ordersDelta >= 0 ? 'up' : 'down', icon: 'package' },
-      { label: 'Average order', value: money(kpi.aov), delta: `${kpi.aovDelta >= 0 ? '+' : ''}${kpi.aovDelta}% vs last month`, tone: kpi.aovDelta >= 0 ? 'up' : 'down', icon: 'trending-up' },
-      { label: 'Customers', value: Number(kpi.customers).toLocaleString('en-NG'), delta: `${Number(kpi.newCustomersLast30).toLocaleString('en-NG')} new in 30 days`, tone: 'up', icon: 'users-round' },
-    ];
-    $('.js-kpis').innerHTML = cards.map((card) => `
-      <article class="kpi"><span class="kpi__label"><i data-lucide="${card.icon}" class="icon-16" aria-hidden="true"></i>${esc(card.label)}</span>
-        <b class="kpi__value">${esc(card.value)}</b><span class="kpi__delta ${card.tone}">${esc(card.delta)}</span></article>`).join('');
+  });
+}
 
-    const count = Number($('.js-chart-range')?.value) || 6;
-    const revenue = adminRevenue(count);
-    $('.js-chart').innerHTML = revenueSVG(revenue);
-    $('.js-chart-months').innerHTML = monthLabels(revenue.length).map((month) => `<span>${esc(month)}</span>`).join('');
-    const trend = $('.js-revenue-delta');
-    if (trend) trend.textContent = `${kpi.revenueDelta >= 0 ? '+' : ''}${kpi.revenueDelta}%`;
-    const trendIcon = $('.revenue-meta__trend');
-    trendIcon?.classList.toggle('is-down', kpi.revenueDelta < 0);
-    const revenueValue = $('.revenue-meta__value');
-    if (revenueValue) revenueValue.textContent = `₦${(Number(kpi.revenue) / 1000000).toFixed(1)}m`;
+/* ── iOS Dynamic Island for Workshop Ops ───────────────────────── */
+function initDynamicIsland() {
+  const island = $('.js-dynamic-island');
+  const toggleBtn = $('.js-island-toggle');
+  const drawer = $('.js-island-drawer');
+  if (!island || !toggleBtn || !drawer) return;
 
-    const latest = adminOrders().slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 5);
-    $('.js-latest-orders tbody').innerHTML = latest.length ? latest.map((order) => `
-      <tr><td><b>${esc(order.id || order.ref || 'Order')}</b></td><td>${esc(customerName(order))}</td>
-        <td style="white-space:nowrap">${formatDate(order.date)}</td><td>${statusPill(order.status)}</td>
-        <td class="align-right"><b>${money(order.total)}</b></td>
-        <td class="align-right"><button class="chip-btn js-order-view" data-id="${esc(order.id)}" type="button" aria-label="View order ${esc(order.id)}"><i data-lucide="arrow-up-right" class="icon-14" aria-hidden="true"></i></button></td></tr>`).join('')
-      : '<tr><td colspan="6" class="muted">No orders yet.</td></tr>';
-    renderAlerts();
-    syncOperationalBadges();
-    hydrateIcons($('.js-kpis'));
-    hydrateIcons($('.js-latest-orders'));
-  }
+  const setExpanded = (open) => {
+    island.dataset.expanded = open ? 'true' : 'false';
+    toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    drawer.hidden = !open;
+  };
 
-  /* ── Orders desk: filters, bulk actions, detail and exports ──── */
-  let selectedOrders = new Set();
-  function syncBulkBar() {
-    const bar = $('.js-bulk-bar');
-    const count = selectedOrders.size;
-    bar.hidden = count === 0;
-    $('.js-bulk-count').textContent = `${count} selected`;
-    const visible = visibleOrders();
-    const selectedVisible = visible.filter((order) => selectedOrders.has(order.id)).length;
-    const selectAll = $('.js-check-all');
-    selectAll.checked = visible.length > 0 && selectedVisible === visible.length;
-    selectAll.indeterminate = selectedVisible > 0 && selectedVisible < visible.length;
-  }
-  function renderAdminOrders() {
-    const all = adminOrders();
-    const rows = visibleOrders();
-    const tbody = $('.js-admin-orders tbody');
-    tbody.innerHTML = rows.length ? rows.map((order) => `
-      <tr class="${selectedOrders.has(order.id) ? 'is-selected' : ''}">
-        <td><input type="checkbox" class="row-check" data-id="${esc(order.id)}" aria-label="Select ${esc(order.id)}" ${selectedOrders.has(order.id) ? 'checked' : ''} /></td>
-        <td><b>${esc(order.id || '—')}</b><small class="table-subline">${esc(order.ref || order.email || '')}</small></td>
-        <td>${esc(customerName(order))}</td><td>${itemCount(order)}</td><td style="white-space:nowrap">${formatDate(order.date)}</td>
-        <td><select class="select select--sm js-status-set" data-id="${esc(order.id)}" aria-label="Status for ${esc(order.id)}">${STATUSES.map((status) => `<option value="${status}" ${status === order.status ? 'selected' : ''}>${esc(cap(status))}</option>`).join('')}</select></td>
-        <td class="align-right"><b>${money(order.total)}</b></td>
-        <td class="align-right"><button class="chip-btn js-order-view" data-id="${esc(order.id)}" type="button" aria-label="View order ${esc(order.id)}"><i data-lucide="eye" class="icon-16" aria-hidden="true"></i></button></td>
-      </tr>`).join('') : '<tr><td colspan="8" class="muted">No orders match these filters.</td></tr>';
-    $('.js-admin-order-total').textContent = `${all.length} order${all.length === 1 ? '' : 's'}`;
-    $('.js-order-results').textContent = `Showing ${rows.length} of ${all.length} order${all.length === 1 ? '' : 's'}`;
-    syncBulkBar();
-    hydrateIcons(tbody);
-  }
-  function openOrderDetails(orderId) {
-    const order = adminOrders().find((item) => item.id === orderId);
-    if (!order) return;
-    const email = order.email ? `<a class="text-link" href="mailto:${esc(order.email)}">${esc(order.email)}</a>` : 'No email on file';
-    const shipping = order.address ? [order.address.line1, order.address.city, order.address.state].filter(Boolean).join(', ') : '';
-    const payment = order.paymentMethod === 'pod' ? 'Pay on delivery' : [order.paymentMethod, order.paymentGateway].filter(Boolean).join(' · ');
-    const modal = openModal(`
-      <div class="dash-modal__head"><div><p class="panel__eyebrow">Fulfilment record</p><h3>${esc(order.id || order.ref || 'Order')}</h3></div><button class="dash-modal__close" type="button" aria-label="Close dialog"><i data-lucide="x" class="icon-18"></i></button></div>
-      <dl class="detail-list">
-        <div class="detail-row"><dt>Rider</dt><dd>${esc(customerName(order))}</dd></div>
-        <div class="detail-row"><dt>Contact</dt><dd>${email}</dd></div>
-        <div class="detail-row"><dt>Placed</dt><dd>${formatDate(order.date)}</dd></div>
-        <div class="detail-row"><dt>Items</dt><dd>${itemCount(order)}</dd></div>
-        <div class="detail-row"><dt>Status</dt><dd>${statusPill(order.status)}</dd></div>
-        ${payment ? `<div class="detail-row"><dt>Payment</dt><dd>${esc(payment)} · simulated · no charge</dd></div>` : ''}
-        ${shipping ? `<div class="detail-row"><dt>Deliver to</dt><dd>${esc(shipping)}</dd></div>` : ''}
-        <div class="detail-row"><dt>Order total</dt><dd>${money(order.total)}</dd></div>
-      </dl>
-      <div class="order-status-actions"><span class="field-label">Move to</span><div class="card-actions">${STATUSES.map((status) => `<button class="chip-btn js-order-set" data-id="${esc(order.id)}" data-status="${status}" type="button" ${status === order.status ? 'aria-pressed="true" disabled' : ''}>${esc(cap(status))}</button>`).join('')}</div></div>`, { label: `Order ${order.id || ''}` });
-    $('.dash-modal__close', modal).addEventListener('click', closeModal);
-    $$('.js-order-set', modal).forEach((button) => button.addEventListener('click', () => {
-      setOrderStatus(button.dataset.id, button.dataset.status);
-      closeModal();
-      renderAdminOrders(); renderOverview(); renderAnalytics();
-      toast(`Order ${button.dataset.id} moved to ${button.dataset.status}.`);
-    }));
-  }
-  $('.js-order-search').addEventListener('input', renderAdminOrders);
-  $('.js-order-status-filter').addEventListener('change', renderAdminOrders);
-  $('.js-admin-orders tbody').addEventListener('change', (event) => {
-    const checkbox = event.target.closest('.row-check');
-    if (checkbox) {
-      if (checkbox.checked) selectedOrders.add(checkbox.dataset.id);
-      else selectedOrders.delete(checkbox.dataset.id);
-      renderAdminOrders();
-      return;
-    }
-    const statusSelect = event.target.closest('.js-status-set');
-    if (statusSelect) {
-      setOrderStatus(statusSelect.dataset.id, statusSelect.value);
-      toast(`${statusSelect.dataset.id} moved to ${statusSelect.value}.`);
-      renderAdminOrders(); renderOverview(); renderAnalytics();
-    }
-  });
-  $('.js-admin-orders tbody').addEventListener('click', (event) => {
-    const viewButton = event.target.closest('.js-order-view');
-    if (viewButton) openOrderDetails(viewButton.dataset.id);
-  });
-  $('.js-latest-orders tbody').addEventListener('click', (event) => {
-    const viewButton = event.target.closest('.js-order-view');
-    if (viewButton) openOrderDetails(viewButton.dataset.id);
-  });
-  $('.js-check-all').addEventListener('change', (event) => {
-    visibleOrders().forEach((order) => {
-      if (event.target.checked) selectedOrders.add(order.id);
-      else selectedOrders.delete(order.id);
-    });
-    renderAdminOrders();
-  });
-  $('.js-bulk-clear').addEventListener('click', () => {
-    selectedOrders.clear();
-    renderAdminOrders();
-  });
-  function applyBulkStatus(status) {
-    const picked = adminOrders().filter((order) => selectedOrders.has(order.id));
-    if (!picked.length) return;
-    const eligible = picked.filter((order) => {
-      if (status === 'cancelled') return !['cancelled', 'delivered'].includes(order.status);
-      if (status === 'delivered') return !['cancelled', 'delivered'].includes(order.status);
-      return true;
-    });
-    eligible.forEach((order) => setOrderStatus(order.id, status));
-    const skipped = picked.length - eligible.length;
-    selectedOrders.clear();
-    renderAdminOrders(); renderOverview(); renderAnalytics();
-    toast(`${eligible.length} order${eligible.length === 1 ? '' : 's'} updated${skipped ? ` · ${skipped} already closed` : ''}.`);
-  }
-  $('.js-bulk-cancel').addEventListener('click', () => applyBulkStatus('cancelled'));
-  $('.js-bulk-deliver').addEventListener('click', () => applyBulkStatus('delivered'));
-  $('.js-order-export-go').addEventListener('click', () => {
-    const mode = $('.js-order-export').value;
-    if (mode === 'print') {
-      window.print();
-      return;
-    }
-    const rows = mode === 'csv-open'
-      ? adminOrders().filter((order) => ['paid', 'processing'].includes(order.status))
-      : mode === 'csv-visible' ? visibleOrders() : adminOrders();
-    if (downloadCSV('soko-orders.csv', exportOrderRows(rows))) toast(`${rows.length} order${rows.length === 1 ? '' : 's'} exported.`);
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setExpanded(island.dataset.expanded !== 'true');
   });
 
-  /* ── Inventory desk ────────────────────────────────────────── */
-  function renderInventory() {
-    const inventory = adminInventory();
-    const query = ($('.js-inv-search').value || '').trim().toLowerCase();
-    const category = $('.js-inv-category-filter').value || 'all';
-    const rows = inventory.filter((product) => {
-      const matchesQuery = !query || `${product.name} ${product.sku || ''} ${product.cat || ''}`.toLowerCase().includes(query);
-      const matchesCategory = category === 'all' || product.cat === category;
-      return matchesQuery && matchesCategory;
-    });
-    $('.js-inventory-total').textContent = `${inventory.length} product${inventory.length === 1 ? '' : 's'}`;
-    $('.js-inventory-low-summary').textContent = `${adminLowStock().length} product${adminLowStock().length === 1 ? '' : 's'}`;
-    $('.js-inv-note').textContent = rows.length
-      ? `Showing ${rows.length} of ${inventory.length} product${inventory.length === 1 ? '' : 's'} · price and stock changes save instantly.`
-      : `No catalogue items match “${query || category}”.`;
-    $('.js-admin-inventory tbody').innerHTML = rows.length ? rows.map((product) => {
-      const stock = stockState(product.stock);
-      const image = product.img || '/images/accessory-helmet.webp';
-      return `<tr>
-        <td><div class="prod-cell"><img src="${esc(image)}" alt="" loading="lazy" /><div><b>${esc(product.name)}</b><small>${esc(product.cat || 'Accessory')} · ${esc(product.sku || 'No SKU')}</small></div></div></td>
-        <td><label class="sr-only" for="price-${esc(product.id)}">Price for ${esc(product.name)}</label><input id="price-${esc(product.id)}" class="mini-input js-price" type="number" inputmode="numeric" min="0" step="100" data-id="${esc(product.id)}" value="${Number(product.price) || 0}" /></td>
-        <td><div class="stock-stepper"><button class="js-stock-minus" data-id="${esc(product.id)}" type="button" aria-label="Decrease ${esc(product.name)} stock"><i data-lucide="minus" class="icon-14"></i></button><span class="js-stock-num" data-id="${esc(product.id)}">${Number(product.stock) || 0}</span><button class="js-stock-plus" data-id="${esc(product.id)}" type="button" aria-label="Increase ${esc(product.name)} stock"><i data-lucide="plus" class="icon-14"></i></button></div></td>
-        <td><span class="pill ${stock.key}">${stock.label}</span></td><td>${Number(product.sold) || 0}</td>
-        <td class="align-right"><button class="chip-btn js-product-remove" data-id="${esc(product.id)}" type="button" aria-label="Remove ${esc(product.name)}"><i data-lucide="trash-2" class="icon-14"></i><span>Remove</span></button></td>
-      </tr>`;
-    }).join('') : '<tr><td colspan="6" class="muted">No products match these filters.</td></tr>';
-    hydrateIcons($('.js-admin-inventory'));
-    syncOperationalBadges();
+  document.addEventListener('click', (e) => {
+    if (island.dataset.expanded === 'true' && !island.contains(e.target)) {
+      setExpanded(false);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && island.dataset.expanded === 'true') {
+      setExpanded(false);
+    }
+  });
+
+  $('.js-quick-toggle-store')?.addEventListener('click', () => {
+    const cur = getAdminSettings().ordersEnabled !== false;
+    setAdminSetting('ordersEnabled', !cur);
+    renderAll();
+    toast(!cur ? 'Storefront checkout reopened.' : 'Storefront checkout paused.');
+  });
+}
+
+/* ── iOS Draggable Sheet Modal System ──────────────────────────── */
+let activeModalCleanup = null;
+function closeActiveModal() {
+  if (activeModalCleanup) activeModalCleanup();
+}
+
+function attachSheetDrag(modal, card) {
+  const handle = $('.ios-sheet__grabber-area', card);
+  if (!handle) return;
+  let startY = 0;
+  let currentY = 0;
+  let lastY = 0;
+  let lastT = 0;
+  let velocity = 0;
+  let dragging = false;
+
+  handle.addEventListener('pointerdown', (e) => {
+    if (e.button && e.button !== 0) return;
+    dragging = true;
+    startY = e.clientY;
+    lastY = e.clientY;
+    lastT = performance.now();
+    velocity = 0;
+    card.style.transition = 'none';
+    try { handle.setPointerCapture(e.pointerId); } catch {}
+  });
+
+  handle.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const now = performance.now();
+    const dt = now - lastT;
+    const dy = e.clientY - startY;
+    if (dt > 0) velocity = ((e.clientY - lastY) / dt) * 1000;
+    lastY = e.clientY;
+    lastT = now;
+    currentY = dy < 0 ? -rubberband(-dy, 180) : dy;
+    card.style.transform = `translate3d(0, ${currentY}px, 0)`;
+  });
+
+  const finishDrag = () => {
+    if (!dragging) return;
+    dragging = false;
+    card.style.transition = 'transform 360ms cubic-bezier(0.32, 0.72, 0, 1), opacity 240ms ease';
+    const projected = currentY + project(velocity, 0.996);
+    if (projected > 130 || velocity > 950) {
+      card.style.transform = 'translate3d(0, 100%, 0)';
+      card.style.opacity = '0';
+      setTimeout(() => closeActiveModal(), 180);
+    } else {
+      card.style.transform = '';
+    }
+  };
+
+  handle.addEventListener('pointerup', finishDrag);
+  handle.addEventListener('pointercancel', finishDrag);
+}
+
+function openModal(html, { wide = false } = {}) {
+  closeActiveModal();
+  const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const m = document.createElement('div');
+  m.className = 'dash-modal';
+  m.setAttribute('role', 'dialog');
+  m.setAttribute('aria-modal', 'true');
+  m.innerHTML = `
+    <div class="dash-modal__card${wide ? ' dash-modal__card--wide' : ''}">
+      <div class="ios-sheet__grabber-area" aria-hidden="true"><span class="ios-sheet__grabber"></span></div>
+      <button class="dash-modal__close" type="button" aria-label="Close dialog">&times;</button>
+      ${html}
+    </div>
+  `;
+  const onKey = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeActiveModal();
+    }
+  };
+  activeModalCleanup = () => {
+    document.removeEventListener('keydown', onKey);
+    m.remove();
+    activeModalCleanup = null;
+    if (trigger && document.contains(trigger)) trigger.focus();
+  };
+  m.addEventListener('click', (e) => {
+    if (e.target === m || e.target.closest('.dash-modal__close')) closeActiveModal();
+  });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(m);
+  hydrateIcons(m);
+  const card = $('.dash-modal__card', m);
+  if (card) attachSheetDrag(m, card);
+  const heading = $('h3, h2', m);
+  if (heading && !heading.id) heading.id = 'dash-modal-title';
+  if (heading) m.setAttribute('aria-labelledby', heading.id);
+  const focusTarget = $('input, select, textarea, .btn--primary, .dash-modal__close', m);
+  focusTarget?.focus();
+  return m;
+}
+
+function activateView(name, { focusHeading = false } = {}) {
+  const valid = Object.prototype.hasOwnProperty.call(VIEW_LABELS, name) ? name : 'overview';
+  $$('[data-view-panel]').forEach((p) => {
+    const isTarget = p.dataset.viewPanel === valid;
+    p.hidden = !isTarget;
+    if (isTarget) {
+      p.classList.remove('is-entering');
+      void p.offsetWidth;
+      p.classList.add('is-entering');
+    }
+  });
+  $$('.dash-nav [data-view]').forEach((a) => {
+    const active = a.dataset.view === valid;
+    a.classList.toggle('is-active', active);
+    if (active) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  });
+  const label = VIEW_LABELS[valid] || 'Overview';
+  const title = $('.js-view-title');
+  const path = $('.js-view-path');
+  if (title) title.textContent = label;
+  if (path) path.textContent = label.toUpperCase();
+  if (focusHeading && title) title.focus({ preventScroll: true });
+  requestAnimationFrame(syncDockPill);
+}
+
+function syncChromeCounts() {
+  const openOrders = adminOrders().filter((o) => o.status === 'paid' || o.status === 'processing').length;
+  const lowStock = adminLowStock().length;
+  const verifications = adminVerifications().filter((v) => v.status === 'booked').length;
+  const openTickets = adminTickets().filter((t) => t.status !== 'resolved').length;
+  const settings = getAdminSettings();
+  const enabled = settings.ordersEnabled !== false;
+
+  const openCount = $('.js-open-count');
+  if (openCount) openCount.textContent = String(openOrders);
+
+  const islandOpen = $('.js-island-open-num');
+  if (islandOpen) islandOpen.textContent = String(openOrders);
+
+  const lowCount = $('.js-low-stock-count');
+  if (lowCount) {
+    lowCount.textContent = String(lowStock);
+    lowCount.hidden = lowStock <= 0;
   }
-  $('.js-inv-search').addEventListener('input', renderInventory);
-  $('.js-inv-category-filter').addEventListener('change', renderInventory);
-  $('.js-admin-inventory tbody').addEventListener('click', (event) => {
-    const plus = event.target.closest('.js-stock-plus');
-    const minus = event.target.closest('.js-stock-minus');
-    if (plus || minus) {
-      adjustAdminStock((plus || minus).dataset.id, plus ? 1 : -1);
-      renderInventory(); renderOverview(); renderAnalytics();
-      return;
-    }
-    const remove = event.target.closest('.js-product-remove');
-    if (remove) {
-      const product = adminInventory().find((item) => item.id === remove.dataset.id);
-      if (!product) return;
-      confirmAction({
-        title: 'Remove this product?',
-        body: `${product.name} will be removed from the local inventory and analytics. This cannot be undone except by resetting demo data.`,
-        confirmText: 'Remove product', danger: true,
-        onConfirm: () => {
-          removeAdminProduct(product.id);
-          renderInventory(); renderOverview(); renderAnalytics();
-          toast(`${product.name} removed from the catalogue.`);
-        },
-      });
-    }
-  });
-  $('.js-admin-inventory tbody').addEventListener('change', (event) => {
-    const priceInput = event.target.closest('.js-price');
-    if (!priceInput) return;
-    const nextPrice = Number(priceInput.value);
-    const product = adminInventory().find((item) => item.id === priceInput.dataset.id);
-    if (!product) return;
-    if (!Number.isFinite(nextPrice) || nextPrice < 0 || priceInput.value.trim() === '') {
-      priceInput.value = String(product.price);
-      toast('Enter a valid price of ₦0 or more.');
-      return;
-    }
-    updateAdminPrice(product.id, nextPrice);
-    toast(`${product.name} price updated.`);
-    renderAnalytics();
-  });
-  $('.js-product-add').addEventListener('click', () => {
-    const modal = openModal(`
-      <div class="dash-modal__head"><div><p class="panel__eyebrow">Add to the range</p><h3>New product</h3></div><button class="dash-modal__close" type="button" aria-label="Close dialog"><i data-lucide="x" class="icon-18"></i></button></div>
-      <form class="js-product-form" novalidate>
-        <div class="dash-view__grid" style="gap:1rem">
-          <div class="field"><label for="new-product-name">Product name</label><input class="input js-p-name" id="new-product-name" maxlength="80" placeholder="SOKO 05 · Touring" required /></div>
-          <div class="field"><label for="new-product-category">Category</label><select class="select js-p-cat" id="new-product-category"><option>Commuter</option><option>Delivery</option><option>Adventure</option><option>Performance</option><option>Accessory</option><option>Cargo</option><option>Off-road</option></select></div>
-          <div class="field"><label for="new-product-price">Price · NGN</label><input class="input js-p-price" id="new-product-price" type="number" min="1" step="100" inputmode="numeric" placeholder="1350000" required /></div>
-          <div class="field"><label for="new-product-stock">Opening stock</label><input class="input js-p-stock" id="new-product-stock" type="number" min="0" step="1" inputmode="numeric" value="0" required /></div>
-          <div class="field"><label for="new-product-sku">SKU <span class="muted">(optional)</span></label><input class="input js-p-sku" id="new-product-sku" maxlength="32" placeholder="Auto-generated if blank" /></div>
-          <div class="field"><label for="new-product-image">Product image</label><select class="select js-p-image" id="new-product-image"><option value="/images/accessory-helmet.webp">Helmet / accessory</option><option value="/images/bike-commuter.webp">Commuter bike</option><option value="/images/bike-commuter-side.webp">Deluxe bike</option><option value="/images/bike-delivery.webp">Cargo bike</option><option value="/images/bike-adventure.webp">Trail bike</option></select></div>
+
+  const openChip = $('.js-open-chip');
+  if (openChip) {
+    openChip.innerHTML = `<i class="top-chip__dot" aria-hidden="true"></i> ${openOrders} open order${openOrders === 1 ? '' : 's'}`;
+  }
+
+  const storeState = $('.js-rail-store-state');
+  const led = $('.rail-status__led');
+  if (storeState) storeState.textContent = enabled ? 'Store open' : 'Store paused';
+  if (led) led.classList.toggle('is-paused', !enabled);
+
+  const toggleStoreLabel = $('.js-quick-toggle-store-label');
+  if (toggleStoreLabel) toggleStoreLabel.textContent = enabled ? 'Pause checkout' : 'Reopen checkout';
+
+  const activityEl = $('.js-island-activity');
+  if (activityEl) {
+    activityEl.innerHTML = `
+      <div class="ios-live-card ios-live-card--admin">
+        <div class="ios-live-card__metrics">
+          <div><span>Open orders</span><strong>${openOrders}</strong></div>
+          <div><span>Low stock</span><strong>${lowStock}</strong></div>
+          <div><span>Bench checks</span><strong>${verifications}</strong></div>
+          <div><span>Open tickets</span><strong>${openTickets}</strong></div>
         </div>
-        <p class="form-error js-product-error" role="alert" hidden></p>
-        <div class="card-actions" style="margin-top:1rem"><button class="btn btn--primary js-p-save" type="submit"><i data-lucide="plus" class="icon-16"></i> Add product</button><button class="btn btn--quiet js-product-cancel" type="button">Cancel</button></div>
-      </form>`, { label: 'Add a product' });
-    $('.dash-modal__close', modal).addEventListener('click', closeModal);
-    $('.js-product-cancel', modal).addEventListener('click', closeModal);
-    $('.js-product-form', modal).addEventListener('submit', (event) => {
-      event.preventDefault();
-      const name = $('.js-p-name', modal).value.trim();
-      const priceText = $('.js-p-price', modal).value.trim();
-      const stockText = $('.js-p-stock', modal).value.trim();
-      const price = Number(priceText);
-      const stock = Number(stockText);
-      const sku = $('.js-p-sku', modal).value.trim();
-      const error = $('.js-product-error', modal);
-      const skuExists = sku && adminInventory().some((product) => String(product.sku || '').toLowerCase() === sku.toLowerCase());
-      let message = '';
-      if (!name) message = 'Add a name so the team can identify this product.';
-      else if (!priceText || !Number.isFinite(price) || price <= 0) message = 'Enter a price greater than zero.';
-      else if (!stockText || !Number.isInteger(stock) || stock < 0) message = 'Opening stock must be a whole number of zero or more.';
-      else if (skuExists) message = 'That SKU is already in use.';
-      if (message) {
-        error.textContent = message;
-        error.hidden = false;
-        return;
-      }
-      addAdminProduct({ name, category: $('.js-p-cat', modal).value, price, stock, sku, img: $('.js-p-image', modal).value });
-      closeModal();
-      renderInventory(); renderOverview(); renderAnalytics();
-      toast(`${name} added to inventory.`);
+      </div>
+    `;
+  }
+}
+
+function init() {
+  ensureSeeded();
+  const guard = $('.js-not-admin-guard');
+  const app = $('.js-app');
+  if (!isAdmin()) {
+    if (guard) guard.hidden = false;
+    if (app) app.hidden = true;
+    hydrateIcons();
+    return;
+  }
+  if (guard) guard.hidden = true;
+  if (app) app.hidden = false;
+
+  initTheme();
+  initDynamicIsland();
+
+  $$('.dash-nav [data-view]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = a.dataset.view;
+      history.replaceState(null, '', '#' + target);
+      activateView(target, { focusHeading: true });
     });
   });
 
-  /* ── Rider book ────────────────────────────────────────────── */
-  function renderCustomers() {
-    const query = ($('.js-cust-search').value || '').trim().toLowerCase();
-    const sort = $('.js-cust-sort').value;
-    const all = adminCustomers();
-    let list = all.filter((customer) => `${customer.name || ''} ${customer.email || ''} ${customer.city || ''}`.toLowerCase().includes(query));
-    if (sort === 'spend') list.sort((a, b) => Number(b.spend) - Number(a.spend));
-    else if (sort === 'orders') list.sort((a, b) => Number(b.orders) - Number(a.orders));
-    else if (sort === 'recent') list.sort((a, b) => String(b.joined || '').localeCompare(String(a.joined || '')));
-    $('.js-customer-count').textContent = `${all.length} rider${all.length === 1 ? '' : 's'} · ${list.length} shown`;
-    $('.js-admin-customers tbody').innerHTML = list.length ? list.map((customer) => `
-      <tr><td><div class="customer-cell"><span class="avatar" aria-hidden="true">${esc(String(customer.name || 'R').trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase())}</span><span><b>${esc(customer.name || 'Rider')}</b><small>${esc(customer.email || 'No email on file')}</small></span></div></td>
-        <td>${esc(customer.city || '—')}</td><td>${Number(customer.orders) || 0}</td><td class="align-right"><b>${money(customer.spend)}</b></td><td style="white-space:nowrap">${formatDate(customer.joined)}</td>
-        <td class="align-right">${customer.email ? `<a class="chip-btn js-customer-email" href="mailto:${esc(customer.email)}" aria-label="Email ${esc(customer.name)}"><i data-lucide="mail" class="icon-14" aria-hidden="true"></i><span>Email</span></a>` : '<span class="muted">—</span>'}<button class="chip-btn js-customer-view" data-email="${esc(customer.email || '')}" data-name="${esc(customer.name || '')}" type="button" aria-label="View ${esc(customer.name)}"><i data-lucide="arrow-up-right" class="icon-14" aria-hidden="true"></i></button></td></tr>`).join('')
-      : '<tr><td colspan="6" class="muted">No riders match this search.</td></tr>';
-    hydrateIcons($('.js-admin-customers'));
-  }
-  function openCustomerDetails(email, name) {
-    const customer = adminCustomers().find((item) => item.email === email || item.name === name);
-    if (!customer) return;
-    const relatedOrders = adminOrders().filter((order) => (email && order.email === email) || order.customer === customer.name);
-    const emailAction = customer.email ? `<a class="btn btn--primary" href="mailto:${esc(customer.email)}"><i data-lucide="mail" class="icon-16"></i> Email rider</a>` : '';
-    const modal = openModal(`
-      <div class="dash-modal__head"><div><p class="panel__eyebrow">Rider record</p><h3>${esc(customer.name)}</h3></div><button class="dash-modal__close" type="button" aria-label="Close dialog"><i data-lucide="x" class="icon-18"></i></button></div>
-      <dl class="detail-list"><div class="detail-row"><dt>Email</dt><dd>${customer.email ? `<a href="mailto:${esc(customer.email)}">${esc(customer.email)}</a>` : '—'}</dd></div>
-        <div class="detail-row"><dt>City</dt><dd>${esc(customer.city || '—')}</dd></div><div class="detail-row"><dt>Joined</dt><dd>${formatDate(customer.joined)}</dd></div>
-        <div class="detail-row"><dt>Orders</dt><dd>${Number(customer.orders) || 0}</dd></div><div class="detail-row"><dt>Lifetime spend</dt><dd>${money(customer.spend)}</dd></div></dl>
-      <h4 class="modal-section-title">Recent order activity</h4>
-      ${relatedOrders.length ? `<ul class="customer-order-list">${relatedOrders.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).slice(0, 4).map((order) => `<li><span><b>${esc(order.id || order.ref)}</b><small>${formatDate(order.date)} · ${esc(cap(cleanStatus(order.status)))}</small></span><b>${money(order.total)}</b></li>`).join('')}</ul>` : '<p class="muted">No orders in this sample ledger.</p>'}
-      ${emailAction ? `<div class="card-actions" style="margin-top:1rem">${emailAction}</div>` : ''}`, { label: `Rider ${customer.name}` });
-    $('.dash-modal__close', modal).addEventListener('click', closeModal);
-  }
-  $('.js-cust-search').addEventListener('input', renderCustomers);
-  $('.js-cust-sort').addEventListener('change', renderCustomers);
-  $('.js-admin-customers tbody').addEventListener('click', (event) => {
-    const button = event.target.closest('.js-customer-view');
-    if (button) openCustomerDetails(button.dataset.email, button.dataset.name);
+  document.addEventListener('click', (e) => {
+    const goto = e.target.closest('[data-goto]');
+    if (!goto) return;
+    e.preventDefault();
+    const target = goto.dataset.goto;
+    history.replaceState(null, '', '#' + target);
+    activateView(target, { focusHeading: true });
+    const island = $('.js-dynamic-island');
+    if (island && island.dataset.expanded === 'true') {
+      island.dataset.expanded = 'false';
+      const drawer = $('.js-island-drawer');
+      if (drawer) drawer.hidden = true;
+    }
   });
 
-  /* ── Analytics ─────────────────────────────────────────────── */
-  const horizontalBar = (fraction, label, value, tone = '') => `
-    <div class="h-bar ${tone}"><div class="h-bar__label"><span>${esc(label)}</span><b>${esc(value)}</b></div>
-      <div class="h-bar__track"><i style="width:${Math.max(1, Math.min(100, Math.round(fraction * 100)))}%"></i></div></div>`;
-  function renderAnalytics() {
-    const windowSize = Number($('.js-trend-range').value) || 12;
-    const trend = adminOrdersTrend().slice(-windowSize);
-    const max = Math.max(1, ...trend.map((point) => point.v));
-    $('.js-trend-chart').innerHTML = trend.length ? trend.map((point) => `
-      <div class="bar-col" title="${esc(point.w)} · index ${point.v}"><i class="bar" style="height:${Math.max(4, Math.round((point.v / max) * 100))}%"></i><span class="bar-label">${esc(point.w)}</span></div>`).join('')
-      : '<p class="muted">No order activity to chart yet.</p>';
-
-    const statuses = adminStatusBreakdown();
-    const total = statuses.reduce((sum, item) => sum + item.count, 0);
-    $('.js-status-break').innerHTML = statuses.length ? statuses.map((item) => horizontalBar(total ? item.count / total : 0, cap(item.status), `${item.count} · ${item.pct}%`, item.status)).join('') : '<p class="muted">No order status data yet.</p>';
-
-    const categories = adminCategoryValue();
-    const categoryMax = Math.max(1, ...categories.map((item) => item.value));
-    $('.js-cat-value').innerHTML = categories.length ? categories.map((item) => horizontalBar(item.value / categoryMax, item.name, money(item.value))).join('') : '<p class="muted">No inventory value to report yet.</p>';
-
-    const products = adminTopProducts();
-    const productMax = Math.max(1, ...products.map((item) => item.sold));
-    $('.js-top-products').innerHTML = products.length ? products.map((item) => horizontalBar(item.sold / productMax, item.name, `${item.sold} sold`)).join('') : '<p class="muted">Product activity will appear here.</p>';
-  }
-  $('.js-trend-range').addEventListener('change', renderAnalytics);
-
-  /* ── Store settings ────────────────────────────────────────── */
-  function renderSettings() {
-    const settings = getAdminSettings();
-    $('.js-set-gateway').value = settings.gateway || 'Paystack';
-    $('.js-set-currency').value = settings.currency || '₦';
-    $('.js-set-low').value = String(settings.lowStockThreshold ?? 6);
-    $('.js-set-tax').value = String(settings.taxRate ?? 7.5);
-    $('.js-set-enable').checked = settings.ordersEnabled !== false;
-    $('.js-settings-state').textContent = 'Changes are saved when you choose Save settings.';
-    syncOperationalBadges();
-  }
-  const settingsForm = $('.js-admin-settings');
-  settingsForm.addEventListener('input', () => { $('.js-settings-state').textContent = 'Unsaved changes'; });
-  settingsForm.addEventListener('change', () => { $('.js-settings-state').textContent = 'Unsaved changes'; });
-  settingsForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const lowText = $('.js-set-low').value.trim();
-    const taxText = $('.js-set-tax').value.trim();
-    const low = Number(lowText);
-    const tax = Number(taxText);
-    if (!lowText || !Number.isInteger(low) || low < 0 || low > 999) {
-      $('.js-set-low').focus(); toast('Low-stock alert must be a whole number from 0 to 999.'); return;
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.js-open-spotlight')) {
+      e.preventDefault();
+      openSpotlightModal();
     }
-    if (!taxText || !Number.isFinite(tax) || tax < 0 || tax > 100) {
-      $('.js-set-tax').focus(); toast('Tax rate must be between 0 and 100 percent.'); return;
-    }
-    setAdminSetting('gateway', $('.js-set-gateway').value);
-    setAdminSetting('currency', $('.js-set-currency').value);
-    setAdminSetting('lowStockThreshold', low);
-    setAdminSetting('taxRate', tax);
-    setAdminSetting('ordersEnabled', $('.js-set-enable').checked);
-    $('.js-settings-state').textContent = 'Saved just now.';
-    renderInventory(); renderOverview(); renderAnalytics();
-    toast('Store settings saved.');
   });
-  $('.js-csv-download').addEventListener('click', () => {
-    if (downloadCSV('soko-orders.csv', exportOrderRows(adminOrders()))) toast('All order records exported.');
-  });
-  $('.js-admin-reset').addEventListener('click', () => confirmAction({
-    title: 'Reset store data?',
-    body: 'Orders, inventory, customer records and store settings will return to the original seeded state. Member accounts and personal rider data stay untouched.',
-    confirmText: 'Reset demo data', danger: true,
-    onConfirm: () => {
-      resetAdminData();
-      selectedOrders.clear();
-      renderAll();
-      toast('Demo store data restored.');
-    },
-  }));
 
-  /* ── CSV export ────────────────────────────────────────────── */
-  function downloadCSV(filename, rows) {
-    if (!rows.length) {
-      toast('There are no rows to export for that selection.');
-      return false;
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      openSpotlightModal();
     }
-    const headers = Object.keys(rows[0]);
-    const csvCell = (value) => {
-      let text = String(value ?? '');
-      if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
-      return `"${text.replace(/"/g, '""')}"`;
-    };
-    const content = `\uFEFF${[headers.map(csvCell).join(','), ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(','))].join('\r\n')}`;
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = filename;
-    anchor.hidden = true;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    return true;
-  }
+  });
 
-  /* ── Sign out + first paint ────────────────────────────────── */
-  $$('[data-logout]').forEach((button) => button.addEventListener('click', (event) => {
-    event.preventDefault();
-    sessionStorage.setItem('soko-redirect', '/pages/admin.html');
+  window.addEventListener('resize', () => requestAnimationFrame(syncDockPill));
+
+  const initial = (location.hash || '#overview').slice(1);
+  activateView(initial);
+
+  $$('[data-logout]').forEach((b) => b.addEventListener('click', () => {
     logout();
-    window.location.href = '/pages/login.html';
+    location.href = '/';
   }));
 
-  function renderAll() {
-    renderOverview();
-    renderAdminOrders();
-    renderInventory();
-    renderCustomers();
-    renderAnalytics();
-    renderSettings();
-    hydrateIcons();
-  }
+  startClock();
   renderAll();
 }
 
-hydrateCartBadge();
-hydrateIcons();
+function renderAll() {
+  syncChromeCounts();
+  renderOverview();
+  renderOrders();
+  renderInventory();
+  renderCustomers();
+  renderAnalytics();
+  renderSettings();
+  hydrateIcons();
+  requestAnimationFrame(syncDockPill);
+}
+
+/* ── Overview ──────────────────────────────────────────────────── */
+function renderOverview() {
+  const k = adminKPIs();
+  const kpiHost = $('.js-kpis');
+  if (kpiHost) {
+    kpiHost.innerHTML = `
+      <div class="kpi">
+        <div class="kpi__top"><span class="kpi__label">Revenue · YTD</span><span class="kpi__icon kpi__icon--orange"><i data-lucide="banknote" class="icon-16"></i></span></div>
+        <div class="kpi__val">${formatNGN(k.revenue)}</div>
+        <div class="kpi__delta"><i data-lucide="trending-up" class="icon-14"></i> +${k.revenueDelta}% vs prior period</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__top"><span class="kpi__label">Orders</span><span class="kpi__icon kpi__icon--blue"><i data-lucide="clipboard-list" class="icon-16"></i></span></div>
+        <div class="kpi__val">${k.orders}</div>
+        <div class="kpi__delta"><i data-lucide="trending-up" class="icon-14"></i> +${k.ordersDelta}% vs prior period</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__top"><span class="kpi__label">Average order</span><span class="kpi__icon kpi__icon--green"><i data-lucide="receipt-text" class="icon-16"></i></span></div>
+        <div class="kpi__val">${formatNGN(k.aov)}</div>
+        <div class="kpi__delta ${k.aovDelta < 0 ? 'is-down' : ''}">${k.aovDelta > 0 ? '+' : ''}${k.aovDelta}% · Mix includes spares</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__top"><span class="kpi__label">Customers</span><span class="kpi__icon kpi__icon--pink"><i data-lucide="users" class="icon-16"></i></span></div>
+        <div class="kpi__val">${k.customers}</div>
+        <div class="kpi__delta">+${k.newCustomersLast30} in the last 30 days</div>
+      </div>
+    `;
+  }
+
+  const drawRevenue = (n) => {
+    const data = adminRevenue(n);
+    const months = ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'].slice(-n);
+    const max = Math.max(...data) * 1.15;
+    const W = 620, H = 200, pad = 28;
+    const stepX = (W - pad * 2) / Math.max(1, data.length - 1);
+    const pts = data.map((v, i) => [pad + i * stepX, H - pad - ((v / max) * (H - pad * 2))]);
+    const line = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const area = `${line} L${pts[pts.length - 1][0]},${H - pad} L${pts[0][0]},${H - pad} Z`;
+    const chartHost = $('.js-chart');
+    if (!chartHost) return;
+    chartHost.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly revenue in millions of Naira">
+        <defs>
+          <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ff6b35" stop-opacity=".42"/>
+            <stop offset="100%" stop-color="#ff6b35" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        ${[0.25, 0.5, 0.75].map((r) => `<line x1="${pad}" x2="${W - pad}" y1="${(H - pad) - r * (H - pad * 2)}" y2="${(H - pad) - r * (H - pad * 2)}" stroke="currentColor" stroke-opacity=".08" stroke-dasharray="3 3"/>`).join('')}
+        <path d="${area}" fill="url(#revGrad)"/>
+        <path d="${line}" fill="none" stroke="#ff6b35" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/>
+        ${pts.map((p, i) => `
+          <g>
+            <circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="#ff6b35" stroke="#0d100e" stroke-width="2"/>
+            <text x="${p[0]}" y="${p[1] - 10}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="currentColor" opacity=".88">₦${data[i]}M</text>
+            <text x="${p[0]}" y="${H - 8}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="currentColor" opacity=".55">${months[i]}</text>
+          </g>
+        `).join('')}
+      </svg>
+    `;
+  };
+  const rangeSelect = $('.js-chart-range');
+  drawRevenue(Number(rangeSelect?.value || 6));
+  if (rangeSelect) rangeSelect.onchange = (e) => drawRevenue(Number(e.target.value));
+
+  const low = adminLowStock();
+  const openOrders = adminOrders().filter((o) => o.status === 'paid' || o.status === 'processing');
+  const settings = getAdminSettings();
+  const alerts = [];
+  if (settings.ordersEnabled === false) {
+    alerts.push({ tone: 'danger', icon: 'pause-circle', title: 'Storefront checkout is paused', sub: 'New customer orders are currently blocked in Settings.' });
+  }
+  if (openOrders.length) {
+    alerts.push({ tone: 'warn', icon: 'package', title: `${openOrders.length} order${openOrders.length === 1 ? '' : 's'} waiting for hand-off`, sub: `${openOrders.map((o) => o.id).slice(0, 3).join(', ')} ready for bench or shipping update.` });
+  }
+  low.forEach((p) => {
+    alerts.push({
+      tone: p.stock === 0 ? 'danger' : 'warn',
+      icon: 'alert-triangle',
+      title: `${p.name} · ${p.stock === 0 ? 'Out of stock' : `Only ${p.stock} left`}`,
+      sub: `${p.sku} · ${p.cat}`,
+    });
+  });
+  const alertHost = $('.js-alerts');
+  if (alertHost) {
+    alertHost.innerHTML = alerts.length
+      ? alerts.map((a) => `
+        <div class="alert-row alert-row--${a.tone}">
+          <span class="alert-row__icon"><i data-lucide="${a.icon}" class="icon-16"></i></span>
+          <div>
+            <b>${esc(a.title)}</b>
+            <small>${esc(a.sub)}</small>
+          </div>
+        </div>
+      `).join('')
+      : `<div class="dash-empty">All stock levels and queues are clear.</div>`;
+  }
+
+  /* Render Guangzhou Bench Verification Bookings Queue */
+  renderVerificationsQueue();
+
+  /* Render Rider Support Tickets Queue */
+  renderSupportTicketsQueue();
+
+  const latestBody = $('.js-latest-orders tbody');
+  if (latestBody) {
+    latestBody.innerHTML = adminOrders().slice(0, 5).map((o) => `
+      <tr>
+        <td><b>${esc(o.id)}</b></td>
+        <td>${esc(o.customer)}<div class="table-sub">${esc(o.email || 'Guest checkout')}</div></td>
+        <td>${esc(o.items)}</td>
+        <td><b>${formatNGN(o.total)}</b></td>
+        <td><span class="status status--${esc(o.status)}">${esc(o.status)}</span></td>
+        <td>${esc(o.date)}</td>
+        <td class="align-right"><button class="btn btn--quiet btn--sm js-order-view" data-id="${esc(o.id)}" type="button">Details</button></td>
+      </tr>
+    `).join('');
+    latestBody.querySelectorAll('.js-order-view').forEach((b) => b.addEventListener('click', () => showOrderDetailModal(b.dataset.id)));
+  }
+}
+
+function renderVerificationsQueue() {
+  const host = $('.js-admin-verifications');
+  const countEl = $('.js-verify-count');
+  const list = adminVerifications();
+  const bookedCount = list.filter((v) => v.status === 'booked').length;
+  if (countEl) countEl.textContent = `${bookedCount} booked`;
+  if (!host) return;
+  if (!list.length) {
+    host.innerHTML = `<div class="dash-empty">No unit verification sessions booked yet.</div>`;
+    return;
+  }
+  host.innerHTML = `
+    <div class="ios-admin-queue">
+      ${list.slice(0, 5).map((v) => `
+        <div class="ios-queue-item">
+          <div class="ios-queue-item__main">
+            <div class="ios-queue-item__top">
+              <b>${esc(v.model)}</b>
+              <span class="status status--${v.status === 'booked' ? 'shipped' : v.status === 'completed' ? 'delivered' : 'cancelled'}">${esc(v.status)}</span>
+            </div>
+            <small>${esc(v.ref)} · ${esc(v.name)} (${esc(v.phone || v.email || 'No phone')}) · ${esc(v.date)} at ${esc(v.slot)} WAT</small>
+          </div>
+          <div class="ios-queue-item__actions">
+            ${v.status === 'booked'
+              ? `<button type="button" class="btn btn--primary btn--sm js-verify-complete" data-ref="${esc(v.ref)}">Sign off 40-pt</button>`
+              : `<button type="button" class="btn btn--quiet btn--sm js-verify-reopen" data-ref="${esc(v.ref)}">Rebook</button>`}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  host.querySelectorAll('.js-verify-complete').forEach((b) => b.addEventListener('click', () => {
+    updateVerificationStatus(b.dataset.ref, 'completed');
+    renderAll();
+    toast(`Signed off 40-point bench check ${b.dataset.ref}.`);
+  }));
+  host.querySelectorAll('.js-verify-reopen').forEach((b) => b.addEventListener('click', () => {
+    updateVerificationStatus(b.dataset.ref, 'booked');
+    renderAll();
+    toast(`Reopened bench check ${b.dataset.ref}.`);
+  }));
+}
+
+function renderSupportTicketsQueue() {
+  const host = $('.js-admin-tickets');
+  const countEl = $('.js-ticket-count');
+  const list = adminTickets();
+  const openCount = list.filter((t) => t.status !== 'resolved').length;
+  if (countEl) countEl.textContent = `${openCount} open`;
+  if (!host) return;
+  if (!list.length) {
+    host.innerHTML = `<div class="dash-empty">No customer support tickets logged.</div>`;
+    return;
+  }
+  host.innerHTML = `
+    <div class="ios-admin-queue">
+      ${list.slice(0, 5).map((t) => `
+        <div class="ios-queue-item">
+          <div class="ios-queue-item__main">
+            <div class="ios-queue-item__top">
+              <b>${esc(t.subject)}</b>
+              <span class="status status--${t.status === 'resolved' ? 'delivered' : 'processing'}">${esc(t.status)}</span>
+            </div>
+            <small>${esc(t.type).toUpperCase()} · ${esc(t.customer)} (${esc(t.email)}) · ${esc(t.date)}</small>
+            ${t.detail ? `<p class="ios-queue-item__detail">${esc(t.detail)}</p>` : ''}
+          </div>
+          <div class="ios-queue-item__actions">
+            <button type="button" class="btn ${t.status === 'resolved' ? 'btn--quiet' : 'btn--primary'} btn--sm js-ticket-toggle" data-id="${esc(t.id)}" data-next="${t.status === 'resolved' ? 'open' : 'resolved'}">
+              ${t.status === 'resolved' ? 'Reopen' : 'Resolve'}
+            </button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  host.querySelectorAll('.js-ticket-toggle').forEach((b) => b.addEventListener('click', () => {
+    setTicketStatus(b.dataset.id, b.dataset.next);
+    renderAll();
+    toast(`Support ticket marked ${b.dataset.next}.`);
+  }));
+}
+
+/* ── Orders ────────────────────────────────────────────────────── */
+let selectedOrders = new Set();
+
+function renderOrders() {
+  const filter = $('.js-order-status-filter');
+  if (filter && !filter.options.length) {
+    filter.innerHTML = orderStatuses.map((s) => `<option value="${s}">${s === 'all' ? 'All statuses' : s[0].toUpperCase() + s.slice(1)}</option>`).join('');
+  }
+
+  const syncSegments = () => {
+    const cur = filter?.value || 'all';
+    $$('.js-admin-order-segments [data-status-seg]').forEach((btn) => {
+      btn.classList.toggle('is-active', btn.dataset.statusSeg === cur);
+    });
+  };
+
+  $$('.js-admin-order-segments [data-status-seg]').forEach((btn) => {
+    btn.onclick = () => {
+      if (filter) {
+        filter.value = btn.dataset.statusSeg;
+        filter.dispatchEvent(new Event('change'));
+      }
+    };
+  });
+
+  const draw = () => {
+    syncSegments();
+    const q = ($('.js-order-search')?.value || '').trim().toLowerCase();
+    const st = filter?.value || 'all';
+    const rows = adminOrders().filter((o) =>
+      (st === 'all' || o.status === st) &&
+      (!q || o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q) || (o.email || '').toLowerCase().includes(q))
+    );
+    const validIds = new Set(adminOrders().map((o) => o.id));
+    selectedOrders = new Set([...selectedOrders].filter((id) => validIds.has(id)));
+
+    const tbody = $('.js-admin-orders tbody');
+    if (!tbody) return;
+    tbody.innerHTML = rows.length
+      ? rows.map((o) => `
+        <tr>
+          <td class="col-check"><input type="checkbox" class="row-check" data-id="${esc(o.id)}" aria-label="Select order ${esc(o.id)}" ${selectedOrders.has(o.id) ? 'checked' : ''} /></td>
+          <td><b>${esc(o.id)}</b></td>
+          <td>${esc(o.customer)}<div class="table-sub">${esc(o.email || 'Guest checkout')}</div></td>
+          <td>${esc(o.items)}</td>
+          <td><b>${formatNGN(o.total)}</b></td>
+          <td>
+            <label class="sr-only" for="st-${esc(o.id)}">Status for ${esc(o.id)}</label>
+            <select id="st-${esc(o.id)}" class="select select--compact js-status-set" data-id="${esc(o.id)}">
+              ${orderStatuses.slice(1).map((s) => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s[0].toUpperCase() + s.slice(1)}</option>`).join('')}
+            </select>
+          </td>
+          <td>${esc(o.date)}</td>
+          <td class="align-right"><button class="btn btn--quiet btn--sm js-order-view" data-id="${esc(o.id)}" type="button">Details</button></td>
+        </tr>
+      `).join('')
+      : `<tr><td colspan="8" class="dash-empty">No orders match that filter.</td></tr>`;
+
+    tbody.querySelectorAll('.js-status-set').forEach((sel) => sel.addEventListener('change', () => {
+      setOrderStatus(sel.dataset.id, sel.value);
+      syncChromeCounts();
+      renderOverview();
+      renderAnalytics();
+      hydrateIcons();
+      toast(`${sel.dataset.id} marked ${sel.value}.`);
+    }));
+    tbody.querySelectorAll('.js-order-view').forEach((b) => b.addEventListener('click', () => showOrderDetailModal(b.dataset.id)));
+    tbody.querySelectorAll('.row-check').forEach((cb) => cb.addEventListener('change', () => {
+      if (cb.checked) selectedOrders.add(cb.dataset.id);
+      else selectedOrders.delete(cb.dataset.id);
+      syncBulkBar(rows);
+    }));
+    syncBulkBar(rows);
+  };
+
+  const syncBulkBar = (visibleRows = []) => {
+    const bar = $('.js-bulk-bar');
+    const count = $('.js-bulk-count');
+    const checkAll = $('.js-check-all');
+    if (bar) bar.hidden = selectedOrders.size === 0;
+    if (count) count.textContent = String(selectedOrders.size);
+    if (checkAll) {
+      checkAll.checked = visibleRows.length > 0 && visibleRows.every((r) => selectedOrders.has(r.id));
+    }
+  };
+
+  const checkAll = $('.js-check-all');
+  if (checkAll) {
+    checkAll.onchange = (e) => {
+      const boxes = $$('.js-admin-orders .row-check');
+      boxes.forEach((cb) => {
+        cb.checked = e.target.checked;
+        if (cb.checked) selectedOrders.add(cb.dataset.id);
+        else selectedOrders.delete(cb.dataset.id);
+      });
+      syncBulkBar(boxes.map((cb) => ({ id: cb.dataset.id })));
+    };
+  }
+
+  const bulkUpdate = (status, label) => {
+    const count = selectedOrders.size;
+    if (!count) return;
+    selectedOrders.forEach((id) => setOrderStatus(id, status));
+    selectedOrders.clear();
+    renderAll();
+    toast(`${count} order${count === 1 ? '' : 's'} ${label}.`);
+  };
+
+  $('.js-bulk-cancel').onclick = () => bulkUpdate('cancelled', 'cancelled');
+  $('.js-bulk-deliver').onclick = () => bulkUpdate('delivered', 'marked delivered');
+  $('.js-bulk-clear').onclick = () => {
+    selectedOrders.clear();
+    draw();
+  };
+
+  $('.js-order-search').oninput = draw;
+  if (filter) filter.onchange = draw;
+  $('.js-order-export-go').onclick = () => {
+    const mode = $('.js-order-export').value;
+    if (mode === 'print') { window.print(); return; }
+    let rows = adminOrders();
+    if (mode === 'open') rows = rows.filter((o) => o.status === 'paid' || o.status === 'processing');
+    if (mode === 'filtered') {
+      const q = ($('.js-order-search').value || '').trim().toLowerCase();
+      const st = filter.value;
+      rows = rows.filter((o) => (st === 'all' || o.status === st) && (!q || o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q)));
+    }
+    exportOrdersCSV(rows, `soko-orders-${mode}.csv`);
+  };
+  draw();
+}
+
+function showOrderDetailModal(orderId) {
+  const o = adminOrders().find((x) => x.id === orderId);
+  if (!o) return;
+  const lineItems = Array.isArray(o.lineItems) && o.lineItems.length ? o.lineItems : null;
+  const m = openModal(`
+    <p class="modal-eyebrow">ORDER RECORD · ${esc(o.id)}</p>
+    <h3>${esc(o.customer)}</h3>
+    <p class="modal-sub">${esc(o.email || 'Guest checkout')} · Placed ${esc(o.date)}</p>
+    <div class="modal-kv-grid">
+      <div><span>Status</span><strong class="status status--${esc(o.status)}">${esc(o.status)}</strong></div>
+      <div><span>Items</span><strong>${esc(o.items)}</strong></div>
+      <div><span>Total</span><strong>${formatNGN(o.total)}</strong></div>
+      <div><span>Payment</span><strong>${esc(o.paymentMethod || 'Paystack')}</strong></div>
+    </div>
+    ${lineItems ? `
+      <table class="dash-table" style="margin:12px 0">
+        <thead><tr><th>Item</th><th>Qty</th><th class="align-right">Price</th></tr></thead>
+        <tbody>${lineItems.map((it) => `<tr><td>${esc(it.name)}</td><td>${esc(it.qty || 1)}</td><td class="align-right">${formatNGN((it.price || 0) * (it.qty || 1))}</td></tr>`).join('')}</tbody>
+      </table>
+    ` : ''}
+    <div class="field" style="margin-top:14px">
+      <label for="modal-order-status">Update fulfilment status</label>
+      <select id="modal-order-status" class="select js-modal-status">
+        ${orderStatuses.slice(1).map((s) => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s[0].toUpperCase() + s.slice(1)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="dash-modal__actions">
+      <button class="btn btn--quiet dash-modal__close" type="button">Close</button>
+      <button class="btn btn--primary js-modal-status-save" type="button">Save status</button>
+    </div>
+  `);
+  m.querySelector('.js-modal-status-save').addEventListener('click', () => {
+    const next = m.querySelector('.js-modal-status').value;
+    setOrderStatus(o.id, next);
+    closeActiveModal();
+    renderAll();
+    toast(`${o.id} updated to ${next}.`);
+  });
+}
+
+function exportOrdersCSV(rows = adminOrders(), filename = 'soko-orders.csv') {
+  const header = 'id,customer,email,items,total,status,date\n';
+  const body = rows.map((o) => [o.id, `"${String(o.customer || '').replace(/"/g, '""')}"`, o.email || '', o.items, o.total, o.status, o.date].join(',')).join('\n');
+  const blob = new Blob([header + body], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast(`Exported ${rows.length} orders.`);
+}
+
+/* ── Inventory ─────────────────────────────────────────────────── */
+function renderInventory() {
+  const all = adminInventory();
+  const lowItems = adminLowStock();
+  const totalValue = all.reduce((sum, p) => sum + (Number(p.price) || 0) * (Number(p.stock) || 0), 0);
+  const totalEl = $('.js-inventory-total');
+  const lowEl = $('.js-inventory-low-summary');
+  if (totalEl) totalEl.textContent = formatNGN(totalValue);
+  if (lowEl) lowEl.textContent = `${lowItems.length} ${lowItems.length === 1 ? 'item' : 'items'}`;
+
+  const catFilter = $('.js-inv-category-filter');
+  if (catFilter && catFilter.options.length <= 1) {
+    const cats = [...new Set(all.map((p) => p.cat))];
+    catFilter.innerHTML = `<option value="all">All categories</option>` + cats.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  }
+
+  const draw = () => {
+    const q = ($('.js-inv-search')?.value || '').trim().toLowerCase();
+    const cat = catFilter?.value || 'all';
+    const inv = adminInventory().filter((p) =>
+      (cat === 'all' || p.cat === cat) &&
+      (!q || p.name.toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q))
+    );
+    const tbody = $('.js-admin-inventory tbody');
+    if (!tbody) return;
+    tbody.innerHTML = inv.map((p) => `
+      <tr>
+        <td>
+          <div class="inv-prod">
+            <img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" width="44" height="44" />
+            <b>${esc(p.name)}</b>
+          </div>
+        </td>
+        <td class="mono">${esc(p.sku)}</td>
+        <td>${esc(p.cat)}</td>
+        <td>
+          <label class="sr-only" for="price-${esc(p.id)}">Price for ${esc(p.name)}</label>
+          <input id="price-${esc(p.id)}" type="number" class="input input--compact js-price" data-id="${esc(p.id)}" value="${p.price}" step="5000" />
+        </td>
+        <td>
+          <div class="stock-ctrl">
+            <button type="button" class="js-stock-minus" data-id="${esc(p.id)}" aria-label="Decrease stock for ${esc(p.name)}">&minus;</button>
+            <span class="stock-num js-stock-num" data-id="${esc(p.id)}">${p.stock}</span>
+            <button type="button" class="js-stock-plus" data-id="${esc(p.id)}" aria-label="Increase stock for ${esc(p.name)}">+</button>
+          </div>
+        </td>
+        <td><span class="status status--${p.status === 'in' ? 'delivered' : p.status === 'low' ? 'processing' : 'cancelled'}">${p.status === 'in' ? 'In stock' : p.status === 'low' ? 'Low stock' : 'Out'}</span></td>
+        <td>${p.sold}</td>
+        <td class="align-right"><button class="btn btn--danger btn--sm js-product-remove" data-id="${esc(p.id)}" type="button" aria-label="Remove ${esc(p.name)}">&times;</button></td>
+      </tr>
+    `).join('');
+
+    const refreshInventoryMeta = () => {
+      syncChromeCounts();
+      renderOverview();
+      renderAnalytics();
+      const updated = adminInventory();
+      const tVal = updated.reduce((s, p) => s + (Number(p.price) || 0) * (Number(p.stock) || 0), 0);
+      if (totalEl) totalEl.textContent = formatNGN(tVal);
+      if (lowEl) lowEl.textContent = `${adminLowStock().length} items`;
+      hydrateIcons();
+    };
+
+    tbody.querySelectorAll('.js-stock-minus').forEach((b) => b.addEventListener('click', () => {
+      adjustAdminStock(b.dataset.id, -1);
+      draw();
+      refreshInventoryMeta();
+    }));
+    tbody.querySelectorAll('.js-stock-plus').forEach((b) => b.addEventListener('click', () => {
+      adjustAdminStock(b.dataset.id, +1);
+      draw();
+      refreshInventoryMeta();
+    }));
+    tbody.querySelectorAll('.js-price').forEach((inp) => inp.addEventListener('change', () => {
+      updateAdminPrice(inp.dataset.id, inp.value);
+      refreshInventoryMeta();
+      toast('Price updated.');
+    }));
+    tbody.querySelectorAll('.js-product-remove').forEach((b) => b.addEventListener('click', () => {
+      removeAdminProduct(b.dataset.id);
+      draw();
+      refreshInventoryMeta();
+      toast('Product removed.');
+    }));
+  };
+
+  $('.js-inv-search').oninput = draw;
+  if (catFilter) catFilter.onchange = draw;
+  draw();
+
+  $('.js-product-add').onclick = () => {
+    const m = openModal(`
+      <p class="modal-eyebrow">NEW CATALOGUE ITEM</p>
+      <h3>Add product to inventory</h3>
+      <form class="js-product-form" novalidate>
+        <div class="dash-view__grid dash-grid-form">
+          <div class="field"><label for="p-name">Product name</label><input id="p-name" class="input js-p-name" placeholder="SOKO 05 · Express" required /></div>
+          <div class="field"><label for="p-cat">Category</label><select id="p-cat" class="select js-p-cat"><option>Commuter</option><option>Cargo</option><option>Trail</option><option>Performance</option><option>Accessory</option></select></div>
+          <div class="field"><label for="p-price">Price (₦)</label><input id="p-price" class="input js-p-price" type="number" value="950000" step="5000" required /></div>
+          <div class="field"><label for="p-stock">Initial stock</label><input id="p-stock" class="input js-p-stock" type="number" value="10" min="0" required /></div>
+          <div class="field"><label for="p-sku">SKU (optional)</label><input id="p-sku" class="input js-p-sku" placeholder="SM-005-EXP" /></div>
+        </div>
+        <div class="dash-modal__actions">
+          <button class="btn btn--quiet dash-modal__close" type="button">Cancel</button>
+          <button class="btn btn--primary js-p-save" type="submit">Add to inventory</button>
+        </div>
+      </form>
+    `);
+    m.querySelector('.js-product-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = m.querySelector('.js-p-name').value.trim();
+      if (!name) { toast('Product name is required.'); return; }
+      addAdminProduct({
+        name,
+        cat: m.querySelector('.js-p-cat').value,
+        price: m.querySelector('.js-p-price').value,
+        stock: m.querySelector('.js-p-stock').value,
+        sku: m.querySelector('.js-p-sku').value.trim(),
+      });
+      closeActiveModal();
+      renderAll();
+      toast(`${name} added to inventory.`);
+    });
+  };
+}
+
+/* ── Customers ─────────────────────────────────────────────────── */
+function renderCustomers() {
+  const all = adminCustomers();
+  const countEl = $('.js-customer-count');
+  if (countEl) countEl.textContent = `${all.length} riders`;
+
+  const draw = () => {
+    const q = ($('.js-cust-search')?.value || '').trim().toLowerCase();
+    const sort = $('.js-cust-sort')?.value || 'spend';
+    const rows = adminCustomers()
+      .filter((c) => !q || c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || (c.city || '').toLowerCase().includes(q))
+      .sort((a, b) => sort === 'orders' ? b.orders - a.orders : sort === 'recent' ? b.joined.localeCompare(a.joined) : b.spend - a.spend);
+
+    const tbody = $('.js-admin-customers tbody');
+    if (!tbody) return;
+    tbody.innerHTML = rows.map((c) => `
+      <tr>
+        <td><b>${esc(c.name)}</b></td>
+        <td>${esc(c.email)}</td>
+        <td>${esc(c.city)}</td>
+        <td>${esc(c.joined)}</td>
+        <td>${esc(c.orders)}</td>
+        <td><b>${formatNGN(c.spend)}</b></td>
+        <td class="align-right">
+          <button class="btn btn--quiet btn--sm js-customer-view" data-email="${esc(c.email)}" type="button">View</button>
+          <a class="btn btn--quiet btn--sm" href="mailto:${esc(c.email)}">Email</a>
+        </td>
+      </tr>
+    `).join('');
+
+    tbody.querySelectorAll('.js-customer-view').forEach((b) => b.addEventListener('click', () => {
+      const cust = adminCustomers().find((x) => x.email === b.dataset.email);
+      if (!cust) return;
+      const custOrders = adminOrders().filter((o) => o.email === cust.email || o.customer === cust.name);
+      openModal(`
+        <p class="modal-eyebrow">RIDER PROFILE · ${esc(cust.city)}</p>
+        <h3>${esc(cust.name)}</h3>
+        <p class="modal-sub">${esc(cust.email)} · Joined ${esc(cust.joined)}</p>
+        <div class="modal-kv-grid">
+          <div><span>Orders</span><strong>${esc(cust.orders)}</strong></div>
+          <div><span>Lifetime spend</span><strong>${formatNGN(cust.spend)}</strong></div>
+          <div><span>City</span><strong>${esc(cust.city)}</strong></div>
+        </div>
+        ${custOrders.length ? `
+          <table class="dash-table" style="margin-top:12px">
+            <thead><tr><th>Order</th><th>Date</th><th>Status</th><th class="align-right">Total</th></tr></thead>
+            <tbody>${custOrders.map((o) => `<tr><td><b>${esc(o.id)}</b></td><td>${esc(o.date)}</td><td><span class="status status--${esc(o.status)}">${esc(o.status)}</span></td><td class="align-right">${formatNGN(o.total)}</td></tr>`).join('')}</tbody>
+          </table>
+        ` : `<p class="modal-sub" style="margin-top:12px">No recent orders in the active ledger.</p>`}
+        <div class="dash-modal__actions">
+          <a class="btn btn--quiet btn--sm" href="mailto:${esc(cust.email)}">Send email</a>
+          <button class="btn btn--primary btn--sm dash-modal__close" type="button">Done</button>
+        </div>
+      `);
+    }));
+  };
+  $('.js-cust-search').oninput = draw;
+  $('.js-cust-sort').onchange = draw;
+  draw();
+}
+
+/* ── Analytics ─────────────────────────────────────────────────── */
+function renderAnalytics() {
+  const drawTrend = () => {
+    const n = Number($('.js-trend-range')?.value || 12);
+    const data = adminOrdersTrend().slice(-n);
+    const host = $('.js-trend-chart');
+    if (!host) return;
+    host.innerHTML = data.map((d) => `
+      <div class="bar-col">
+        <div class="bar-val">${Math.round(d.v * 0.7)}</div>
+        <div class="bar" style="height:${d.v}%"></div>
+        <div class="bar-lbl">${esc(d.w)}</div>
+      </div>
+    `).join('');
+  };
+  drawTrend();
+  const trendRange = $('.js-trend-range');
+  if (trendRange) trendRange.onchange = drawTrend;
+
+  const statusHost = $('.js-status-break');
+  if (statusHost) {
+    statusHost.innerHTML = adminStatusBreakdown().map((s) => `
+      <div class="metric-bar-row">
+        <div class="metric-bar-row__top">
+          <span class="status status--${esc(s.status)}">${esc(s.status)}</span>
+          <span><b>${s.count}</b> (${s.pct}%)</span>
+        </div>
+        <div class="metric-bar"><span style="width:${s.pct}%"></span></div>
+      </div>
+    `).join('');
+  }
+
+  const cats = adminCategoryValue();
+  const maxCat = Math.max(1, ...cats.map((c) => c.value));
+  const catHost = $('.js-cat-value');
+  if (catHost) {
+    catHost.innerHTML = cats.map((c) => `
+      <div class="metric-bar-row">
+        <div class="metric-bar-row__top">
+          <b>${esc(c.name)}</b>
+          <span>${formatNGN(c.value)}</span>
+        </div>
+        <div class="metric-bar metric-bar--ink"><span style="width:${Math.round((c.value / maxCat) * 100)}%"></span></div>
+      </div>
+    `).join('');
+  }
+
+  const topHost = $('.js-top-products');
+  if (topHost) {
+    topHost.innerHTML = `
+      <div class="table-scroll">
+        <table class="dash-table">
+          <thead><tr><th>#</th><th>Product</th><th>Units (30d)</th><th class="align-right">Revenue</th></tr></thead>
+          <tbody>
+            ${adminTopProducts().map((p, i) => `
+              <tr>
+                <td><b>0${i + 1}</b></td>
+                <td><b>${esc(p.name)}</b></td>
+                <td>${p.sold}</td>
+                <td class="align-right"><b>${formatNGN(p.value)}</b></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+}
+
+/* ── iOS Spotlight Command Search Modal (⌘K) ───────────────────── */
+function openSpotlightModal() {
+  const m = openModal(`
+    <p class="modal-eyebrow">WORKSHOP OS · COMMAND SPOTLIGHT</p>
+    <h3>Quick jump &amp; search</h3>
+    <div class="field" style="margin-top:10px">
+      <label class="sr-only" for="admin-spotlight-input">Search views, orders, stock or riders</label>
+      <input id="admin-spotlight-input" class="input js-spotlight-input" type="search" placeholder="Search order ID, rider name, SKU, or jump to a section..." autocomplete="off" />
+    </div>
+    <div class="ios-spotlight-results js-spotlight-results"></div>
+  `);
+
+  const input = m.querySelector('.js-spotlight-input');
+  const results = m.querySelector('.js-spotlight-results');
+
+  const renderHits = (q = '') => {
+    const needle = q.trim().toLowerCase();
+    const views = Object.entries(VIEW_LABELS)
+      .filter(([k, label]) => !needle || label.toLowerCase().includes(needle) || k.includes(needle))
+      .map(([k, label]) => ({ type: 'Console', title: label, sub: `Switch to ${label}`, action: () => { activateView(k, { focusHeading: true }); history.replaceState(null, '', '#' + k); } }));
+
+    const orderHits = adminOrders()
+      .filter((o) => !needle || o.id.toLowerCase().includes(needle) || o.customer.toLowerCase().includes(needle))
+      .slice(0, 3)
+      .map((o) => ({ type: 'Order', title: `${o.id} · ${o.customer}`, sub: `${o.status.toUpperCase()} · ${formatNGN(o.total)}`, action: () => showOrderDetailModal(o.id) }));
+
+    const stockHits = adminInventory()
+      .filter((p) => !needle || p.name.toLowerCase().includes(needle) || (p.sku || '').toLowerCase().includes(needle))
+      .slice(0, 3)
+      .map((p) => ({ type: 'Stock', title: `${p.name} (${p.sku})`, sub: `${p.stock} in stock · ${formatNGN(p.price)}`, action: () => { activateView('inventory', { focusHeading: true }); history.replaceState(null, '', '#inventory'); } }));
+
+    const combined = [...views, ...orderHits, ...stockHits].slice(0, 8);
+    results.innerHTML = combined.length
+      ? combined.map((h, i) => `
+          <button type="button" class="ios-spotlight-item" data-hit="${i}">
+            <div><b>${esc(h.title)}</b><small>${esc(h.sub)}</small></div>
+            <span class="ios-spotlight-item__tag">${esc(h.type)}</span>
+          </button>
+        `).join('')
+      : `<div class="dash-empty">No matching results.</div>`;
+
+    results.querySelectorAll('.ios-spotlight-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const hit = combined[Number(btn.dataset.hit)];
+        closeActiveModal();
+        hit?.action();
+      });
+    });
+  };
+
+  renderHits('');
+  input?.addEventListener('input', () => renderHits(input.value));
+}
+
+/* ── Settings ──────────────────────────────────────────────────── */
+function renderSettings() {
+  const s = getAdminSettings();
+  const gw = $('.js-set-gateway');
+  const cur = $('.js-set-currency');
+  const low = $('.js-set-low');
+  const tax = $('.js-set-tax');
+  const en = $('.js-set-enable');
+  const lbl = $('.js-enable-label');
+
+  if (gw) gw.value = s.gateway || 'Paystack';
+  if (cur) cur.value = s.currency || '₦';
+  if (low) low.value = s.lowStockThreshold ?? 6;
+  if (tax) tax.value = s.taxRate ?? 7.5;
+  if (en) en.checked = s.ordersEnabled !== false;
+  if (lbl) lbl.textContent = en?.checked ? 'Accept new orders on the storefront' : 'Storefront checkout is paused';
+  if (en) {
+    en.onchange = () => {
+      if (lbl) lbl.textContent = en.checked ? 'Accept new orders on the storefront' : 'Storefront checkout is paused';
+    };
+  }
+
+  const saveSettings = (e) => {
+    e?.preventDefault();
+    setAdminSetting('gateway', gw.value);
+    setAdminSetting('currency', cur.value);
+    setAdminSetting('lowStockThreshold', Number(low.value || 6));
+    setAdminSetting('taxRate', Number(tax.value ?? 7.5));
+    setAdminSetting('ordersEnabled', en.checked);
+    renderAll();
+    toast('Store settings saved.');
+  };
+
+  const form = $('.js-admin-settings');
+  if (form) form.onsubmit = saveSettings;
+  const saveBtn = $('.js-settings-save');
+  if (saveBtn) saveBtn.onclick = saveSettings;
+
+  $('.js-csv-download').onclick = () => exportOrdersCSV();
+
+  $('.js-admin-reset').onclick = () => {
+    const m = openModal(`
+      <p class="modal-eyebrow">RESET DEMO STORE</p>
+      <h3>Restore seeded demo data?</h3>
+      <p class="modal-sub">This resets orders, stock counts, customers and settings in this browser back to the original workshop defaults.</p>
+      <div class="dash-modal__actions">
+        <button class="btn btn--quiet dash-modal__close" type="button">Cancel</button>
+        <button class="btn btn--danger js-confirm-reset" type="button">Reset demo data</button>
+      </div>
+    `);
+    m.querySelector('.js-confirm-reset').addEventListener('click', () => {
+      resetAdminData();
+      selectedOrders.clear();
+      closeActiveModal();
+      renderAll();
+      toast('Demo data restored.');
+    });
+  };
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
