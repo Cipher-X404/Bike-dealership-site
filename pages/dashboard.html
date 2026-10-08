@@ -2,21 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Rider desk · SOKO Moto</title>
-    <meta name="description" content="Track your SOKO Moto order, manage your garage, wallet, saved rides and support." />
+    <meta name="description" content="Track your SOKO Moto order, manage your garage, bench verifications, wallet, saved rides and support." />
     <link rel="canonical" href="https://sokomoto.ng/pages/dashboard.html" />
-    <meta name="theme-color" content="#f1f1eb" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f2f7" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0c0b" />
     <meta name="robots" content="noindex, nofollow" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="SOKO Moto" />
     <meta property="og:title" content="Rider desk · SOKO Moto" />
-    <meta property="og:description" content="Your orders, garage, wallet and support in one place." />
+    <meta property="og:description" content="Your orders, garage, live bench verifications, wallet and support in one place." />
     <meta property="og:url" content="https://sokomoto.ng/pages/dashboard.html" />
     <meta property="og:image" content="https://sokomoto.ng/images/og.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Rider desk · SOKO Moto" />
-    <meta name="twitter:description" content="Your orders, garage, wallet and support in one place." />
+    <meta name="twitter:description" content="Your orders, garage, live bench verifications, wallet and support in one place." />
     <meta name="twitter:image" content="https://sokomoto.ng/images/og.jpg" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
@@ -24,19 +25,20 @@
     <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=clash-display@600,700&f[]=cabinet-grotesk@500,700&f[]=jetbrains-mono@400,500,600&display=swap" />
   </head>
   <body>
-    <div class="dash dash--member dash-ios-active" data-dash="user">
+    <div class="dash dash--member" data-dash="user">
       <a class="dash-skip" href="#member-main">Skip to your dashboard</a>
 
+      <!-- iOS Lock-Screen Style Guest Guard -->
       <div class="dash-guard js-guest-guard" hidden>
         <div class="access-side">
           <a class="access-brand" href="/" aria-label="SOKO Moto home"><span class="access-brand__mark">S</span><span>SOKO <b>MOTO</b></span></a>
-          <div class="access-photo"><img src="/images/bike-commuter-side.webp" alt="SOKO 01 electric motorcycle" /></div>
+          <div class="access-photo"><img src="/images/bike-commuter-side.webp" alt="SOKO 01 electric motorcycle" width="1536" height="1024" /></div>
           <div class="access-caption"><span>Built for the long way home.</span><i data-lucide="move-up-right" class="icon-18"></i></div>
         </div>
         <div class="dash-guard__card">
-          <span class="dash-guard__kicker"><i data-lucide="key-round" class="icon-16"></i> Rider account</span>
+          <span class="dash-guard__kicker"><i data-lucide="key-round" class="icon-16"></i> Rider OS · Member Pass</span>
           <h1>Your whole ride,<br />in one place.</h1>
-          <p>Track a delivery from the Guangzhou bench to your door, keep your bike and warranty on file, and reach the SOKO crew when you need us.</p>
+          <p>Track a delivery from the Guangzhou bench to your door, watch your 40-point video verification, manage your garage and warranty, and reach the SOKO crew whenever you need us.</p>
           <div class="dash-guard__actions">
             <a class="btn btn--primary" href="/pages/login.html">Log in</a>
             <a class="btn btn--quiet" href="/pages/signup.html">Create an account</a>
@@ -47,45 +49,77 @@
       </div>
 
       <div class="js-app" hidden>
-        <div class="dash-shell dash-ios-active">
-          <aside class="dash-rail" aria-label="Rider desk navigation">
-            <a class="rail__brand" href="/" aria-label="SOKO Moto home">
-              <span class="rail__brand-symbol">S</span>
-              <span class="rail__brand-copy"><b>SOKO</b><small>RIDER DESK</small></span>
-            </a>
-            <div class="rail__rule"></div>
-            <p class="rail__section-label">Your account</p>
-            <nav class="dash-nav" aria-label="Rider desk">
-              <a href="#overview" data-view="overview" data-label="Overview" class="is-active" aria-label="Overview"><i data-lucide="house" class="icon-18"></i><span>Overview</span></a>
-              <a href="#orders" data-view="orders" data-label="Orders" aria-label="Orders"><i data-lucide="package-check" class="icon-18"></i><span>Orders</span></a>
-              <a href="#wishlist" data-view="wishlist" data-label="Saved rides" aria-label="Saved rides"><i data-lucide="heart" class="icon-18"></i><span>Saved rides</span></a>
-              <a href="#wallet" data-view="wallet" data-label="Wallet" aria-label="Wallet and cards"><i data-lucide="wallet-cards" class="icon-18"></i><span>Wallet &amp; cards</span></a>
-              <a href="#garage" data-view="garage" data-label="Garage" aria-label="Garage"><i data-lucide="bike" class="icon-18"></i><span>My garage</span></a>
-              <a href="#addresses" data-view="addresses" data-label="Addresses" aria-label="Delivery addresses"><i data-lucide="map-pin-house" class="icon-18"></i><span>Addresses</span></a>
-              <a href="#support" data-view="support" data-label="Support" aria-label="Support"><i data-lucide="life-buoy" class="icon-18"></i><span>Support</span></a>
-              <a href="#notifications" data-view="notifications" data-label="Notifications" aria-label="Notifications"><i data-lucide="bell" class="icon-18"></i><span>Notifications</span><span class="nav-count js-unread-count" hidden>0</span></a>
-              <a href="#settings" data-view="settings" data-label="Settings" aria-label="Settings"><i data-lucide="settings-2" class="icon-18"></i><span>Settings</span></a>
-            </nav>
-            <div class="rail-route" aria-label="SOKO Moto delivery route">
-              <span class="rail-route__signal"><i></i> YOUR ROUTE</span>
-              <div class="rail-route__places"><b>Guangzhou</b><span aria-hidden="true"></span><b>Nigeria</b></div>
-              <p>Verified at the bench.<br />Delivered to your door.</p>
-            </div>
-            <div class="rail__spacer"></div>
-            <a class="rail-help" href="/pages/contact.html"><span class="rail-help__icon"><i data-lucide="message-circle" class="icon-18"></i></span><span><b>Need a hand?</b><small>Talk to the SOKO crew</small></span><i data-lucide="arrow-up-right" class="icon-14"></i></a>
-            <div class="rail__foot">
-              <div class="rail__profile top-user">
-                <span class="top-user__avatar js-user-initial">C</span>
-                <span class="top-user__meta"><b class="js-user-name">-</b><small class="js-user-email">-</small></span>
-              </div>
-              <div class="rail__foot-row">
-                <span class="rail__clock"><span>WAT</span><b class="js-dash-clock">--:--</b></span>
-                <button type="button" data-logout class="rail__logout" aria-label="Sign out"><i data-lucide="log-out" class="icon-18"></i><span>Sign out</span></button>
-              </div>
-            </div>
-          </aside>
+        <!-- iOS Ambient Mesh Backdrop -->
+        <div class="ios-ambient" aria-hidden="true">
+          <span class="ios-ambient__orb ios-ambient__orb--one"></span>
+          <span class="ios-ambient__orb ios-ambient__orb--two"></span>
+          <span class="ios-ambient__orb ios-ambient__orb--three"></span>
+        </div>
 
+        <!-- iOS Dynamic Island (Live Activity & Quick Control Center) -->
+        <div class="ios-island-bar">
+          <div class="ios-island js-dynamic-island" data-expanded="false">
+            <div class="ios-island__compact">
+              <a class="ios-island__brand" href="/" aria-label="SOKO Moto home">
+                <span class="rail__brand-symbol">S</span>
+              </a>
+              <button type="button" class="ios-island__trigger js-island-toggle" aria-expanded="false" aria-label="Toggle Live Activity and Control Center">
+                <span class="ios-island__pulse" aria-hidden="true"></span>
+                <span class="ios-island__live-copy js-island-summary">Guangzhou · Lagos Corridor</span>
+                <span class="ios-island__wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+              </button>
+              <div class="ios-island__right">
+                <span class="ios-island__clock"><small>WAT</small><b class="js-dash-clock">--:--</b></span>
+                <button type="button" class="ios-island__pill-btn js-open-spotlight" aria-label="Open Spotlight Search" title="Spotlight Search (⌘K)">
+                  <i data-lucide="search" class="icon-14"></i>
+                </button>
+                <button type="button" class="ios-island__pill-btn js-theme-toggle" aria-label="Switch appearance">
+                  <i data-lucide="moon" class="icon-14"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Expanded Dynamic Island Live Activity Sheet -->
+            <div class="ios-island__drawer js-island-drawer" hidden>
+              <div class="ios-island__drawer-head">
+                <div class="ios-island__user">
+                  <span class="top-user__avatar js-user-initial">C</span>
+                  <div class="top-user__meta">
+                    <b class="js-user-name">-</b>
+                    <small class="js-user-email">-</small>
+                  </div>
+                </div>
+                <div class="ios-island__route-pill">
+                  <span class="rail-route__signal"><i></i> LIVE TELEMETRY</span>
+                  <b>Guangzhou Hub · Nigeria Doorstep</b>
+                </div>
+              </div>
+              <div class="ios-island__live-activity js-island-activity"></div>
+              <div class="ios-island__controls">
+                <button type="button" class="ios-cc-tile js-book-verification">
+                  <i data-lucide="video" class="icon-18"></i>
+                  <span><b>Video Check</b><small>40-pt Guangzhou bench</small></span>
+                </button>
+                <button type="button" class="ios-cc-tile js-open-bag">
+                  <i data-lucide="shopping-bag" class="icon-18"></i>
+                  <span><b>Active Bag</b><small class="js-island-bag-meta">View cart &amp; Split-in-3</small></span>
+                </button>
+                <a class="ios-cc-tile" href="/pages/shop.html">
+                  <i data-lucide="compass" class="icon-18"></i>
+                  <span><b>Showroom</b><small>22 bikes &amp; kit</small></span>
+                </a>
+                <button type="button" data-logout class="ios-cc-tile ios-cc-tile--danger">
+                  <i data-lucide="log-out" class="icon-18"></i>
+                  <span><b>Sign out</b><small>End session</small></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-shell">
           <div class="dash-stage">
+            <!-- iOS Large Title Navigation Header -->
             <header class="dash-top">
               <div class="dash-top__id">
                 <p class="dash-top__path">RIDER DESK <b>/</b> <span class="js-view-path">OVERVIEW</span></p>
@@ -93,138 +127,393 @@
               </div>
               <div class="dash-top__actions">
                 <span class="top-chip"><i class="top-chip__dot" aria-hidden="true"></i> Guangzhou <span class="top-chip__arrow">to</span> Nigeria</span>
-                <a class="dash-top-link" href="/pages/cart.html" aria-label="View your cart"><i data-lucide="shopping-bag" class="icon-18"></i><span>Cart</span><b class="js-cart-count" hidden>0</b></a>
+                <button type="button" class="dash-top-link js-open-spotlight" aria-label="Search Rider OS">
+                  <i data-lucide="search" class="icon-16"></i><span>Search</span><kbd class="ios-kbd">⌘K</kbd>
+                </button>
+                <button type="button" class="dash-top-link js-book-verification" aria-label="Book unit verification">
+                  <i data-lucide="video" class="icon-16"></i><span>Bench check</span>
+                </button>
+                <a class="dash-top-link" href="/pages/cart.html" aria-label="View your cart">
+                  <i data-lucide="shopping-bag" class="icon-18"></i><span>Cart</span><b class="js-cart-count" hidden>0</b>
+                </a>
                 <a class="btn btn--primary btn--sm top-shop-link" href="/pages/shop.html">Explore bikes <i data-lucide="arrow-up-right" class="icon-16"></i></a>
               </div>
             </header>
 
             <main class="dash-main" id="member-main" tabindex="-1">
+              <!-- VIEW 1: OVERVIEW -->
               <section class="dash-view js-view" data-view-panel="overview" aria-labelledby="member-welcome-title">
                 <div class="welcome">
                   <div class="welcome__text">
-                    <p class="welcome__eyebrow"><span class="welcome__spark" aria-hidden="true"></span> YOUR RIDE, UNDER ONE ROOF</p>
+                    <p class="welcome__eyebrow"><span class="welcome__spark" aria-hidden="true"></span> RIDER OS · YOUR GARAGE &amp; ROADBOOK</p>
                     <h2 class="js-welcome-heading" id="member-welcome-title">Welcome back.</h2>
                     <p class="js-welcome-body"></p>
                   </div>
                   <div class="welcome__ctas">
                     <a class="btn btn--primary" href="/pages/shop.html">Browse the lineup <i data-lucide="arrow-up-right" class="icon-16"></i></a>
-                    <a class="btn btn--quiet" href="/pages/contact.html"><i data-lucide="scan-eye" class="icon-16"></i> Book a video check</a>
+                    <button class="btn btn--quiet js-book-verification" type="button"><i data-lucide="scan-eye" class="icon-16"></i> Book a video check</button>
+                    <button class="btn btn--quiet js-open-bag" type="button"><i data-lucide="shopping-bag" class="icon-16"></i> Quick bag</button>
                   </div>
                 </div>
 
+                <!-- 4 iOS Squircle KPI Widgets -->
                 <div class="kpis js-kpis" aria-label="Account summary"></div>
 
                 <div class="overview-layout">
                   <div class="overview-main">
+                    <!-- Latest Order Live Activity Roadbook -->
                     <section class="manifest-section" aria-labelledby="manifest-title">
                       <div class="section-heading">
-                        <div><span class="section-heading__index">01</span><div><p class="section-heading__overline">Shipping, without the guesswork</p><h2 id="manifest-title">Your latest roadbook</h2></div></div>
+                        <div>
+                          <span class="section-heading__index">01</span>
+                          <div>
+                            <p class="section-heading__overline">Live transit · Guangzhou to doorstep</p>
+                            <h2 id="manifest-title">Your latest roadbook</h2>
+                          </div>
+                        </div>
                         <a class="text-link" href="#orders" data-goto="orders">All orders <i data-lucide="arrow-right" class="icon-16"></i></a>
                       </div>
                       <div class="js-recent-orders"></div>
                     </section>
 
+                    <!-- Live Guangzhou Bench Video Verification Widget -->
+                    <section class="panel verify-overview-panel" aria-labelledby="verify-overview-title">
+                      <div class="panel__head">
+                        <div>
+                          <p class="panel__eyebrow">Live from the Guangzhou bench</p>
+                          <h2 class="panel__title" id="verify-overview-title">40-Point Video Verification</h2>
+                        </div>
+                        <button class="btn btn--quiet btn--sm js-book-verification" type="button"><i data-lucide="video" class="icon-14"></i> Book slot</button>
+                      </div>
+                      <div class="js-overview-verify"></div>
+                    </section>
+
                     <div class="overview-pair">
                       <section class="panel activity-panel" aria-labelledby="activity-title">
-                        <div class="panel__head"><div><p class="panel__eyebrow">From the crew</p><h2 class="panel__title" id="activity-title">Recent activity</h2></div><a class="icon-link" href="#notifications" data-goto="notifications" aria-label="See all notifications"><i data-lucide="arrow-up-right" class="icon-18"></i></a></div>
+                        <div class="panel__head">
+                          <div>
+                            <p class="panel__eyebrow">Notification Center</p>
+                            <h2 class="panel__title" id="activity-title">Recent activity</h2>
+                          </div>
+                          <a class="icon-link" href="#notifications" data-goto="notifications" aria-label="See all notifications"><i data-lucide="arrow-up-right" class="icon-18"></i></a>
+                        </div>
                         <div class="notif-list js-overview-notifs"></div>
                       </section>
+
                       <section class="panel quick-panel" aria-labelledby="quick-title">
-                        <div class="panel__head"><div><p class="panel__eyebrow">Ready when you are</p><h2 class="panel__title" id="quick-title">Quick moves</h2></div></div>
+                        <div class="panel__head">
+                          <div>
+                            <p class="panel__eyebrow">Control Center</p>
+                            <h2 class="panel__title" id="quick-title">Quick moves</h2>
+                          </div>
+                        </div>
                         <div class="js-quick-actions"></div>
                       </section>
                     </div>
                   </div>
 
                   <aside class="overview-aside" aria-label="Your SOKO garage and support">
+                    <!-- CarPlay / Watch Style Garage Widget -->
                     <section class="garage-peek" aria-labelledby="garage-peek-title">
-                      <div class="garage-peek__head"><span class="garage-peek__mark"><i data-lucide="bike" class="icon-20"></i></span><span class="garage-peek__label">YOUR GARAGE</span><a href="#garage" data-goto="garage" aria-label="Open your garage"><i data-lucide="arrow-up-right" class="icon-16"></i></a></div>
+                      <div class="garage-peek__head">
+                        <span class="garage-peek__mark"><i data-lucide="bike" class="icon-20"></i></span>
+                        <span class="garage-peek__label">YOUR GARAGE</span>
+                        <a href="#garage" data-goto="garage" aria-label="Open your garage"><i data-lucide="arrow-up-right" class="icon-16"></i></a>
+                      </div>
                       <h2 id="garage-peek-title">The bike you ride.</h2>
                       <div class="js-overview-garage"></div>
                     </section>
+
+                    <!-- Active Bag & Paystack Split-in-3 Widget -->
+                    <section class="panel bag-peek-panel" aria-labelledby="bag-peek-title">
+                      <div class="panel__head">
+                        <div>
+                          <p class="panel__eyebrow">Checkout &amp; Split-in-3</p>
+                          <h2 class="panel__title" id="bag-peek-title">Active bag</h2>
+                        </div>
+                        <button type="button" class="text-link js-open-bag">Open bag <i data-lucide="arrow-up-right" class="icon-14"></i></button>
+                      </div>
+                      <div class="js-overview-bag"></div>
+                    </section>
+
+                    <!-- 90-Day Guarantee Card -->
                     <section class="service-card">
                       <img src="/images/tech-warranty.webp" alt="SOKO Moto warranty card" loading="lazy" width="1086" height="1448" />
                       <div class="service-card__scrim"></div>
-                      <div class="service-card__content"><span>Made for the distance</span><h2>90 days.<br />We stand behind it.</h2><a href="/pages/faq.html">See what’s covered <i data-lucide="arrow-up-right" class="icon-16"></i></a></div>
+                      <div class="service-card__content">
+                        <span>90-day arrival guarantee · Factory cover</span>
+                        <h2>90 days.<br />We stand behind it.</h2>
+                        <a href="/pages/faq.html">See what’s covered <i data-lucide="arrow-up-right" class="icon-16"></i></a>
+                      </div>
                     </section>
-                    <a class="aside-contact" href="/pages/contact.html"><span><i data-lucide="headset" class="icon-18"></i></span><span><b>Need service or a human?</b><small>We reply within one working day.</small></span><i data-lucide="arrow-right" class="icon-16"></i></a>
+
+                    <a class="aside-contact" href="/pages/contact.html">
+                      <span><i data-lucide="headset" class="icon-18"></i></span>
+                      <span><b>Need service or a human?</b><small>We reply within one working day.</small></span>
+                      <i data-lucide="arrow-right" class="icon-16"></i>
+                    </a>
                   </aside>
                 </div>
               </section>
 
+              <!-- VIEW 2: ORDERS -->
               <section class="dash-view js-view" data-view-panel="orders" aria-labelledby="orders-heading" hidden>
-                <div class="page-intro"><div><p class="page-intro__eyebrow">From checkout to your doorstep</p><h2 id="orders-heading">Your orders</h2><p>Follow each order, download its invoice or bring a favourite back for another lap.</p></div><span class="count-stamp js-order-count">0 orders</span></div>
+                <div class="page-intro">
+                  <div>
+                    <p class="page-intro__eyebrow">From the Guangzhou bench to your doorstep</p>
+                    <h2 id="orders-heading">Your orders</h2>
+                    <p>Follow each order across the 5-leg crossing, download its printable invoice, or bring a favourite back for another lap.</p>
+                  </div>
+                  <span class="count-stamp js-order-count">0 orders</span>
+                </div>
+
+                <!-- iOS Segmented Filter + Search Bar -->
+                <div class="ios-filter-bar">
+                  <div class="ios-segmented js-user-order-segments" role="tablist" aria-label="Filter orders by status">
+                    <button type="button" class="ios-segmented__btn is-active" data-order-seg="all" role="tab" aria-selected="true">All</button>
+                    <button type="button" class="ios-segmented__btn" data-order-seg="active" role="tab" aria-selected="false">In transit</button>
+                    <button type="button" class="ios-segmented__btn" data-order-seg="delivered" role="tab" aria-selected="false">Delivered</button>
+                    <button type="button" class="ios-segmented__btn" data-order-seg="cancelled" role="tab" aria-selected="false">Cancelled</button>
+                  </div>
+                  <label class="search ios-search" for="user-order-search">
+                    <i data-lucide="search" class="icon-16"></i>
+                    <input id="user-order-search" class="js-user-order-search" type="search" placeholder="Search order ID, reference or item" />
+                  </label>
+                </div>
+
                 <div class="order-list js-orders"></div>
               </section>
 
+              <!-- VIEW 3: WISHLIST / SAVED RIDES -->
               <section class="dash-view js-view" data-view-panel="wishlist" aria-labelledby="wishlist-heading" hidden>
-                <div class="page-intro"><div><p class="page-intro__eyebrow">Saved for the next ride</p><h2 id="wishlist-heading">Saved rides</h2><p>Keep the bikes and kit you’re thinking about close at hand.</p></div><span class="count-stamp js-wishlist-count">0 saved</span></div>
+                <div class="page-intro">
+                  <div>
+                    <p class="page-intro__eyebrow">Saved for the next ride</p>
+                    <h2 id="wishlist-heading">Saved rides</h2>
+                    <p>Keep the bikes and kit you’re thinking about close at hand, compare specs, or move them straight into your bag.</p>
+                  </div>
+                  <div class="page-intro__actions">
+                    <span class="count-stamp js-wishlist-count">0 saved</span>
+                    <button type="button" class="btn btn--primary btn--sm js-browse-lineup"><i data-lucide="plus" class="icon-16"></i> Add from lineup</button>
+                  </div>
+                </div>
                 <div class="wish-grid js-wishlist"></div>
               </section>
 
+              <!-- VIEW 4: WALLET & CARDS -->
               <section class="dash-view js-view" data-view-panel="wallet" aria-labelledby="wallet-heading" hidden>
-                <div class="page-intro"><div><p class="page-intro__eyebrow">Credits, cards and good turns</p><h2 id="wallet-heading">Wallet &amp; cards</h2><p>Keep referral rewards and simulated demo credit together in one place.</p></div></div>
+                <div class="page-intro">
+                  <div>
+                    <p class="page-intro__eyebrow">Apple Passbook style · Credits, cards &amp; Split-in-3</p>
+                    <h2 id="wallet-heading">Wallet &amp; cards</h2>
+                    <p>Manage referral rewards, simulated demo wallet credit, saved cards, and calculate Paystack Split-in-3 instalments.</p>
+                  </div>
+                </div>
+
                 <div class="wallet-header-grid">
                   <div class="wallet-balance">
-                    <div class="wallet-balance__top"><span class="wallet-balance__label"><i data-lucide="wallet-cards" class="icon-16"></i> Wallet balance</span><span class="wallet-balance__secure"><i data-lucide="shield-check" class="icon-14"></i> SOKO credit</span></div>
+                    <div class="wallet-balance__top">
+                      <span class="wallet-balance__label"><i data-lucide="wallet-cards" class="icon-16"></i> SOKO Pass · Balance</span>
+                      <span class="wallet-balance__secure"><i data-lucide="shield-check" class="icon-14"></i> Instant checkout credit</span>
+                    </div>
                     <div class="amount js-wallet-balance">₦0</div>
                     <p>Simulated top-ups and seeded rewards stay in this local demo wallet; no payment is collected.</p>
-                    <div class="wallet-balance__actions"><button class="btn btn--primary btn--sm js-topup" type="button"><i data-lucide="plus" class="icon-16"></i> Add wallet credit</button></div>
+                    <div class="wallet-balance__actions">
+                      <button class="btn btn--primary btn--sm js-topup" type="button"><i data-lucide="plus" class="icon-16"></i> Add wallet credit</button>
+                      <button class="btn btn--light btn--sm js-open-bag" type="button"><i data-lucide="shopping-bag" class="icon-16"></i> Apply to bag</button>
+                    </div>
                   </div>
+
                   <div class="referral-card">
-                    <div class="referral-card__head"><span>Good rides travel.</span><i data-lucide="move-up-right" class="icon-18"></i></div>
-                    <p>Your demo referral code is ready to share. Referral rewards in this prototype are sample account credit.</p>
-                    <div class="ref-code-row"><span class="ref-code js-ref-code">SOKO-XXXXX</span><button class="icon-button js-ref-copy" type="button" aria-label="Copy referral code"><i data-lucide="copy" class="icon-16"></i></button></div>
+                    <div class="referral-card__head"><span>Good rides travel.</span><i data-lucide="share-2" class="icon-18"></i></div>
+                    <p>Share your rider code. Referral rewards in this prototype add sample credit straight to your SOKO Pass.</p>
+                    <div class="ref-code-row">
+                      <span class="ref-code js-ref-code">SOKO-XXXXX</span>
+                      <button class="icon-button js-ref-copy" type="button" aria-label="Copy referral code"><i data-lucide="copy" class="icon-16"></i></button>
+                    </div>
                     <div class="js-ref-stats referral-stats"></div>
                   </div>
                 </div>
+
+                <!-- Integrated Paystack Split-in-3 & Financing Calculator -->
+                <section class="panel finance-sim-panel" aria-labelledby="finance-sim-title">
+                  <div class="panel__head">
+                    <div>
+                      <p class="panel__eyebrow">Paystack Split-in-3 · 0% on 3 months</p>
+                      <h2 class="panel__title" id="finance-sim-title">Instalment &amp; wallet estimator</h2>
+                    </div>
+                    <div class="ios-segmented js-wallet-plan-seg" role="radiogroup" aria-label="Instalment plan">
+                      <button type="button" class="ios-segmented__btn" data-plan-months="1">Pay once</button>
+                      <button type="button" class="ios-segmented__btn is-active" data-plan-months="3">3 mo · 0%</button>
+                      <button type="button" class="ios-segmented__btn" data-plan-months="6">6 mo</button>
+                      <button type="button" class="ios-segmented__btn" data-plan-months="12">12 mo</button>
+                    </div>
+                  </div>
+                  <div class="finance-sim-body js-finance-sim"></div>
+                </section>
+
                 <div class="wallet-grid">
                   <section class="panel wallet-transactions" aria-labelledby="transactions-title">
-                    <div class="panel__head"><div><p class="panel__eyebrow">Money in motion</p><h2 class="panel__title" id="transactions-title">Transactions</h2></div></div>
-                    <div class="table-scroll"><table class="dash-table js-wallet-txns"><thead><tr><th>Date</th><th>Detail</th><th>Type</th><th class="align-right">Amount</th></tr></thead><tbody></tbody></table></div>
+                    <div class="panel__head">
+                      <div>
+                        <p class="panel__eyebrow">Money in motion</p>
+                        <h2 class="panel__title" id="transactions-title">Transactions</h2>
+                      </div>
+                    </div>
+                    <div class="table-scroll">
+                      <table class="dash-table js-wallet-txns">
+                        <thead><tr><th>Date</th><th>Detail</th><th>Type</th><th class="align-right">Amount</th></tr></thead>
+                        <tbody></tbody>
+                      </table>
+                    </div>
                   </section>
+
                   <section class="panel saved-cards-panel" aria-labelledby="cards-title">
-                    <div class="panel__head"><div><p class="panel__eyebrow">Local demo record</p><h2 class="panel__title" id="cards-title">Payment methods</h2></div><button class="btn btn--quiet btn--sm js-add-card" type="button"><i data-lucide="plus" class="icon-16"></i> Add card</button></div>
-                    <div class="card-grid js-cards"></div><p class="form-note" style="margin-top:12px">Only the brand, last four digits and expiry are stored here. No card number is collected and saved cards are not charged.</p>
+                    <div class="panel__head">
+                      <div>
+                        <p class="panel__eyebrow">Apple Pay style · Local demo record</p>
+                        <h2 class="panel__title" id="cards-title">Payment methods</h2>
+                      </div>
+                      <button class="btn btn--quiet btn--sm js-add-card" type="button"><i data-lucide="plus" class="icon-16"></i> Add card</button>
+                    </div>
+                    <div class="card-grid js-cards"></div>
+                    <p class="form-note" style="margin-top:12px">Only the brand, last four digits and expiry are stored here. No card number is collected and saved cards are not charged.</p>
                   </section>
                 </div>
               </section>
 
+              <!-- VIEW 5: GARAGE -->
               <section class="dash-view js-view" data-view-panel="garage" aria-labelledby="garage-heading" hidden>
-                <div class="page-intro"><div><p class="page-intro__eyebrow">Your bikes, their service history</p><h2 id="garage-heading">The garage</h2><p>Register a SOKO bike to keep its serial number, warranty and service requests together.</p></div><button class="btn btn--primary js-register-bike" type="button"><i data-lucide="plus" class="icon-16"></i> Register a bike</button></div>
+                <div class="page-intro">
+                  <div>
+                    <p class="page-intro__eyebrow">Your bikes, factory warranty &amp; bench inspections</p>
+                    <h2 id="garage-heading">The garage</h2>
+                    <p>Register a SOKO bike to keep its VIN, 90-day arrival guarantee, factory battery/motor coverage, and service history together.</p>
+                  </div>
+                  <div class="page-intro__actions">
+                    <button class="btn btn--quiet js-book-verification" type="button"><i data-lucide="video" class="icon-16"></i> Book bench video check</button>
+                    <button class="btn btn--primary js-register-bike" type="button"><i data-lucide="plus" class="icon-16"></i> Register a bike</button>
+                  </div>
+                </div>
                 <div class="garage-grid js-garage"></div>
+
+                <!-- Scheduled Live Bench Video Verifications -->
+                <section class="panel garage-verify-panel" style="margin-top:18px" aria-labelledby="garage-verify-title">
+                  <div class="panel__head">
+                    <div>
+                      <p class="panel__eyebrow">40-Point inspection · Guangzhou hub</p>
+                      <h2 class="panel__title" id="garage-verify-title">Live video verification bookings</h2>
+                    </div>
+                    <button class="btn btn--quiet btn--sm js-book-verification" type="button"><i data-lucide="plus" class="icon-14"></i> Schedule slot</button>
+                  </div>
+                  <div class="js-garage-verifications"></div>
+                </section>
               </section>
 
+              <!-- VIEW 6: ADDRESSES -->
               <section class="dash-view js-view" data-view-panel="addresses" aria-labelledby="addresses-heading" hidden>
-                <div class="page-intro"><div><p class="page-intro__eyebrow">Where the bike meets you</p><h2 id="addresses-heading">Delivery addresses</h2><p>Choose a default destination and keep every delivery detail current.</p></div><button class="btn btn--primary btn--sm js-add-addr" type="button"><i data-lucide="plus" class="icon-16"></i> Add address</button></div>
+                <div class="page-intro">
+                  <div>
+                    <p class="page-intro__eyebrow">Where the bike meets you · Free Lagos freight</p>
+                    <h2 id="addresses-heading">Delivery addresses</h2>
+                    <p>Choose a default destination so checkout pre-fills automatically. Delivery to Lagos is free; nationwide shipping is ₦25,000 across all 36 states + FCT.</p>
+                  </div>
+                  <button class="btn btn--primary btn--sm js-add-addr" type="button"><i data-lucide="plus" class="icon-16"></i> Add address</button>
+                </div>
                 <div class="addr-grid js-addresses"></div>
               </section>
 
+              <!-- VIEW 7: SUPPORT -->
               <section class="dash-view js-view" data-view-panel="support" aria-labelledby="support-heading" hidden>
-                <div class="page-intro"><div><p class="page-intro__eyebrow">Real people, practical answers</p><h2 id="support-heading">Talk to the crew</h2><p>Log a support request in this demo account, or send a message to the SOKO crew from the contact page.</p></div><a class="btn btn--quiet btn--sm" href="/pages/faq.html"><i data-lucide="book-open" class="icon-16"></i> Read the guide</a></div>
+                <div class="page-intro">
+                  <div>
+                    <p class="page-intro__eyebrow">Real people, practical answers · 24-hour promise</p>
+                    <h2 id="support-heading">Talk to the crew</h2>
+                    <p>Log a service, warranty, or return request in your account, or schedule a live 20-minute video check at the Guangzhou bench.</p>
+                  </div>
+                  <div class="page-intro__actions">
+                    <button class="btn btn--quiet btn--sm js-book-verification" type="button"><i data-lucide="video" class="icon-16"></i> Book video verification</button>
+                    <a class="btn btn--quiet btn--sm" href="/pages/faq.html"><i data-lucide="book-open" class="icon-16"></i> Read the guide</a>
+                  </div>
+                </div>
                 <div class="support-grid">
                   <section class="panel support-form-panel" aria-labelledby="ticket-form-title">
-                    <div class="panel__head"><div><p class="panel__eyebrow">We’re listening</p><h2 class="panel__title" id="ticket-form-title">Start a support request</h2></div><span class="response-badge"><i class="response-badge__dot"></i> Saved locally</span></div>
-                    <div class="dash-view__grid dash-grid-form">
-                      <div class="field"><label for="tk-type">What do you need?</label><select class="select js-tk-type" id="tk-type"><option value="service">Service request</option><option value="returns">Return or refund</option><option value="warranty">Warranty claim</option><option value="verification">Unit verification</option><option value="other">Something else</option></select></div>
-                      <div class="field"><label for="tk-subject">Subject</label><input class="input js-tk-subject" id="tk-subject" placeholder="A short summary" maxlength="90" /></div>
+                    <div class="panel__head">
+                      <div>
+                        <p class="panel__eyebrow">We’re listening</p>
+                        <h2 class="panel__title" id="ticket-form-title">Start a support request</h2>
+                      </div>
+                      <span class="response-badge"><i class="response-badge__dot"></i> Saved locally</span>
                     </div>
-                    <div class="field dash-field-stack"><label for="tk-detail">A few details</label><textarea class="textarea js-tk-detail" id="tk-detail" placeholder="Include an order number or bike model if it helps." maxlength="1000"></textarea></div>
-                    <div class="panel__foot"><button class="btn btn--primary js-tk-submit" type="button">Save request <i data-lucide="arrow-right" class="icon-16"></i></button><span class="form-note">This prototype stores the request in this browser.</span><a class="text-link" href="/pages/contact.html">Contact the crew <i data-lucide="arrow-up-right" class="icon-14"></i></a></div>
+                    <div class="dash-view__grid dash-grid-form">
+                      <div class="field">
+                        <label for="tk-type">What do you need?</label>
+                        <select class="select js-tk-type" id="tk-type">
+                          <option value="service">Service request</option>
+                          <option value="returns">Return or refund</option>
+                          <option value="warranty">Warranty claim</option>
+                          <option value="verification">Unit verification</option>
+                          <option value="other">Something else</option>
+                        </select>
+                      </div>
+                      <div class="field">
+                        <label for="tk-subject">Subject</label>
+                        <input class="input js-tk-subject" id="tk-subject" placeholder="A short summary" maxlength="90" />
+                      </div>
+                    </div>
+                    <div class="field dash-field-stack">
+                      <label for="tk-detail">A few details</label>
+                      <textarea class="textarea js-tk-detail" id="tk-detail" placeholder="Include an order number or bike model if it helps." maxlength="1000"></textarea>
+                    </div>
+                    <div class="panel__foot">
+                      <button class="btn btn--primary js-tk-submit" type="button">Save request <i data-lucide="arrow-right" class="icon-16"></i></button>
+                      <span class="form-note">This prototype stores the request in this browser.</span>
+                      <a class="text-link" href="/pages/contact.html">Contact the crew <i data-lucide="arrow-up-right" class="icon-14"></i></a>
+                    </div>
                   </section>
-                  <section class="panel tickets-panel" aria-labelledby="tickets-title"><div class="panel__head"><div><p class="panel__eyebrow">Your conversation history</p><h2 class="panel__title" id="tickets-title">Support history</h2></div></div><div class="ticket-list js-tickets"></div></section>
+
+                  <section class="panel tickets-panel" aria-labelledby="tickets-title">
+                    <div class="panel__head">
+                      <div>
+                        <p class="panel__eyebrow">Your conversation history</p>
+                        <h2 class="panel__title" id="tickets-title">Support history</h2>
+                      </div>
+                    </div>
+                    <div class="ticket-list js-tickets"></div>
+                  </section>
                 </div>
               </section>
 
+              <!-- VIEW 8: NOTIFICATIONS -->
               <section class="dash-view js-view" data-view-panel="notifications" aria-labelledby="notifications-heading" hidden>
-                <div class="page-intro"><div><p class="page-intro__eyebrow">Important notes from SOKO</p><h2 id="notifications-heading">Notifications</h2><p>Order movements, service reminders and updates about your account.</p></div><button class="btn btn--quiet btn--sm js-mark-read" type="button"><i data-lucide="check-check" class="icon-16"></i> Mark all as read</button></div>
+                <div class="page-intro">
+                  <div>
+                    <p class="page-intro__eyebrow">iOS Notification Center · Updates from SOKO</p>
+                    <h2 id="notifications-heading">Notifications</h2>
+                    <p>Order milestones, Guangzhou bench video links, service reminders and updates about your account.</p>
+                  </div>
+                  <button class="btn btn--quiet btn--sm js-mark-read" type="button"><i data-lucide="check-check" class="icon-16"></i> Mark all as read</button>
+                </div>
                 <div class="panel notification-panel"><div class="notif-list js-notifs"></div></div>
               </section>
 
+              <!-- VIEW 9: SETTINGS -->
               <section class="dash-view js-view" data-view-panel="settings" aria-labelledby="settings-heading" hidden>
-                <div class="page-intro"><div><p class="page-intro__eyebrow">Your details, your preferences</p><h2 id="settings-heading">Account settings</h2><p>Keep your rider profile current and choose what we send you.</p></div></div>
+                <div class="page-intro">
+                  <div>
+                    <p class="page-intro__eyebrow">iOS System Preferences · Your details</p>
+                    <h2 id="settings-heading">Account settings</h2>
+                    <p>Keep your rider profile current, manage security, and choose what notifications we send you.</p>
+                  </div>
+                </div>
                 <div class="settings-stack">
-                  <section class="panel" aria-labelledby="profile-title"><div class="panel__head"><div><p class="panel__eyebrow">How we reach you</p><h2 class="panel__title" id="profile-title">Rider profile</h2></div></div>
+                  <section class="panel" aria-labelledby="profile-title">
+                    <div class="panel__head">
+                      <div>
+                        <p class="panel__eyebrow">Apple ID style profile</p>
+                        <h2 class="panel__title" id="profile-title">Rider profile</h2>
+                      </div>
+                    </div>
                     <div class="dash-view__grid dash-grid-form">
                       <div class="field"><label for="set-name">Full name</label><input class="input js-set-name" id="set-name" autocomplete="name" /></div>
                       <div class="field"><label for="set-email">Email</label><input class="input js-set-email" id="set-email" type="email" autocomplete="email" disabled /></div>
@@ -233,59 +522,94 @@
                     </div>
                     <div class="panel__foot"><button class="btn btn--primary js-save-profile" type="button">Save profile</button></div>
                   </section>
-                  <section class="panel" aria-labelledby="password-title"><div class="panel__head"><div><p class="panel__eyebrow">Keep your account yours</p><h2 class="panel__title" id="password-title">Change password</h2></div></div>
+
+                  <section class="panel" aria-labelledby="password-title">
+                    <div class="panel__head">
+                      <div>
+                        <p class="panel__eyebrow">Keep your account yours</p>
+                        <h2 class="panel__title" id="password-title">Change password</h2>
+                      </div>
+                    </div>
                     <div class="dash-view__grid dash-grid-form">
                       <div class="field"><label for="pw-cur">Current password</label><input class="input js-pw-cur" id="pw-cur" type="password" autocomplete="current-password" /></div>
                       <div class="field"><label for="pw-new">New password</label><input class="input js-pw-new" id="pw-new" type="password" autocomplete="new-password" minlength="8" /></div>
                     </div>
                     <div class="panel__foot"><button class="btn btn--quiet js-pw-change" type="button">Update password</button><span class="form-note">Use at least 8 characters.</span></div>
                   </section>
-                  <section class="panel" aria-labelledby="prefs-title"><div class="panel__head"><div><p class="panel__eyebrow">Saved in this prototype</p><h2 class="panel__title" id="prefs-title">Message preferences</h2></div></div>
+
+                  <section class="panel" aria-labelledby="prefs-title">
+                    <div class="panel__head">
+                      <div>
+                        <p class="panel__eyebrow">Saved in this prototype</p>
+                        <h2 class="panel__title" id="prefs-title">Message preferences</h2>
+                      </div>
+                    </div>
                     <div class="dash-prefs">
-                      <label class="check"><input type="checkbox" class="js-pref-order" /> <span><b>Order updates</b><small>Bench check, shipping and delivery milestones.</small></span></label>
-                      <label class="check"><input type="checkbox" class="js-pref-promo" /> <span><b>New bikes and offers</b><small>Product drops, useful gear and occasional promos.</small></span></label>
-                      <label class="check"><input type="checkbox" class="js-pref-sms" /> <span><b>SMS alerts</b><small>Short, time-sensitive updates by text.</small></span></label>
+                      <label class="check ios-toggle-row">
+                        <input type="checkbox" class="js-pref-order" />
+                        <span class="ios-toggle-copy"><b>Order updates</b><small>Bench check, shipping and delivery milestones.</small></span>
+                        <span class="ios-switch" aria-hidden="true"><i></i></span>
+                      </label>
+                      <label class="check ios-toggle-row">
+                        <input type="checkbox" class="js-pref-promo" />
+                        <span class="ios-toggle-copy"><b>New bikes and offers</b><small>Product drops, useful gear and occasional promos.</small></span>
+                        <span class="ios-switch" aria-hidden="true"><i></i></span>
+                      </label>
+                      <label class="check ios-toggle-row">
+                        <input type="checkbox" class="js-pref-sms" />
+                        <span class="ios-toggle-copy"><b>SMS alerts</b><small>Short, time-sensitive updates by text.</small></span>
+                        <span class="ios-switch" aria-hidden="true"><i></i></span>
+                      </label>
                     </div>
                   </section>
-                  <section class="panel panel--danger" aria-labelledby="privacy-title"><div class="panel__head"><div><p class="panel__eyebrow">You’re in control</p><h2 class="panel__title" id="privacy-title">Account controls</h2></div></div>
+
+                  <section class="panel panel--danger" aria-labelledby="privacy-title">
+                    <div class="panel__head">
+                      <div>
+                        <p class="panel__eyebrow">You’re in control</p>
+                        <h2 class="panel__title" id="privacy-title">Account controls</h2>
+                      </div>
+                    </div>
                     <p class="panel__danger-copy">Sign out on a shared device, or remove this demo account and its saved details from this browser. Guest shopping stays available either way.</p>
-                    <div class="panel__foot"><button class="btn btn--quiet js-logout" type="button"><i data-lucide="log-out" class="icon-16"></i> Sign out</button><button class="btn btn--danger js-delete-account" type="button"><i data-lucide="user-round-x" class="icon-16"></i> Delete account</button></div>
+                    <div class="panel__foot">
+                      <button class="btn btn--quiet js-logout" type="button"><i data-lucide="log-out" class="icon-16"></i> Sign out</button>
+                      <button class="btn btn--danger js-delete-account" type="button"><i data-lucide="user-round-x" class="icon-16"></i> Delete account</button>
+                    </div>
                   </section>
                 </div>
               </section>
             </main>
           </div>
+
+          <!-- iOS Floating Glass Dock (Replaces Traditional Sidebar) -->
+          <aside class="dash-rail" aria-label="Rider desk navigation">
+            <a class="rail__brand" href="/" aria-label="SOKO Moto home">
+              <span class="rail__brand-symbol">S</span>
+              <span class="rail__brand-copy"><b>SOKO</b><small>RIDER OS</small></span>
+            </a>
+            <div class="rail__rule"></div>
+            <p class="rail__section-label">Your account</p>
+            <nav class="dash-nav" aria-label="Rider desk">
+              <span class="ios-dock__pill js-dock-pill" aria-hidden="true"></span>
+              <a href="#overview" data-view="overview" data-label="Overview" class="is-active" aria-label="Overview"><i data-lucide="house" class="icon-18"></i><span>Overview</span></a>
+              <a href="#orders" data-view="orders" data-label="Orders" aria-label="Orders"><i data-lucide="package-check" class="icon-18"></i><span>Orders</span></a>
+              <a href="#wishlist" data-view="wishlist" data-label="Saved rides" aria-label="Saved rides"><i data-lucide="heart" class="icon-18"></i><span>Saved rides</span></a>
+              <a href="#wallet" data-view="wallet" data-label="Wallet" aria-label="Wallet and cards"><i data-lucide="wallet-cards" class="icon-18"></i><span>Wallet</span></a>
+              <a href="#garage" data-view="garage" data-label="Garage" aria-label="Garage"><i data-lucide="bike" class="icon-18"></i><span>Garage</span></a>
+              <a href="#addresses" data-view="addresses" data-label="Addresses" aria-label="Delivery addresses"><i data-lucide="map-pin-house" class="icon-18"></i><span>Addresses</span></a>
+              <a href="#support" data-view="support" data-label="Support" aria-label="Support"><i data-lucide="life-buoy" class="icon-18"></i><span>Support</span></a>
+              <a href="#notifications" data-view="notifications" data-label="Notifications" aria-label="Notifications"><i data-lucide="bell" class="icon-18"></i><span>Alerts</span><span class="nav-count js-unread-count" hidden>0</span></a>
+              <a href="#settings" data-view="settings" data-label="Settings" aria-label="Settings"><i data-lucide="settings-2" class="icon-18"></i><span>Settings</span></a>
+            </nav>
+            <div class="rail__foot">
+              <button type="button" data-logout class="rail__logout" aria-label="Sign out" title="Sign out">
+                <i data-lucide="log-out" class="icon-18"></i><span>Sign out</span>
+              </button>
+            </div>
+          </aside>
         </div>
       </div>
     </div>
-
-    <!-- iOS-inspired bottom dock navigation -->
-    <nav class="dash-ios-dock dash-ios-active" aria-label="Rider desk navigation">
-      <div class="dash-ios-dock__inner">
-        <a href="#overview" data-view="overview" data-label="Home" class="dash-ios-dock__tab is-active" aria-current="page" aria-label="Home"><i data-lucide="house" class="icon-20"></i><span>Home</span></a>
-        <a href="#orders" data-view="orders" data-label="Orders" class="dash-ios-dock__tab" aria-label="Orders"><i data-lucide="package-check" class="icon-20"></i><span>Orders</span></a>
-        <a href="#garage" data-view="garage" data-label="Garage" class="dash-ios-dock__tab" aria-label="Garage"><i data-lucide="bike" class="icon-20"></i><span>Garage</span></a>
-        <a href="#wallet" data-view="wallet" data-label="Wallet" class="dash-ios-dock__tab" aria-label="Wallet"><i data-lucide="wallet-cards" class="icon-20"></i><span>Wallet</span></a>
-        <a href="#more" data-view="more" data-label="More" class="dash-ios-dock__tab" aria-label="More"><i data-lucide="menu" class="icon-20"></i><span>More</span></a>
-      </div>
-    </nav>
-
-    <!-- More view - contains secondary destinations -->
-    <section class="dash-view js-view dash-ios-view" data-view-panel="more" aria-labelledby="more-heading" hidden>
-      <div class="page-intro"><div><p class="page-intro__eyebrow">Additional options</p><h2 id="more-heading">More</h2><p>Additional account settings and features are available here.</p></div></div>
-      <div class="dash-ios-more">
-        <div class="dash-ios-more__section">
-          <span class="dash-ios-more__title">Account</span>
-          <div class="dash-ios-more__list">
-            <a href="#wishlist" data-goto="wishlist" class="dash-ios-more__link"><i data-lucide="heart" class="icon-18"></i><span>Saved rides</span><i data-lucide="arrow-right" class="icon-14"></i></a>
-            <a href="#addresses" data-goto="addresses" class="dash-ios-more__link"><i data-lucide="map-pin-house" class="icon-18"></i><span>Delivery addresses</span><i data-lucide="arrow-right" class="icon-14"></i></a>
-            <a href="#support" data-goto="support" class="dash-ios-more__link"><i data-lucide="life-buoy" class="icon-18"></i><span>Support</span><i data-lucide="arrow-right" class="icon-14"></i></a>
-            <a href="#notifications" data-goto="notifications" class="dash-ios-more__link"><i data-lucide="bell" class="icon-18"></i><span>Notifications</span><span class="nav-count js-unread-count" hidden>0</span><i data-lucide="arrow-right" class="icon-14"></i></a>
-            <a href="#settings" data-goto="settings" class="dash-ios-more__link"><i data-lucide="settings-2" class="icon-18"></i><span>Settings</span><i data-lucide="arrow-right" class="icon-14"></i></a>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <div class="toast js-toast" role="status" aria-live="polite" aria-atomic="true"></div>
     <script type="module" src="/src/js/main.js"></script>

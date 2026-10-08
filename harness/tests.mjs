@@ -382,15 +382,14 @@ const confirmDemo = {
 const dashboard = {
   name: 'dashboard',
   run: async function ({ q, qa, expect, store }) {
-    expect(q('.dash-ios-dock [data-view]') !== null, 'iOS dock nav views');
+    expect(q('.dash-nav [data-view]') !== null, 'dash nav views');
     expect(q('.js-view-title'), 'view title');
     expect(q('.js-guest-guard') !== null, 'guest guard present');
     // log in as demo customer and re-check guest view
     const users = JSON.parse(store.get('soko-users-v1') || '[]');
     expect(users.some((u) => u.email === 'chidi@example.com'), 'demo user seeded');
-    expect(qa('[data-view-panel]').length === 10, '10 view panels (including more)');
-    expect(qa('.dash-ios-dock [data-view]').length === 5, '5 dock tabs');
-    expect(qa('.dash-ios-more__link').length === 5, '5 More view links');
+    expect(qa('[data-view-panel]').length === 9, '9 view panels');
+    expect(qa('.dash-nav [data-view]').length === 9, '9 nav views');
     expect(q('.welcome') && q('.js-welcome-heading'), 'welcome band');
     expect(q('.js-kpis') && q('.js-recent-orders') && q('.js-quick-actions'), 'overview widgets');
     expect(q('.js-wallet-balance') && q('.js-ref-code') && q('.js-wallet-txns') && q('.js-cards'), 'wallet hooks');
@@ -406,13 +405,8 @@ const deckUser = {
   name: 'deck-user',
   run: async function ({ q, qa, expect }) {
     expect(q('.js-app').hidden === false, 'app shown for seeded session');
-    expect(q('.dash-ios-dock [data-view].is-active') !== null, 'active iOS dock navigation marker');
-    expect(qa('.dash-ios-dock [data-view]').length === 5, '5 dock tabs in exact order');
-    expect(qa('.dash-ios-dock [data-view="overview"]').length === 1, 'dock tab 1: Home → overview');
-    expect(qa('.dash-ios-dock [data-view="orders"]').length === 1, 'dock tab 2: Orders → orders');
-    expect(qa('.dash-ios-dock [data-view="garage"]').length === 1, 'dock tab 3: Garage → garage');
-    expect(qa('.dash-ios-dock [data-view="wallet"]').length === 1, 'dock tab 4: Wallet → wallet');
-    expect(qa('.dash-ios-dock [data-view="more"]').length === 1, 'dock tab 5: More → more');
+    expect(q('.dash-nav [data-view].is-active') !== null, 'active rail navigation marker');
+    expect(qa('.dash-nav a[data-label]').length === 9, '9 labelled rail stations');
     expect(q('.dash-side') === null, 'old sidebar gone');
     expect(q('.js-kpis').children.length === 4, '4 kpis in ledger band');
     expect(q('[data-manifest]') !== null, 'shipping manifest rendered');
@@ -424,25 +418,14 @@ const deckUser = {
     expect(q('.js-user-initial').textContent.trim().length >= 1, 'avatar initials');
     expect(q('.js-orders').children.length >= 1, 'orders list rendered');
     expect(/₦/.test(q('.js-wallet-balance').textContent), 'wallet balance rendered');
-    // Check More view exists and has correct links
-    expect(q('[data-view-panel="more"]') !== null, 'More view panel exists');
-    expect(qa('.dash-ios-more__link[data-goto="wishlist"]').length === 1, 'More view links to wishlist');
-    expect(qa('.dash-ios-more__link[data-goto="addresses"]').length === 1, 'More view links to addresses');
-    expect(qa('.dash-ios-more__link[data-goto="support"]').length === 1, 'More view links to support');
-    expect(qa('.dash-ios-more__link[data-goto="notifications"]').length === 1, 'More view links to notifications');
-    expect(qa('.dash-ios-more__link[data-goto="settings"]').length === 1, 'More view links to settings');
     // nav → orders updates path + ink target
-    q('.dash-ios-dock [data-view="orders"]').click();
+    q('.dash-nav [data-view="orders"]').click();
     expect(q('.js-view-path').textContent === 'ORDERS', 'path updates on nav');
     expect(q('[data-view-panel="orders"]').hidden === false, 'orders panel shown');
     // manifest details opens modal
-    q('.dash-ios-dock [data-view="overview"]').click();
+    q('.dash-nav [data-view="overview"]').click();
     q('[data-manifest] .js-order-detail').click();
     expect(q('.dash-modal') !== null, 'manifest details opens modal');
-    // Test More view navigation
-    q('.dash-ios-dock [data-view="more"]').click();
-    expect(q('[data-view-panel="more"]').hidden === false, 'More panel shown when More tab selected');
-    expect(q('.dash-ios-dock [data-view="more"]').getAttribute('aria-current') === 'page', 'More tab has aria-current when active');
   },
 };
 
@@ -451,7 +434,7 @@ const deckUserActions = {
   run: async function ({ q, window, expect, store }) {
     const read = (key, fallback) => JSON.parse(store.get(key) || JSON.stringify(fallback));
     const userId = 'u-demo';
-    q('.dash-ios-dock [data-view="wallet"]').click();
+    q('.dash-nav [data-view="wallet"]').click();
     const balanceBefore = read('soko-wallet-v1', {})[userId].balance;
     q('.js-topup').click();
     q('.js-topup-amt[data-amt="10000"]').click();
@@ -464,8 +447,7 @@ const deckUserActions = {
     q('.js-card-save').click();
     expect(read('soko-cards-v1', {})[userId].some((card) => card.last4 === '9134'), 'payment method form saves only its demo card label');
 
-    q('.dash-ios-dock [data-view="more"]').click();
-    q('.dash-ios-more__link[data-goto="addresses"]').click();
+    q('.dash-nav [data-view="addresses"]').click();
     const addressMap = read('soko-addr-v1', {});
     const defaultAddress = addressMap[userId].find((address) => address.isDefault);
     q(`.js-addr-edit[data-id="${defaultAddress.id}"]`).click();
@@ -488,16 +470,14 @@ const deckUserActions = {
     q('.js-addr-save').click();
     expect(read('soko-addr-v1', {})[userId].some((address) => address.label === 'Test stop' && !address.line2), 'address form accepts an omitted optional second line');
 
-    q('.dash-ios-dock [data-view="more"]').click();
-    q('.dash-ios-more__link[data-goto="support"]').click();
+    q('.dash-nav [data-view="support"]').click();
     const ticketCount = read('soko-tickets-v1', {})[userId].length;
     q('.js-tk-subject').value = 'Browser demo check';
     q('.js-tk-detail').value = 'Testing the saved support request flow.';
     q('.js-tk-submit').click();
     expect(read('soko-tickets-v1', {})[userId].length === ticketCount + 1, 'support request is saved to the local account');
 
-    q('.dash-ios-dock [data-view="more"]').click();
-    q('.dash-ios-more__link[data-goto="settings"]').click();
+    q('.dash-nav [data-view="settings"]').click();
     const sms = q('.js-pref-sms');
     sms.checked = !sms.checked;
     sms.dispatchEvent(new window.Event('change', { bubbles: true }));
@@ -513,20 +493,11 @@ const deckAdmin = {
   run: async function ({ q, qa, expect, window, store }) {
     expect(q('.js-app').hidden === false, 'admin app shown');
     expect(q('.js-not-admin-guard').hidden === true, 'not-admin guard hidden');
-    expect(qa('.dash-ios-dock [data-view]').length === 5, '5 dock tabs in exact order');
-    expect(qa('.dash-ios-dock [data-view="overview"]').length === 1, 'dock tab 1: Home → overview');
-    expect(qa('.dash-ios-dock [data-view="orders"]').length === 1, 'dock tab 2: Orders → orders');
-    expect(qa('.dash-ios-dock [data-view="inventory"]').length === 1, 'dock tab 3: Stock → inventory');
-    expect(qa('.dash-ios-dock [data-view="customers"]').length === 1, 'dock tab 4: Riders → customers');
-    expect(qa('.dash-ios-dock [data-view="more"]').length === 1, 'dock tab 5: More → more');
+    expect(qa('.dash-nav a[data-label]').length === 6, '6 labelled rail stations');
     expect(q('.dash-side') === null, 'old sidebar gone');
     expect(q('.js-kpis').children.length === 4, '4 kpis');
     expect(q('.js-chart svg') !== null, 'revenue svg');
     expect(/^\d+$/.test(q('.js-open-count').textContent), 'open-orders chip numeric');
-    // Check More view exists and has correct links
-    expect(q('[data-view-panel="more"]') !== null, 'More view panel exists');
-    expect(qa('.dash-ios-more__link[data-goto="analytics"]').length === 1, 'More view links to analytics');
-    expect(qa('.dash-ios-more__link[data-goto="settings"]').length === 1, 'More view links to settings');
     expect(/\d\d:\d\d/.test(q('.js-dash-clock').textContent), 'Lagos-local clock');
     expect(qa('.js-latest-orders tbody tr').length >= 1, 'latest orders rows');
     expect(qa('.js-admin-inventory tbody tr').length >= 1, 'inventory rows');
@@ -571,13 +542,12 @@ const deckAdmin = {
     q('.js-product-form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
     expect(JSON.parse(store.get('soko-a-inventory-v1')).some((product) => product.name === 'Harness touring bike'), 'add inventory form creates a local stock item');
 
-    q('.dash-ios-dock [data-view="customers"]').click();
+    q('.dash-nav [data-view="customers"]').click();
     q('.js-admin-customers tbody .js-customer-view').click();
     expect(q('.dash-modal h3')?.textContent.trim().length > 0, 'customer action opens rider details');
     q('.dash-modal__close').click();
 
-    q('.dash-ios-dock [data-view="more"]').click();
-    q('.dash-ios-more__link[data-goto="settings"]').click();
+    q('.dash-nav [data-view="settings"]').click();
     q('.js-set-gateway').value = 'Flutterwave';
     q('.js-set-tax').value = '5';
     q('.js-set-enable').checked = false;
